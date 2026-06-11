@@ -4,7 +4,7 @@ import '../theme/app_theme.dart';
 
 import '../services/auth_service.dart';
 import 'onboarding_screen.dart';
-import 'dashboard_screen.dart';
+import '../widgets/main_shell.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -43,7 +43,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       if (isLoggedIn) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+          MaterialPageRoute(builder: (context) => const MainShell()),
         );
       } else {
         Navigator.pushReplacement(

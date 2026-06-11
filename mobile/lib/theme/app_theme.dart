@@ -2,13 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Primary Colors (Elegant deep blue/green for finance)
-  static const Color primaryColor = Color(0xFF1E3E62);
-  static const Color secondaryColor = Color(0xFF00C09D);
-  static const Color backgroundColor = Color(0xFFF8F9FB);
+  // Primary Colors (Elegant deep blue)
+  static const Color primaryColor = Color(0xFF1E439B); // Deep blue from the mockup
+  static const Color secondaryColor = Color(0xFF3B6CCF); // Lighter blue
+  static const Color backgroundColor = Color(0xFFF8F9FA); // Off-white/gray background
   static const Color surfaceColor = Colors.white;
   static const Color textPrimary = Color(0xFF1A1A1A);
   static const Color textSecondary = Color(0xFF757575);
+  
+  // Semantic Colors for Charts and Budget
+  static const Color errorColor = Color(0xFFD32F2F); // Red
+  static const Color successColor = Color(0xFF388E3C); // Green
+  static const Color warningColor = Color(0xFFFBC02D); // Yellow
+  static const Color infoColor = Color(0xFF1976D2); // Light Blue
+  static const Color neutralColor = Color(0xFFE0E0E0); // Gray for 'Lainnya'
 
   static ThemeData get lightTheme {
     return ThemeData(

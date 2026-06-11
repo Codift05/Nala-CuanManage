@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
-import '../services/auth_service.dart';
-import 'login_screen.dart';
+import '../widgets/donut_chart.dart';
+import '../widgets/budget_progress_bar.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -11,146 +11,419 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await AuthService().logout();
-              if (context.mounted) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                );
-              }
-            },
-          )
-        ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 24),
+              _buildBalanceCard(),
+              const SizedBox(height: 32),
+              _buildSectionTitle('Pengeluaran Bulan Ini', null),
+              const SizedBox(height: 16),
+              _buildExpenseChart(),
+              const SizedBox(height: 32),
+              _buildSectionTitle('Budget Bulan Ini', () {}),
+              const SizedBox(height: 16),
+              _buildBudgetCard(),
+              const SizedBox(height: 32),
+              _buildSectionTitle('Terakhir', () {}),
+              const SizedBox(height: 16),
+              _buildRecentTransactions(),
+              const SizedBox(height: 80), // Extra space for bottom nav
+            ],
+          ),
+        ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    );
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: const BoxDecoration(
+            color: Color(0xFF1954C2),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              'MI',
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          'Haii, Mip',
+          style: GoogleFonts.inter(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        const Spacer(),
+        Stack(
           children: [
-            // Balance Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24.0),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+            const Icon(Icons.notifications_none, size: 28, color: AppTheme.textPrimary),
+            Positioned(
+              right: 2,
+              top: 2,
+              child: Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: AppTheme.errorColor,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppTheme.backgroundColor, width: 2),
                 ),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.primaryColor.withValues(alpha: 0.3),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Total Balance',
-                    style: GoogleFonts.inter(
-                      color: Colors.white.withValues(alpha: 0.8),
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Rp 12.500.000',
-                    style: GoogleFonts.outfit(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-            
-            // AI Insights Placeholder
-            Text(
-              'AI Insights',
-              style: GoogleFonts.outfit(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.surfaceColor,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.tips_and_updates, color: Colors.orange, size: 32),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      'Your food expenses are 20% higher than last month. Consider cooking at home to save more.',
-                      style: GoogleFonts.inter(
-                        color: AppTheme.textSecondary,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 32),
-            
-            // Recent Transactions
-            Text(
-              'Recent Transactions',
-              style: GoogleFonts.outfit(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 3,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(
-                    backgroundColor: index == 0 ? Colors.red.withValues(alpha: 0.1) : Colors.green.withValues(alpha: 0.1),
-                    child: Icon(
-                      index == 0 ? Icons.fastfood : Icons.attach_money,
-                      color: index == 0 ? Colors.red : Colors.green,
-                    ),
-                  ),
-                  title: Text(index == 0 ? 'Lunch at Cafe' : 'Salary'),
-                  subtitle: Text('Today'),
-                  trailing: Text(
-                    index == 0 ? '- Rp 50.000' : '+ Rp 5.000.000',
-                    style: GoogleFonts.inter(
-                      fontWeight: FontWeight.bold,
-                      color: index == 0 ? Colors.red : Colors.green,
-                    ),
-                  ),
-                );
-              },
             ),
           ],
         ),
+      ],
+    );
+  }
+
+  Widget _buildBalanceCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24.0),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryColor,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryColor.withValues(alpha: 0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total Saldo',
+                style: GoogleFonts.inter(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 14,
+                ),
+              ),
+              Icon(Icons.visibility_outlined, color: Colors.white.withValues(alpha: 0.7), size: 20),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Rp 4.250.000',
+            style: GoogleFonts.outfit(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              _buildAccountChip(Icons.money, 'Tunai Rp 800k', Colors.greenAccent),
+              _buildAccountChip(Icons.favorite, 'GoPay Rp 950k', Colors.lightBlueAccent),
+              _buildAccountChip(Icons.account_balance, 'BCA Rp 2.5jt', Colors.white),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAccountChip(IconData icon, String label, Color iconColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: iconColor, size: 14),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              color: Colors.white.withValues(alpha: 0.9),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title, VoidCallback? onSeeAll) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: GoogleFonts.inter(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        if (onSeeAll != null)
+          GestureDetector(
+            onTap: onSeeAll,
+            child: Text(
+              'Lihat semua \u2192',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1954C2),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildExpenseChart() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: 100,
+                height: 100,
+                child: DonutChart(
+                  strokeWidth: 14,
+                  data: [
+                    DonutChartData(32, AppTheme.errorColor),
+                    DonutChartData(18, AppTheme.infoColor),
+                    DonutChartData(14, AppTheme.warningColor),
+                    DonutChartData(36, AppTheme.neutralColor),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 24),
+              Expanded(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: _buildLegendItem(AppTheme.errorColor, 'Makan 32%')),
+                        Expanded(child: _buildLegendItem(AppTheme.infoColor, 'Transport 18%')),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(child: _buildLegendItem(AppTheme.warningColor, 'Belanja 14%')),
+                        Expanded(child: _buildLegendItem(AppTheme.neutralColor, 'Lainnya 36%')),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Divider(color: Colors.grey.withValues(alpha: 0.2)),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Text(
+                'Total ',
+                style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
+              ),
+              Text(
+                'Rp 1.840.000',
+                style: GoogleFonts.inter(color: AppTheme.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                ' dari Rp 2.500.000 budget',
+                style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegendItem(Color color, String label) {
+    return Row(
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            color: AppTheme.textSecondary,
+            fontSize: 12,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBudgetCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: const Column(
+        children: [
+          BudgetProgressBar(
+            label: 'Makan',
+            percentage: 78,
+            activeColor: AppTheme.warningColor,
+          ),
+          SizedBox(height: 20),
+          BudgetProgressBar(
+            label: 'Transport',
+            percentage: 52,
+            activeColor: AppTheme.successColor,
+          ),
+          SizedBox(height: 20),
+          BudgetProgressBar(
+            label: 'Belanja',
+            percentage: 102,
+            activeColor: AppTheme.errorColor,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecentTransactions() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _buildTransactionItem(
+            Icons.shopping_bag_outlined,
+            'Indomaret',
+            'Belanja',
+            '-Rp 47.500',
+            AppTheme.errorColor,
+          ),
+          _buildTransactionItem(
+            Icons.directions_car_outlined,
+            'Gojek',
+            'Transport',
+            '-Rp 25.000',
+            AppTheme.errorColor,
+          ),
+          _buildTransactionItem(
+            Icons.arrow_downward,
+            'Transfer in',
+            'Pemasukan',
+            '+Rp 500.000',
+            AppTheme.successColor,
+            isLast: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTransactionItem(IconData icon, String title, String subtitle, String amount, Color amountColor, {bool isLast = false}) {
+    return Column(
+      children: [
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+          leading: Container(
+            width: 48,
+            height: 48,
+            decoration: const BoxDecoration(
+              color: AppTheme.backgroundColor, // light gray
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: const Color(0xFF4A4A4A)),
+          ),
+          title: Text(
+            title,
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          subtitle: Text(
+            subtitle,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+          trailing: Text(
+            amount,
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              color: amountColor,
+            ),
+          ),
+        ),
+        if (!isLast)
+          Padding(
+            padding: const EdgeInsets.only(left: 80, right: 20),
+            child: Divider(color: Colors.grey.withValues(alpha: 0.1), height: 1),
+          ),
+      ],
     );
   }
 }

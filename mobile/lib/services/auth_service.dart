@@ -2,8 +2,16 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 class AuthService {
-  static const String baseUrl = 'http://10.0.2.2:3000/api'; // Use 10.0.2.2 for Android emulator
+  static String get baseUrl {
+    if (kIsWeb) {
+      return 'http://127.0.0.1:3000/api';
+    }
+    return Platform.isAndroid ? 'http://10.0.2.2:3000/api' : 'http://127.0.0.1:3000/api';
+  }
 
   Future<bool> login(String email, String password) async {
     try {
@@ -18,8 +26,11 @@ class AuthService {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', data['token']);
         return true;
+      } else {
+        print('Login failed with status: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        return false;
       }
-      return false;
     } catch (e) {
       print('Login error: $e');
       return false;
