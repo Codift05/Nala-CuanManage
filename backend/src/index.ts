@@ -11,6 +11,9 @@ app.use(cors());
 app.use(express.json());
 
 import authRoutes from './routes/auth';
+import walletRoutes from './routes/wallet';
+import transactionRoutes from './routes/transaction';
+import budgetRoutes from './routes/budget';
 
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
@@ -18,6 +21,9 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/wallets', walletRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/budgets', budgetRoutes);
 
 app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', message: 'NALA Backend API is running' });
