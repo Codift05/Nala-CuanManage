@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../widgets/donut_chart.dart';
 import '../widgets/budget_progress_bar.dart';
+import 'health_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -20,6 +21,8 @@ class DashboardScreen extends StatelessWidget {
               _buildHeader(),
               const SizedBox(height: 24),
               _buildBalanceCard(),
+              const SizedBox(height: 24),
+              _buildHealthCard(context),
               const SizedBox(height: 32),
               _buildSectionTitle('Pengeluaran Bulan Ini', null),
               const SizedBox(height: 16),
@@ -424,6 +427,63 @@ class DashboardScreen extends StatelessWidget {
             child: Divider(color: Colors.grey.withValues(alpha: 0.1), height: 1),
           ),
       ],
+    );
+  }
+
+  Widget _buildHealthCard(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const HealthScreen()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE2E8FF), // Light blue tint
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFF1954C2).withValues(alpha: 0.1)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: const BoxDecoration(
+                color: Color(0xFF1954C2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.health_and_safety, color: Colors.white, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Kesehatan Keuangan',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Skor 72 • Cukup Sehat',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF1954C2),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Color(0xFF1954C2)),
+          ],
+        ),
+      ),
     );
   }
 }
