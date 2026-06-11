@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../screens/dashboard_screen.dart';
+import '../screens/report_screen.dart';
+import '../screens/transaction_screen.dart';
+import '../screens/profile_screen.dart';
+import '../screens/scan_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -13,12 +17,12 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [
+  late final List<Widget> _screens = [
     const DashboardScreen(),
-    const Center(child: Text('Transaksi')),
+    const TransactionScreen(),
     const SizedBox(), // Placeholder for Scan
-    const Center(child: Text('Laporan')),
-    const Center(child: Text('Profil')),
+    ReportScreen(onBack: () => _onItemTapped(0)),
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -40,12 +44,15 @@ class _MainShellState extends State<MainShell> {
         height: 56,
         width: 56,
         child: Transform.translate(
-          offset: const Offset(0, 12), // Move the FAB down by 12 pixels
+          offset: const Offset(0, 16), // Lowered the FAB slightly more
           child: FloatingActionButton(
             onPressed: () {
-              // Action for Scan
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ScanScreen()),
+              );
             },
-            backgroundColor: const Color(0xFF1954C2), // Deep vibrant blue
+            backgroundColor: const Color(0xFF1954C2),
             elevation: 4,
             shape: const CircleBorder(),
             child: const Icon(Icons.add, size: 28, color: Colors.white),
@@ -61,15 +68,16 @@ class _MainShellState extends State<MainShell> {
         child: SizedBox(
           height: 60,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(Icons.home, 'Home', 0),
-              _buildNavItem(Icons.receipt_long, 'Transaksi', 1),
-              SizedBox(
-                width: 56,
+              Expanded(child: _buildNavItem(Icons.home, 'Home', 0)),
+              Expanded(child: _buildNavItem(Icons.receipt_long, 'Transaksi', 1)),
+              Expanded(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    const SizedBox(height: 24), // Same height as the icons
+                    const SizedBox(height: 4),  // Same gap as the icons
                     Text(
                       'Scan',
                       style: GoogleFonts.inter(
@@ -78,12 +86,11 @@ class _MainShellState extends State<MainShell> {
                         color: AppTheme.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 9), // Exactly match the 9px bottom padding of other labels
                   ],
                 ),
               ),
-              _buildNavItem(Icons.bar_chart, 'Laporan', 3),
-              _buildNavItem(Icons.person_outline, 'Profil', 4),
+              Expanded(child: _buildNavItem(Icons.bar_chart, 'Laporan', 3)),
+              Expanded(child: _buildNavItem(Icons.person_outline, 'Profil', 4)),
             ],
           ),
         ),
