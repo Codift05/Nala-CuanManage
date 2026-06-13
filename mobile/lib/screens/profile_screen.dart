@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
+import '../services/auth_service.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -21,7 +23,7 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 24),
               _buildPreferencesSection(),
               const SizedBox(height: 24),
-              _buildOthersSection(),
+              _buildOthersSection(context),
               const SizedBox(height: 80), // Padding for bottom nav
             ],
           ),
@@ -179,7 +181,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOthersSection() {
+  Widget _buildOthersSection(BuildContext context) {
     return _buildSectionCard(
       title: 'Lainnya',
       children: [
@@ -203,7 +205,35 @@ class ProfileScreen extends StatelessWidget {
           title: 'Keluar',
           textColor: AppTheme.errorColor,
           hideArrow: true,
-          onTap: () {},
+          onTap: () async {
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text('Keluar Aplikasi', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                content: Text('Apakah kamu yakin ingin keluar?', style: GoogleFonts.inter()),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: Text('Batal', style: GoogleFonts.inter(color: Colors.grey)),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text('Keluar', style: GoogleFonts.inter(color: AppTheme.errorColor, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            );
+
+            if (confirm == true) {
+              await AuthService().logout();
+              if (context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  (Route<dynamic> route) => false,
+                );
+              }
+            }
+          },
         ),
       ],
     );

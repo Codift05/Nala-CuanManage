@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
+import '../services/transaction_service.dart';
+import '../models/transaction.dart';
 
 class TransactionScreen extends StatefulWidget {
   const TransactionScreen({super.key});
@@ -10,73 +13,113 @@ class TransactionScreen extends StatefulWidget {
 }
 
 class _TransactionScreenState extends State<TransactionScreen> {
-  // Dummy data for demonstration
-  final String currentMonth = 'Juni 2026';
-  final double totalIncome = 12500000;
-  final double totalExpense = 4350000;
+  final TransactionService _transactionService = TransactionService();
+  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
   
-  // Example data structure for UI
-  final List<Map<String, dynamic>> transactionGroups = [
-    {
-      'date': 'Hari Ini, 11 Jun 2026',
-      'transactions': [
-        {
-          'title': 'Makan Siang Nasi Padang',
-          'category': 'Makanan',
-          'account': 'Gopay',
-          'amount': -35000,
-          'icon': Icons.restaurant,
-          'iconColor': Colors.orange,
-        },
-        {
-          'title': 'Isi Saldo Flazz',
-          'category': 'Transportasi',
-          'account': 'BCA',
-          'amount': -100000,
-          'icon': Icons.directions_bus,
-          'iconColor': Colors.blue,
-        },
-      ]
-    },
-    {
-      'date': 'Kemarin, 10 Jun 2026',
-      'transactions': [
-        {
-          'title': 'Gaji Bulanan',
-          'category': 'Gaji',
-          'account': 'BCA',
-          'amount': 12500000,
-          'icon': Icons.account_balance_wallet,
-          'iconColor': Colors.green,
-        },
-        {
-          'title': 'Langganan Internet',
-          'category': 'Tagihan',
-          'account': 'Kartu Kredit',
-          'amount': -350000,
-          'icon': Icons.wifi,
-          'iconColor': Colors.purple,
-        },
-        {
-          'title': 'Kopi Sore',
-          'category': 'Makanan',
-          'account': 'Ovo',
-          'amount': -45000,
-          'icon': Icons.local_cafe,
-          'iconColor': Colors.brown,
-        },
-      ]
-    },
-  ];
+  bool _isLoading = true;
+  double _totalIncome = 0;
+  double _totalExpense = 0;
+  List<Map<String, dynamic>> _transactionGroups = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTransactions();
+  }
+
+  String _formatMonthYear(DateTime d) {
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    return '${months[d.month - 1]} ${d.year}';
+  }
+  
+  String _formatDate(DateTime d) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+    return '${d.day} ${months[d.month - 1]} ${d.year}';
+  }
+
+  Future<void> _loadTransactions() async {
+    setState(() => _isLoading = true);
+    try {
+      final transactions = await _transactionService.getTransactions();
+      
+      double income = 0;
+      double expense = 0;
+      Map<String, List<TransactionItem>> grouped = {};
+      
+      for (var tx in transactions) {
+        if (tx.type == 'INCOME') {
+          income += tx.amount;
+        } else {
+          expense += tx.amount;
+        }
+        
+        String dateStr = _formatDate(tx.date);
+        
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+        final yesterday = today.subtract(const Duration(days: 1));
+        final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
+        
+        if (txDate == today) {
+          dateStr = 'Hari Ini, $dateStr';
+        } else if (txDate == yesterday) {
+          dateStr = 'Kemarin, $dateStr';
+        }
+        
+        if (!grouped.containsKey(dateStr)) {
+          grouped[dateStr] = [];
+        }
+        grouped[dateStr]!.add(tx);
+      }
+      
+      List<Map<String, dynamic>> groups = [];
+      grouped.forEach((key, value) {
+        value.sort((a, b) => b.date.compareTo(a.date));
+        groups.add({
+          'date': key,
+          'transactions': value.map((tx) {
+            IconData icon = Icons.receipt_long;
+            Color iconColor = Colors.grey;
+            
+            if (tx.type == 'INCOME') {
+              icon = Icons.account_balance_wallet;
+              iconColor = Colors.green;
+            } else if (tx.categoryId == 'Food' || tx.categoryId == 'Makanan') {
+              icon = Icons.restaurant;
+              iconColor = Colors.orange;
+            } else if (tx.categoryId == 'Transport' || tx.categoryId == 'Transportasi') {
+              icon = Icons.directions_bus;
+              iconColor = Colors.blue;
+            }
+            
+            return {
+              'title': tx.merchant ?? tx.categoryId ?? tx.type,
+              'category': tx.categoryId ?? 'Lainnya',
+              'account': tx.wallet?.name ?? 'Wallet',
+              'amount': tx.type == 'EXPENSE' ? -tx.amount : tx.amount,
+              'icon': icon,
+              'iconColor': iconColor,
+            };
+          }).toList(),
+        });
+      });
+      
+      setState(() {
+        _totalIncome = income;
+        _totalExpense = expense;
+        _transactionGroups = groups;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Load transactions error: $e');
+      setState(() => _isLoading = false);
+    }
+  }
 
   String _formatCurrency(double amount) {
-    // Simple formatter, in a real app use intl package
     final isNegative = amount < 0;
-    final absAmount = amount.abs().toInt().toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]}.',
-        );
-    return '${isNegative ? '- ' : '+ '}Rp $absAmount';
+    final absAmount = amount.abs();
+    return '${isNegative ? '- ' : '+ '}${_currencyFormat.format(absAmount)}';
   }
 
   @override
@@ -84,41 +127,43 @@ class _TransactionScreenState extends State<TransactionScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(),
-                    const SizedBox(height: 24),
-                    _buildSummaryCard(),
-                  const SizedBox(height: 24),
-                  _buildFilterRow(),
-                  const SizedBox(height: 16),
-                ],
-              ),
+        child: _isLoading 
+            ? const Center(child: CircularProgressIndicator())
+            : CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildHeader(),
+                          const SizedBox(height: 24),
+                          _buildSummaryCard(),
+                        const SizedBox(height: 24),
+                        _buildFilterRow(),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final group = _transactionGroups[index];
+                        return _buildTransactionGroup(group);
+                      },
+                      childCount: _transactionGroups.length,
+                    ),
+                  ),
+                ),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 80), // Padding for FAB
+                ),
+              ],
             ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final group = transactionGroups[index];
-                  return _buildTransactionGroup(group);
-                },
-                childCount: transactionGroups.length,
-              ),
-            ),
-          ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 80), // Padding for FAB
-          ),
-        ],
-      ),
       ),
     );
   }
@@ -143,7 +188,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
             Row(
               children: [
                 Text(
-                  currentMonth,
+                  _formatMonthYear(DateTime.now()),
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -202,7 +247,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
   }
 
   Widget _buildSummaryCard() {
-    final balance = totalIncome - totalExpense;
+    final balance = _totalIncome - _totalExpense;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -228,7 +273,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Rp ${balance.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
+            _currencyFormat.format(balance),
             style: GoogleFonts.inter(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -241,7 +286,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
               Expanded(
                 child: _buildSummaryItem(
                   'Pemasukan',
-                  totalIncome,
+                  _totalIncome,
                   Icons.arrow_downward,
                   AppTheme.successColor,
                 ),
@@ -256,7 +301,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   padding: const EdgeInsets.only(left: 16),
                   child: _buildSummaryItem(
                     'Pengeluaran',
-                    totalExpense,
+                    _totalExpense,
                     Icons.arrow_upward,
                     AppTheme.errorColor,
                   ),
@@ -295,7 +340,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Rp ${amount.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
+          _currencyFormat.format(amount),
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,

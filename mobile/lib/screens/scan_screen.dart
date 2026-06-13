@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
+import '../services/transaction_service.dart';
+import '../services/wallet_service.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -11,6 +13,52 @@ class ScanScreen extends StatefulWidget {
 
 class _ScanScreenState extends State<ScanScreen> {
   String selectedSource = 'Tunai';
+  bool _isSaving = false;
+  
+  final TransactionService _transactionService = TransactionService();
+  final WalletService _walletService = WalletService();
+
+  Future<void> _saveTransaction() async {
+    setState(() => _isSaving = true);
+    try {
+      final wallets = await _walletService.getWallets();
+      if (wallets.isEmpty) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tidak ada wallet ditemukan!')));
+        setState(() => _isSaving = false);
+        return;
+      }
+      
+      final walletId = wallets.first.id; // Using the first wallet available for dummy integration
+      
+      final result = await _transactionService.createTransaction(
+        walletId: walletId,
+        type: 'EXPENSE',
+        amount: 47500,
+        categoryId: 'Belanja', 
+        merchant: 'Indomaret Manado',
+        notes: 'Hasil Scan Otomatis',
+      );
+      
+      if (!mounted) return;
+      
+      if (result != null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Transaksi Berhasil Disimpan!'),
+          backgroundColor: AppTheme.successColor,
+        ));
+        Navigator.pop(context, true); 
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Gagal menyimpan transaksi!'),
+          backgroundColor: AppTheme.errorColor,
+        ));
+      }
+    } catch(e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -300,7 +348,7 @@ class _ScanScreenState extends State<ScanScreen> {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {},
+                    onPressed: _isSaving ? null : () {},
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       side: const BorderSide(color: Color(0xFF1954C2)),
@@ -321,7 +369,7 @@ class _ScanScreenState extends State<ScanScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: _isSaving ? null : _saveTransaction,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF1954C2),
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -330,21 +378,23 @@ class _ScanScreenState extends State<ScanScreen> {
                         borderRadius: BorderRadius.circular(24),
                       ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Simpan Transaksi',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                    child: _isSaving 
+                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Simpan Transaksi',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.check, color: Colors.white, size: 16),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.check, color: Colors.white, size: 16),
-                      ],
-                    ),
                   ),
                 ),
               ],

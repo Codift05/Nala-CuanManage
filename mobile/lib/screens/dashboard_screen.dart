@@ -1,44 +1,108 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../widgets/donut_chart.dart';
 import '../widgets/budget_progress_bar.dart';
 import 'health_screen.dart';
+import '../services/wallet_service.dart';
+import '../services/transaction_service.dart';
+import '../services/health_service.dart';
+import '../models/wallet.dart';
+import '../models/transaction.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  final WalletService _walletService = WalletService();
+  final TransactionService _transactionService = TransactionService();
+  final HealthService _healthService = HealthService();
+  
+  bool _isLoading = true;
+  double _totalBalance = 0;
+  List<Wallet> _wallets = [];
+  List<TransactionItem> _recentTransactions = [];
+  int _healthScore = 0;
+  String _healthStatus = 'Memuat...';
+
+  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+    
+    try {
+      final wallets = await _walletService.getWallets();
+      final transactions = await _transactionService.getTransactions(limit: 3);
+      final healthData = await _healthService.getHealthScore();
+      
+      double total = 0;
+      for (var w in wallets) {
+        total += w.balance;
+      }
+      
+      setState(() {
+        _wallets = wallets;
+        _totalBalance = total;
+        _recentTransactions = transactions;
+        if (healthData != null) {
+          _healthScore = healthData['score'];
+          _healthStatus = healthData['status'];
+        } else {
+          _healthScore = 72; // Fallback
+          _healthStatus = 'Cukup Sehat';
+        }
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading dashboard data: $e');
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 24),
-              _buildBalanceCard(),
-              const SizedBox(height: 24),
-              _buildHealthCard(context),
-              const SizedBox(height: 32),
-              _buildSectionTitle('Pengeluaran Bulan Ini', null),
-              const SizedBox(height: 16),
-              _buildExpenseChart(),
-              const SizedBox(height: 32),
-              _buildSectionTitle('Budget Bulan Ini', () {}),
-              const SizedBox(height: 16),
-              _buildBudgetCard(),
-              const SizedBox(height: 32),
-              _buildSectionTitle('Terakhir', () {}),
-              const SizedBox(height: 16),
-              _buildRecentTransactions(),
-              const SizedBox(height: 80), // Extra space for bottom nav
-            ],
-          ),
-        ),
+        child: _isLoading 
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(),
+                    const SizedBox(height: 24),
+                    _buildBalanceCard(),
+                    const SizedBox(height: 24),
+                    _buildHealthCard(context),
+                    const SizedBox(height: 32),
+                    _buildSectionTitle('Pengeluaran Bulan Ini', null),
+                    const SizedBox(height: 16),
+                    _buildExpenseChart(),
+                    const SizedBox(height: 32),
+                    _buildSectionTitle('Budget Bulan Ini', () {}),
+                    const SizedBox(height: 16),
+                    _buildBudgetCard(),
+                    const SizedBox(height: 32),
+                    _buildSectionTitle('Terakhir', () {}),
+                    const SizedBox(height: 16),
+                    _buildRecentTransactions(),
+                    const SizedBox(height: 80), // Extra space for bottom nav
+                  ],
+                ),
+              ),
       ),
     );
   }
@@ -129,7 +193,7 @@ class DashboardScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Rp 4.250.000',
+            _currencyFormat.format(_totalBalance),
             style: GoogleFonts.outfit(
               color: Colors.white,
               fontSize: 32,
@@ -140,11 +204,20 @@ class DashboardScreen extends StatelessWidget {
           Wrap(
             spacing: 12,
             runSpacing: 12,
-            children: [
-              _buildAccountChip(Icons.money, 'Tunai Rp 800k', Colors.greenAccent),
-              _buildAccountChip(Icons.favorite, 'GoPay Rp 950k', Colors.lightBlueAccent),
-              _buildAccountChip(Icons.account_balance, 'BCA Rp 2.5jt', Colors.white),
-            ],
+            children: _wallets.map((wallet) {
+              IconData icon = Icons.account_balance_wallet;
+              Color color = Colors.white;
+              if (wallet.type == 'CASH') {
+                icon = Icons.money;
+                color = Colors.greenAccent;
+              } else if (wallet.type == 'EWALLET') {
+                icon = Icons.favorite;
+                color = Colors.lightBlueAccent;
+              }
+              
+              String label = '${wallet.name} ${_currencyFormat.format(wallet.balance)}';
+              return _buildAccountChip(icon, label, color);
+            }).toList(),
           ),
         ],
       ),
@@ -341,6 +414,10 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildRecentTransactions() {
+    if (_recentTransactions.isEmpty) {
+      return const Text("Belum ada transaksi.");
+    }
+    
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
@@ -355,30 +432,23 @@ class DashboardScreen extends StatelessWidget {
         ],
       ),
       child: Column(
-        children: [
-          _buildTransactionItem(
-            Icons.shopping_bag_outlined,
-            'Indomaret',
-            'Belanja',
-            '-Rp 47.500',
-            AppTheme.errorColor,
-          ),
-          _buildTransactionItem(
-            Icons.directions_car_outlined,
-            'Gojek',
-            'Transport',
-            '-Rp 25.000',
-            AppTheme.errorColor,
-          ),
-          _buildTransactionItem(
-            Icons.arrow_downward,
-            'Transfer in',
-            'Pemasukan',
-            '+Rp 500.000',
-            AppTheme.successColor,
-            isLast: true,
-          ),
-        ],
+        children: _recentTransactions.asMap().entries.map((entry) {
+          int index = entry.key;
+          TransactionItem item = entry.value;
+          
+          IconData icon = item.type == 'INCOME' ? Icons.arrow_downward : Icons.shopping_bag_outlined;
+          Color color = item.type == 'INCOME' ? AppTheme.successColor : AppTheme.errorColor;
+          String prefix = item.type == 'INCOME' ? '+' : '-';
+          
+          return _buildTransactionItem(
+            icon,
+            item.merchant ?? 'Transaksi',
+            item.categoryId ?? item.type,
+            '$prefix${_currencyFormat.format(item.amount)}',
+            color,
+            isLast: index == _recentTransactions.length - 1,
+          );
+        }).toList(),
       ),
     );
   }
@@ -470,7 +540,7 @@ class DashboardScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Skor 72 • Cukup Sehat',
+                    'Skor $_healthScore • $_healthStatus',
                     style: GoogleFonts.inter(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,

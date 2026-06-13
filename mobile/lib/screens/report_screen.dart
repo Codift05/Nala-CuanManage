@@ -1,47 +1,142 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../widgets/expense_item_card.dart';
+import '../services/transaction_service.dart';
+import '../models/transaction.dart';
 
-class ReportScreen extends StatelessWidget {
+class ReportScreen extends StatefulWidget {
   final VoidCallback? onBack;
 
   const ReportScreen({super.key, this.onBack});
+
+  @override
+  State<ReportScreen> createState() => _ReportScreenState();
+}
+
+class _ReportScreenState extends State<ReportScreen> {
+  final TransactionService _transactionService = TransactionService();
+  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+
+  bool _isLoading = true;
+  double _totalIncome = 0;
+  double _totalExpense = 0;
+  List<Map<String, dynamic>> _expenseCategories = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReport();
+  }
+
+  String _formatMonthYear(DateTime d) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+    return '${months[d.month - 1]} ${d.year}';
+  }
+
+  Future<void> _loadReport() async {
+    setState(() => _isLoading = true);
+    try {
+      final transactions = await _transactionService.getTransactions();
+      
+      double income = 0;
+      double expense = 0;
+      Map<String, double> categoryExpense = {};
+      
+      for (var tx in transactions) {
+        if (tx.type == 'INCOME') {
+          income += tx.amount;
+        } else {
+          expense += tx.amount;
+          String cat = tx.categoryId ?? 'Lainnya';
+          categoryExpense[cat] = (categoryExpense[cat] ?? 0) + tx.amount;
+        }
+      }
+      
+      List<Map<String, dynamic>> catList = [];
+      categoryExpense.forEach((key, value) {
+        double percentage = expense > 0 ? (value / expense) * 100 : 0;
+        
+        IconData icon = Icons.receipt_long;
+        Color iconColor = const Color(0xFF1954C2);
+        Color iconBgColor = const Color(0xFFE2E8F0);
+        
+        if (key == 'Food' || key == 'Makanan') {
+          icon = Icons.restaurant;
+          iconColor = AppTheme.errorColor;
+          iconBgColor = const Color(0xFFFFE0E0);
+        } else if (key == 'Transport' || key == 'Transportasi') {
+          icon = Icons.directions_car;
+          iconColor = const Color(0xFFB45309);
+          iconBgColor = const Color(0xFFFFEDD5);
+        } else if (key == 'Belanja') {
+          icon = Icons.shopping_bag_outlined;
+          iconColor = const Color(0xFF3730A3);
+          iconBgColor = const Color(0xFFE0E7FF);
+        }
+        
+        catList.add({
+          'title': key,
+          'amount': value,
+          'percentage': percentage.toInt(),
+          'icon': icon,
+          'iconColor': iconColor,
+          'iconBgColor': iconBgColor,
+          'barColor': iconColor,
+        });
+      });
+      
+      catList.sort((a, b) => b['amount'].compareTo(a['amount']));
+      
+      setState(() {
+        _totalIncome = income;
+        _totalExpense = expense;
+        _expenseCategories = catList;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Load report error: $e');
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FC), // Slightly bluish-gray background to match the mockup
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 24),
-              _buildDatePicker(),
-              const SizedBox(height: 24),
-              _buildSummaryCards(),
-              const SizedBox(height: 32),
-              _buildTrendChart(),
-              const SizedBox(height: 32),
-              Text(
-                'Terbesar Bulan Ini',
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+        child: _isLoading 
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(),
+                    const SizedBox(height: 24),
+                    _buildDatePicker(),
+                    const SizedBox(height: 24),
+                    _buildSummaryCards(),
+                    const SizedBox(height: 32),
+                    _buildTrendChart(),
+                    const SizedBox(height: 32),
+                    Text(
+                      'Terbesar Bulan Ini',
+                      style: GoogleFonts.inter(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildExpenseList(),
+                    const SizedBox(height: 32),
+                    _buildExportButton(),
+                    const SizedBox(height: 80), // Extra space for bottom nav
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
-              _buildExpenseList(),
-              const SizedBox(height: 32),
-              _buildExportButton(),
-              const SizedBox(height: 80), // Extra space for bottom nav
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -49,11 +144,13 @@ class ReportScreen extends StatelessWidget {
   Widget _buildHeader() {
     return Row(
       children: [
-        GestureDetector(
-          onTap: onBack,
-          child: const Icon(Icons.arrow_back, color: AppTheme.textPrimary, size: 24),
-        ),
-        const SizedBox(width: 16),
+        if (widget.onBack != null)
+          GestureDetector(
+            onTap: widget.onBack,
+            child: const Icon(Icons.arrow_back, color: AppTheme.textPrimary, size: 24),
+          ),
+        if (widget.onBack != null)
+          const SizedBox(width: 16),
         Text(
           'Laporan Keuangan',
           style: GoogleFonts.inter(
@@ -80,7 +177,7 @@ class ReportScreen extends StatelessWidget {
             const Icon(Icons.chevron_left, size: 16, color: AppTheme.textSecondary),
             const SizedBox(width: 16),
             Text(
-              'Mei 2025',
+              _formatMonthYear(DateTime.now()),
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -103,7 +200,7 @@ class ReportScreen extends StatelessWidget {
         children: [
           _buildSummaryCard(
             title: 'Pemasukan',
-            amount: 'Rp 3.200.000',
+            amount: _currencyFormat.format(_totalIncome),
             iconData: Icons.arrow_downward,
             iconColor: const Color(0xFF1954C2),
             iconBgColor: const Color(0xFFE2E8FF),
@@ -114,7 +211,7 @@ class ReportScreen extends StatelessWidget {
           const SizedBox(width: 16),
           _buildSummaryCard(
             title: 'Pengeluaran',
-            amount: 'Rp 2.640.000',
+            amount: _currencyFormat.format(_totalExpense),
             iconData: Icons.arrow_upward,
             iconColor: AppTheme.errorColor,
             iconBgColor: const Color(0xFFFFE5E5),
@@ -301,48 +398,33 @@ class ReportScreen extends StatelessWidget {
   }
 
   Widget _buildExpenseList() {
+    if (_expenseCategories.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Center(
+          child: Text(
+            'Belum ada pengeluaran bulan ini.',
+            style: GoogleFonts.inter(color: AppTheme.textSecondary),
+          ),
+        ),
+      );
+    }
+    
     return Column(
-      children: [
-        ExpenseItemCard(
-          icon: Icons.restaurant,
-          iconBgColor: const Color(0xFFFFE0E0), // Light red/pink
-          iconColor: AppTheme.errorColor,
-          title: 'Makan',
-          amount: 'Rp 850.000',
-          percentage: 32,
-          barColor: AppTheme.errorColor,
-        ),
-        const SizedBox(height: 12),
-        ExpenseItemCard(
-          icon: Icons.directions_car,
-          iconBgColor: const Color(0xFFFFEDD5), // Light orange/brown
-          iconColor: const Color(0xFFB45309), // Dark orange/brown
-          title: 'Transport',
-          amount: 'Rp 420.000',
-          percentage: 16,
-          barColor: const Color(0xFFB45309),
-        ),
-        const SizedBox(height: 12),
-        ExpenseItemCard(
-          icon: Icons.shopping_bag_outlined,
-          iconBgColor: const Color(0xFFE0E7FF), // Light blue-purple
-          iconColor: const Color(0xFF3730A3), // Dark purple
-          title: 'Belanja',
-          amount: 'Rp 380.000',
-          percentage: 14,
-          barColor: const Color(0xFFFFA07A), // Salmon/Orange
-        ),
-        const SizedBox(height: 12),
-        ExpenseItemCard(
-          icon: Icons.movie_outlined,
-          iconBgColor: const Color(0xFFE2E8F0), // Light gray-blue
-          iconColor: const Color(0xFF0F172A), // Dark blue-gray
-          title: 'Hiburan',
-          amount: 'Rp 210.000',
-          percentage: 8,
-          barColor: const Color(0xFF1954C2), // Blue
-        ),
-      ],
+      children: _expenseCategories.map((cat) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12.0),
+          child: ExpenseItemCard(
+            icon: cat['icon'],
+            iconBgColor: cat['iconBgColor'],
+            iconColor: cat['iconColor'],
+            title: cat['title'],
+            amount: _currencyFormat.format(cat['amount']),
+            percentage: cat['percentage'],
+            barColor: cat['barColor'],
+          ),
+        );
+      }).toList(),
     );
   }
 
