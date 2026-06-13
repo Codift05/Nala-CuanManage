@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../services/transaction_service.dart';
 import '../models/transaction.dart';
+import 'add_transaction_screen.dart';
 
 class TransactionScreen extends StatefulWidget {
   const TransactionScreen({super.key});
@@ -217,8 +218,14 @@ class _TransactionScreenState extends State<TransactionScreen> {
               ),
               child: IconButton(
                 icon: const Icon(Icons.add, color: AppTheme.textPrimary, size: 20),
-                onPressed: () {
-                  // Action to add new transaction manually
+                onPressed: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
+                  );
+                  if (result == true) {
+                    _loadTransactions();
+                  }
                 },
               ),
             ),

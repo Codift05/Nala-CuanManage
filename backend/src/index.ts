@@ -16,6 +16,7 @@ import transactionRoutes from './routes/transaction';
 import budgetRoutes from './routes/budget';
 import healthRoutes from './routes/health';
 import chatRoutes from './routes/chat';
+import recurringRoutes from './routes/recurring';
 
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
@@ -28,6 +29,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/recurring', recurringRoutes);
 
 app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', message: 'NALA Backend API is running' });

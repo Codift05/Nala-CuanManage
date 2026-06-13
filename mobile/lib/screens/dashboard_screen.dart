@@ -10,6 +10,10 @@ import '../services/transaction_service.dart';
 import '../services/health_service.dart';
 import '../models/wallet.dart';
 import '../models/transaction.dart';
+import 'budget_screen.dart';
+import 'add_transaction_screen.dart';
+import 'package:telephony/telephony.dart';
+import 'package:home_widget/home_widget.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -29,13 +33,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<TransactionItem> _recentTransactions = [];
   int _healthScore = 0;
   String _healthStatus = 'Memuat...';
+  String _nudgeMessage = '';
 
   final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+  final Telephony telephony = Telephony.instance;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _initHomeWidget();
+    _initSmsListener();
+  }
+
+  void _initHomeWidget() {
+    HomeWidget.widgetClicked.listen((Uri? uri) {
+      if (uri?.host == 'add_transaction' && mounted) {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const AddTransactionScreen()));
+      }
+    });
+  }
+
+  void _initSmsListener() async {
+    try {
+      bool? permissionsGranted = await telephony.requestPhoneAndSmsPermissions;
+      if (permissionsGranted ?? false) {
+        telephony.listenIncomingSms(
+          onNewMessage: (SmsMessage message) {
+            if (!mounted) return;
+            String text = message.body?.toLowerCase() ?? '';
+            if (text.contains('berhasil') && (text.contains('gopay') || text.contains('bca'))) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Ada SMS pemotongan dana terdeteksi!'),
+                  action: SnackBarAction(
+                    label: 'Catat ke Nala',
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const AddTransactionScreen()));
+                    },
+                  ),
+                  duration: const Duration(seconds: 10),
+                ),
+              );
+            }
+          },
+          listenInBackground: false,
+        );
+      }
+    } catch (e) {
+      print('SMS listener error: $e');
+    }
   }
 
   Future<void> _loadData() async {
@@ -58,6 +105,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (healthData != null) {
           _healthScore = healthData['score'];
           _healthStatus = healthData['status'];
+          _nudgeMessage = healthData['nudgeMessage'] ?? '';
         } else {
           _healthScore = 72; // Fallback
           _healthStatus = 'Cukup Sehat';
@@ -83,6 +131,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildHeader(),
+                    if (_nudgeMessage.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      _buildNudgeBanner(),
+                    ],
                     const SizedBox(height: 24),
                     _buildBalanceCard(),
                     const SizedBox(height: 24),
@@ -92,7 +144,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     const SizedBox(height: 16),
                     _buildExpenseChart(),
                     const SizedBox(height: 32),
-                    _buildSectionTitle('Budget Bulan Ini', () {}),
+                    _buildSectionTitle('Budget Bulan Ini', () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const BudgetScreen()),
+                      );
+                    }),
                     const SizedBox(height: 16),
                     _buildBudgetCard(),
                     const SizedBox(height: 32),
@@ -157,6 +214,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildNudgeBanner() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF4E5), // Light orange/yellow background
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFFFB74D).withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: const BoxDecoration(
+              color: Color(0xFFFFB74D),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.tips_and_updates, color: Colors.white, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              _nudgeMessage,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFFB45309), // Dark orange text
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

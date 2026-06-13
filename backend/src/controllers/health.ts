@@ -60,11 +60,20 @@ export const getHealthScore = async (req: AuthRequest, res: Response): Promise<v
     score = Math.min(100, Math.max(0, Math.round(score)));
 
     let status = 'Sangat Sehat';
-    if (score < 40) status = 'Kritis';
-    else if (score < 60) status = 'Perlu Perhatian';
-    else if (score < 80) status = 'Cukup Sehat';
+    let nudgeMessage = 'Keuanganmu aman terkendali! Lanjutkan kebiasaan baik ini. 🚀';
+    
+    if (score < 40) {
+      status = 'Kritis';
+      nudgeMessage = 'Waduh, pengeluaranmu udah over limit banget nih! Stop jajan dulu ya minggu ini! 🛑';
+    } else if (score < 60) {
+      status = 'Perlu Perhatian';
+      nudgeMessage = 'Hati-hati, pengeluaranmu mulai mendekati batas budget! Ngerem dikit ya. ⚠️';
+    } else if (score < 80) {
+      status = 'Cukup Sehat';
+      nudgeMessage = 'Masih aman, tapi jangan mentang-mentang ada sisa langsung dihabisin ya! 👀';
+    }
 
-    res.json({ score, status, totalExpense, totalBudget });
+    res.json({ score, status, totalExpense, totalBudget, nudgeMessage });
   } catch (error) {
     console.error('Error calculating health score:', error);
     res.status(500).json({ error: 'Failed to calculate health score' });

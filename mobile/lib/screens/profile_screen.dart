@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import 'login_screen.dart';
+import 'wallet_management_screen.dart';
+import 'recurring_bills_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -19,7 +21,7 @@ class ProfileScreen extends StatelessWidget {
             children: [
               _buildProfileHeader(),
               const SizedBox(height: 32),
-              _buildAccountSection(),
+              _buildAccountSection(context),
               const SizedBox(height: 24),
               _buildPreferencesSection(),
               const SizedBox(height: 24),
@@ -123,7 +125,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAccountSection() {
+  Widget _buildAccountSection(BuildContext context) {
     return _buildSectionCard(
       title: 'Akun & Keamanan',
       children: [
@@ -145,7 +147,24 @@ class ProfileScreen extends StatelessWidget {
           icon: Icons.account_balance_wallet_outlined,
           iconColor: const Color(0xFF388E3C), // Green
           title: 'Manajemen Bank & Dompet',
-          onTap: () {},
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const WalletManagementScreen()),
+            );
+          },
+        ),
+        _buildDivider(),
+        _buildMenuTile(
+          icon: Icons.autorenew,
+          iconColor: const Color(0xFFE91E63), // Pink
+          title: 'Tagihan Berulang',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const RecurringBillsScreen()),
+            );
+          },
         ),
       ],
     );

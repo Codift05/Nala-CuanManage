@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
+import 'package:home_widget/home_widget.dart';
 import 'screens/splash_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  HomeWidget.setAppGroupId('group.nala');
+  
   runApp(
     // Setup Provider at the highest level
     MultiProvider(
