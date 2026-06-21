@@ -17,6 +17,7 @@ import budgetRoutes from './routes/budget';
 import healthRoutes from './routes/health';
 import chatRoutes from './routes/chat';
 import recurringRoutes from './routes/recurring';
+import { initRecurringJob } from './cron/recurringJob';
 
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
@@ -34,6 +35,8 @@ app.use('/api/recurring', recurringRoutes);
 app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', message: 'NALA Backend API is running' });
 });
+
+initRecurringJob();
 
 app.listen(Number(port), '0.0.0.0', () => {
   console.log(`Server is running on port ${port}`);
