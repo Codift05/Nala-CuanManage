@@ -4,8 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/wallet.dart';
 
 class WalletService {
-  // Use 10.0.2.2 for Android emulator to connect to localhost
-  static const String baseUrl = 'http://10.0.2.2:3000/api';
+  // Android development uses `adb reverse tcp:3001 tcp:3001`.
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://127.0.0.1:3001/api',
+  );
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
