@@ -133,14 +133,14 @@ class ProfileScreen extends StatelessWidget {
           icon: Icons.person_outline,
           iconColor: const Color(0xFF1954C2),
           title: 'Informasi Pribadi',
-          onTap: () {},
+          onTap: () => _showEditProfileDialog(context),
         ),
         _buildDivider(),
         _buildMenuTile(
           icon: Icons.lock_outline,
           iconColor: const Color(0xFFB45309), // Dark Orange
           title: 'Keamanan & PIN',
-          onTap: () {},
+          onTap: () => _showChangePasswordDialog(context),
         ),
         _buildDivider(),
         _buildMenuTile(
@@ -358,6 +358,122 @@ class ProfileScreen extends StatelessWidget {
         height: 1,
         thickness: 1,
         color: Colors.grey.withValues(alpha: 0.1),
+      ),
+    );
+  }
+
+  void _showEditProfileDialog(BuildContext context) {
+    final nameController = TextEditingController();
+    final emailController = TextEditingController();
+    bool isLoading = false;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text('Edit Profil', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: 'Nama Lengkap',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Batal', style: GoogleFonts.inter(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: isLoading ? null : () async {
+                setState(() => isLoading = true);
+                final success = await AuthService().updateProfile(nameController.text, emailController.text);
+                setState(() => isLoading = false);
+                if (success && context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profil berhasil diperbarui')));
+                } else if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gagal memperbarui profil')));
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor),
+              child: isLoading ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text('Simpan', style: GoogleFonts.inter(color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showChangePasswordDialog(BuildContext context) {
+    final oldPasswordController = TextEditingController();
+    final newPasswordController = TextEditingController();
+    bool isLoading = false;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text('Ubah Password', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: oldPasswordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Password Lama',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: newPasswordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Password Baru',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Batal', style: GoogleFonts.inter(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: isLoading ? null : () async {
+                setState(() => isLoading = true);
+                final success = await AuthService().changePassword(oldPasswordController.text, newPasswordController.text);
+                setState(() => isLoading = false);
+                if (success && context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password berhasil diubah')));
+                } else if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gagal mengubah password (password lama salah)')));
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor),
+              child: isLoading ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text('Simpan', style: GoogleFonts.inter(color: Colors.white)),
+            ),
+          ],
+        ),
       ),
     );
   }
