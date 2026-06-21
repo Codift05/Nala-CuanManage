@@ -61,7 +61,7 @@ export const getRecurringBills = async (req: AuthRequest, res: Response): Promis
 
 export const deleteRecurringBill = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const id = req.params.id;
+    const id = req.params.id as string;
     const userId = req.user?.userId;
 
     if (!userId) {
