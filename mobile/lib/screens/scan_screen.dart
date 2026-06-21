@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import '../theme/app_theme.dart';
 import '../services/transaction_service.dart';
 import '../services/wallet_service.dart';
+import '../models/wallet.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -12,49 +15,153 @@ class ScanScreen extends StatefulWidget {
 }
 
 class _ScanScreenState extends State<ScanScreen> {
-  String selectedSource = 'Tunai';
-  bool _isSaving = false;
-  
   final TransactionService _transactionService = TransactionService();
   final WalletService _walletService = WalletService();
+  final ImagePicker _picker = ImagePicker();
+
+  bool _isProcessing = false;
+  bool _isSaving = false;
+  Map<String, dynamic>? _scannedData;
+  List<Wallet> _wallets = [];
+  Wallet? _selectedWallet;
+
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _merchantController = TextEditingController();
+  final TextEditingController _notesController = TextEditingController();
+  String _selectedCategory = 'Belanja';
+
+  final List<String> _categories = [
+    'Belanja',
+    'Food',
+    'Transport',
+    'Bills',
+    'Others',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWallets();
+  }
+
+  Future<void> _loadWallets() async {
+    final wallets = await _walletService.getWallets();
+    if (mounted) {
+      setState(() {
+        _wallets = wallets;
+        if (wallets.isNotEmpty) _selectedWallet = wallets.first;
+      });
+    }
+  }
+
+  Future<void> _pickAndScanImage(ImageSource source) async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        imageQuality: 80,
+      );
+      if (image == null) return;
+
+      setState(() {
+        _isProcessing = true;
+        _scannedData = null;
+      });
+
+      final bytes = await image.readAsBytes();
+      final base64Image = base64Encode(bytes);
+
+      final result = await _transactionService.scanReceipt(base64Image);
+
+      if (!mounted) return;
+
+      if (result != null) {
+        setState(() {
+          _scannedData = result;
+          _amountController.text = (result['amount'] ?? 0).toString();
+          _merchantController.text = result['merchant'] ?? '';
+          _notesController.text = result['notes'] ?? '';
+
+          String cat = result['categoryId'] ?? 'Belanja';
+          if (!_categories.contains(cat)) {
+            cat = 'Others';
+          }
+          _selectedCategory = cat;
+          _isProcessing = false;
+        });
+      } else {
+        setState(() => _isProcessing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Gagal membaca struk. Coba lagi.'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
+    }
+  }
 
   Future<void> _saveTransaction() async {
+    if (_selectedWallet == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pilih sumber dana terlebih dahulu')),
+      );
+      return;
+    }
+
     setState(() => _isSaving = true);
     try {
-      final wallets = await _walletService.getWallets();
-      if (wallets.isEmpty) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tidak ada wallet ditemukan!')));
-        setState(() => _isSaving = false);
-        return;
-      }
-      
-      final walletId = wallets.first.id; // Using the first wallet available for dummy integration
-      
       final result = await _transactionService.createTransaction(
-        walletId: walletId,
-        type: 'EXPENSE',
-        amount: 47500,
-        categoryId: 'Belanja', 
-        merchant: 'Indomaret Manado',
-        notes: 'Hasil Scan Otomatis',
+        walletId: _selectedWallet!.id,
+        type: 'EXPENSE', // Usually receipts are expenses
+        amount: double.tryParse(_amountController.text) ?? 0,
+        categoryId: _selectedCategory,
+        merchant: _merchantController.text,
+        notes: _notesController.text,
       );
-      
+
       if (!mounted) return;
-      
+
       if (result != null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Transaksi Berhasil Disimpan!'),
-          backgroundColor: AppTheme.successColor,
-        ));
-        Navigator.pop(context, true); 
+        if (result['warning'] != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['warning']),
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Transaksi Berhasil Disimpan!'),
+              backgroundColor: AppTheme.successColor,
+            ),
+          );
+        }
+        Navigator.pop(context, true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Gagal menyimpan transaksi!'),
-          backgroundColor: AppTheme.errorColor,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Gagal menyimpan transaksi!'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
       }
-    } catch(e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+    } catch (e) {
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -63,106 +170,93 @@ class _ScanScreenState extends State<ScanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF121212), // Dark background for camera
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Fake Camera Background
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      const Color(0xFF121212),
-                      const Color(0xFF2C2C2C).withValues(alpha: 0.5),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            
-            // Scan Frame Overlay
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 200.0), // Shift up to avoid bottom sheet
-                child: _buildScanFrame(),
-              ),
-            ),
-
-            // Top Bar
-            Positioned(
-              top: 16,
-              left: 16,
-              right: 16,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white, size: 28),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  Text(
-                    'Scan Struk',
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.flash_off, color: Colors.white, size: 24),
-                    onPressed: () {
-                      // Toggle flash
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            // Bottom Sheet Modal
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: _buildBottomSheet(),
-            ),
-          ],
+      backgroundColor: const Color(0xFF121212),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text(
+          'Scan Struk',
+          style: GoogleFonts.inter(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
+      ),
+      body: SafeArea(
+        child: _scannedData != null ? _buildResultForm() : _buildScannerView(),
       ),
     );
   }
 
-  Widget _buildScanFrame() {
-    return Container(
-      width: 280,
-      height: 380,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFF1954C2).withValues(alpha: 0.8), // Blue frame
-          width: 2,
-        ),
-      ),
-      child: Stack(
+  Widget _buildScannerView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Simulated scanning line
-          Positioned(
-            top: 180,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 2,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1954C2),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF1954C2).withValues(alpha: 0.6),
-                    blurRadius: 8,
-                    spreadRadius: 2,
+          _isProcessing
+              ? const CircularProgressIndicator(color: AppTheme.primaryColor)
+              : Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
                   ),
-                ],
-              ),
+                  child: const Icon(
+                    Icons.receipt_long,
+                    size: 80,
+                    color: Colors.white,
+                  ),
+                ),
+          const SizedBox(height: 32),
+          Text(
+            _isProcessing
+                ? 'Menganalisis struk dengan AI...'
+                : 'Pilih metode input struk',
+            style: GoogleFonts.inter(color: Colors.white, fontSize: 16),
+          ),
+          const SizedBox(height: 48),
+          if (!_isProcessing)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildOptionBtn(
+                  Icons.camera_alt,
+                  'Kamera',
+                  () => _pickAndScanImage(ImageSource.camera),
+                ),
+                const SizedBox(width: 32),
+                _buildOptionBtn(
+                  Icons.photo_library,
+                  'Galeri',
+                  () => _pickAndScanImage(ImageSource.gallery),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOptionBtn(IconData icon, String label, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: const BoxDecoration(
+              color: AppTheme.primaryColor,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: Colors.white, size: 32),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -170,10 +264,10 @@ class _ScanScreenState extends State<ScanScreen> {
     );
   }
 
-  Widget _buildBottomSheet() {
+  Widget _buildResultForm() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+      height: double.infinity,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -182,186 +276,123 @@ class _ScanScreenState extends State<ScanScreen> {
         ),
       ),
       child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle
-            Container(
-              width: 48,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
+            Center(
+              child: Container(
+                width: 48,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
             const SizedBox(height: 24),
-            
-            // Success Icon
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE2E8FF),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-              child: const Icon(Icons.check_circle, color: Color(0xFF1954C2), size: 24),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE2E8FF),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_circle,
+                    color: AppTheme.primaryColor,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Struk Terdeteksi',
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Periksa kembali data di bawah ini',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
+            const SizedBox(height: 32),
+
+            _buildTextField('Nominal (Rp)', _amountController, isNumber: true),
             const SizedBox(height: 16),
-            
-            // Status Text
+            _buildTextField('Merchant', _merchantController),
+            const SizedBox(height: 16),
+            _buildTextField('Catatan', _notesController),
+            const SizedBox(height: 16),
+
             Text(
-              'Struk Terdeteksi!',
+              'Kategori',
               style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Indomaret Manado',
-              style: GoogleFonts.inter(
-                fontSize: 14,
+                fontSize: 12,
                 color: AppTheme.textSecondary,
               ),
             ),
-            const SizedBox(height: 24),
-            
-            // Divider
-            Divider(color: Colors.grey.shade200, thickness: 1),
-            const SizedBox(height: 24),
-            
-            // Amount
-            Text(
-              'Rp 47.500',
-              style: GoogleFonts.outfit(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF1954C2),
-              ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              value: _selectedCategory,
+              decoration: _inputDecoration(),
+              items: _categories
+                  .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                  .toList(),
+              onChanged: (v) => setState(() => _selectedCategory = v!),
             ),
             const SizedBox(height: 16),
-            
-            // Category Pill
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE2E8FF),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.shopping_cart_outlined, size: 16, color: Color(0xFF1954C2)),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Belanja',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF1954C2),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Icon(Icons.edit_outlined, size: 14, color: Color(0xFF1954C2)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-            
-            // Source of Funds
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Sumber Dana',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: AppTheme.textSecondary,
-                ),
+
+            Text(
+              'Sumber Dana',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: AppTheme.textSecondary,
               ),
             ),
             const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.payments_outlined, color: AppTheme.textPrimary, size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      selectedSource,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: AppTheme.textPrimary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  const Icon(Icons.keyboard_arrow_down, color: AppTheme.textSecondary, size: 20),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            
-            // Notes
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Catatan (Opsional)',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: AppTheme.textSecondary,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              textCapitalization: TextCapitalization.sentences,
-              textInputAction: TextInputAction.done,
-              decoration: InputDecoration(
-                hintText: 'Tambahkan catatan...',
-                hintStyle: GoogleFonts.inter(color: Colors.grey.shade400, fontSize: 14),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF1954C2)),
-                ),
-              ),
+            DropdownButtonFormField<Wallet>(
+              value: _selectedWallet,
+              decoration: _inputDecoration(),
+              items: _wallets
+                  .map((w) => DropdownMenuItem(value: w, child: Text(w.name)))
+                  .toList(),
+              onChanged: (v) => setState(() => _selectedWallet = v),
             ),
             const SizedBox(height: 32),
-            
-            // Action Buttons
+
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: _isSaving ? null : () {},
+                    onPressed: _isSaving
+                        ? null
+                        : () => setState(() => _scannedData = null),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: const BorderSide(color: Color(0xFF1954C2)),
+                      side: const BorderSide(color: AppTheme.primaryColor),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
                     ),
                     child: Text(
-                      'Ulangi Scan',
+                      'Scan Ulang',
                       style: GoogleFonts.inter(
-                        fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1954C2),
+                        color: AppTheme.primaryColor,
                       ),
                     ),
                   ),
@@ -371,30 +402,28 @@ class _ScanScreenState extends State<ScanScreen> {
                   child: ElevatedButton(
                     onPressed: _isSaving ? null : _saveTransaction,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1954C2),
+                      backgroundColor: AppTheme.primaryColor,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
                     ),
-                    child: _isSaving 
-                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Simpan Transaksi',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                    child: _isSaving
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
                             ),
-                            const SizedBox(width: 8),
-                            const Icon(Icons.check, color: Colors.white, size: 16),
-                          ],
-                        ),
+                          )
+                        : Text(
+                            'Simpan',
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
               ],
@@ -402,6 +431,46 @@ class _ScanScreenState extends State<ScanScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  InputDecoration _inputDecoration() {
+    return InputDecoration(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppTheme.primaryColor),
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller, {
+    bool isNumber = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+          decoration: _inputDecoration(),
+        ),
+      ],
     );
   }
 }
