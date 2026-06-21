@@ -4,9 +4,12 @@ import '../theme/app_theme.dart';
 import '../services/transaction_service.dart';
 import '../services/wallet_service.dart';
 import '../models/wallet.dart';
+import '../models/transaction.dart';
 
 class AddTransactionScreen extends StatefulWidget {
-  const AddTransactionScreen({super.key});
+  final TransactionItem? transactionToEdit;
+
+  const AddTransactionScreen({super.key, this.transactionToEdit});
 
   @override
   State<AddTransactionScreen> createState() => _AddTransactionScreenState();
@@ -34,12 +37,22 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     'Shopping',
     'Bills',
     'Income',
-    'Others'
+    'Others',
   ];
 
   @override
   void initState() {
     super.initState();
+    if (widget.transactionToEdit != null) {
+      _type = widget.transactionToEdit!.type;
+      _amountController.text = widget.transactionToEdit!.amount.toStringAsFixed(
+        0,
+      );
+      _selectedCategory = widget.transactionToEdit!.categoryId;
+      _selectedWalletId = widget.transactionToEdit!.walletId;
+      _merchantController.text = widget.transactionToEdit!.merchant ?? '';
+      _notesController.text = widget.transactionToEdit!.notes ?? '';
+    }
     _loadWallets();
   }
 
@@ -64,24 +77,64 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
     setState(() => _isLoading = true);
 
-    final amount = double.tryParse(_amountController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+    final amount =
+        double.tryParse(
+          _amountController.text.replaceAll(RegExp(r'[^0-9]'), ''),
+        ) ??
+        0;
 
-    final tx = await _transactionService.createTransaction(
-      walletId: _selectedWalletId!,
-      type: _type,
-      amount: amount,
-      categoryId: _selectedCategory,
-      merchant: _merchantController.text.isNotEmpty ? _merchantController.text : null,
-      notes: _notesController.text.isNotEmpty ? _notesController.text : null,
-    );
+    Map<String, dynamic>? result;
+    if (widget.transactionToEdit != null) {
+      result = await _transactionService.updateTransaction(
+        id: widget.transactionToEdit!.id,
+        walletId: _selectedWalletId!,
+        type: _type,
+        amount: amount,
+        categoryId: _selectedCategory,
+        merchant: _merchantController.text.isNotEmpty
+            ? _merchantController.text
+            : null,
+        notes: _notesController.text.isNotEmpty ? _notesController.text : null,
+      );
+    } else {
+      result = await _transactionService.createTransaction(
+        walletId: _selectedWalletId!,
+        type: _type,
+        amount: amount,
+        categoryId: _selectedCategory,
+        merchant: _merchantController.text.isNotEmpty
+            ? _merchantController.text
+            : null,
+        notes: _notesController.text.isNotEmpty ? _notesController.text : null,
+      );
+    }
 
     setState(() => _isLoading = false);
 
-    if (tx != null && mounted) {
+    if (result != null && mounted) {
+      if (result['warning'] != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['warning']),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Transaksi berhasil ditambahkan'),
+            backgroundColor: AppTheme.successColor,
+          ),
+        );
+      }
       Navigator.pop(context, true); // return true to indicate success
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal menyimpan transaksi')),
+        const SnackBar(
+          content: Text('Gagal menyimpan transaksi'),
+          backgroundColor: AppTheme.errorColor,
+        ),
       );
     }
   }
@@ -98,7 +151,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Tambah Transaksi',
+          widget.transactionToEdit != null
+              ? 'Edit Transaksi'
+              : 'Tambah Transaksi',
           style: GoogleFonts.inter(
             color: AppTheme.textPrimary,
             fontWeight: FontWeight.bold,
@@ -148,7 +203,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           ),
                         ),
                         child: _isLoading
-                            ? const CircularProgressIndicator(color: Colors.white)
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
                             : Text(
                                 'Simpan Transaksi',
                                 style: GoogleFonts.inter(
@@ -184,14 +241,20 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
-                  color: _type == 'EXPENSE' ? AppTheme.errorColor.withValues(alpha: 0.1) : Colors.transparent,
-                  borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+                  color: _type == 'EXPENSE'
+                      ? AppTheme.errorColor.withValues(alpha: 0.1)
+                      : Colors.transparent,
+                  borderRadius: const BorderRadius.horizontal(
+                    left: Radius.circular(16),
+                  ),
                 ),
                 child: Center(
                   child: Text(
                     'Pengeluaran',
                     style: GoogleFonts.inter(
-                      color: _type == 'EXPENSE' ? AppTheme.errorColor : AppTheme.textSecondary,
+                      color: _type == 'EXPENSE'
+                          ? AppTheme.errorColor
+                          : AppTheme.textSecondary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -208,14 +271,20 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
-                  color: _type == 'INCOME' ? AppTheme.successColor.withValues(alpha: 0.1) : Colors.transparent,
-                  borderRadius: const BorderRadius.horizontal(right: Radius.circular(16)),
+                  color: _type == 'INCOME'
+                      ? AppTheme.successColor.withValues(alpha: 0.1)
+                      : Colors.transparent,
+                  borderRadius: const BorderRadius.horizontal(
+                    right: Radius.circular(16),
+                  ),
                 ),
                 child: Center(
                   child: Text(
                     'Pemasukan',
                     style: GoogleFonts.inter(
-                      color: _type == 'INCOME' ? AppTheme.successColor : AppTheme.textSecondary,
+                      color: _type == 'INCOME'
+                          ? AppTheme.successColor
+                          : AppTheme.textSecondary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -263,7 +332,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             fillColor: Colors.white,
           ),
           validator: (value) {
-            if (value == null || value.isEmpty) return 'Nominal tidak boleh kosong';
+            if (value == null || value.isEmpty)
+              return 'Nominal tidak boleh kosong';
             if (double.tryParse(value) == null) return 'Nominal tidak valid';
             return null;
           },
