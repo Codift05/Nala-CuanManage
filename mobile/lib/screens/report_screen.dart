@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../widgets/expense_item_card.dart';
 import '../services/transaction_service.dart';
-import '../models/transaction.dart';
 
 class ReportScreen extends StatefulWidget {
   final VoidCallback? onBack;
@@ -17,7 +16,11 @@ class ReportScreen extends StatefulWidget {
 
 class _ReportScreenState extends State<ReportScreen> {
   final TransactionService _transactionService = TransactionService();
-  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'id_ID',
+    symbol: 'Rp ',
+    decimalDigits: 0,
+  );
 
   bool _isLoading = true;
   double _totalIncome = 0;
@@ -31,7 +34,20 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   String _formatMonthYear(DateTime d) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Ags',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
     return '${months[d.month - 1]} ${d.year}';
   }
 
@@ -39,12 +55,16 @@ class _ReportScreenState extends State<ReportScreen> {
     setState(() => _isLoading = true);
     try {
       final transactions = await _transactionService.getTransactions();
-      
+      final now = DateTime.now();
+      final monthlyTransactions = transactions.where(
+        (tx) => tx.date.month == now.month && tx.date.year == now.year,
+      );
+
       double income = 0;
       double expense = 0;
       Map<String, double> categoryExpense = {};
-      
-      for (var tx in transactions) {
+
+      for (var tx in monthlyTransactions) {
         if (tx.type == 'INCOME') {
           income += tx.amount;
         } else {
@@ -53,15 +73,15 @@ class _ReportScreenState extends State<ReportScreen> {
           categoryExpense[cat] = (categoryExpense[cat] ?? 0) + tx.amount;
         }
       }
-      
+
       List<Map<String, dynamic>> catList = [];
       categoryExpense.forEach((key, value) {
         double percentage = expense > 0 ? (value / expense) * 100 : 0;
-        
+
         IconData icon = Icons.receipt_long;
         Color iconColor = const Color(0xFF1954C2);
         Color iconBgColor = const Color(0xFFE2E8F0);
-        
+
         if (key == 'Food' || key == 'Makanan') {
           icon = Icons.restaurant;
           iconColor = AppTheme.errorColor;
@@ -75,20 +95,21 @@ class _ReportScreenState extends State<ReportScreen> {
           iconColor = const Color(0xFF3730A3);
           iconBgColor = const Color(0xFFE0E7FF);
         }
-        
+
         catList.add({
           'title': key,
           'amount': value,
-          'percentage': percentage.toInt(),
+          'percentage': percentage,
           'icon': icon,
           'iconColor': iconColor,
           'iconBgColor': iconBgColor,
           'barColor': iconColor,
         });
       });
-      
+
       catList.sort((a, b) => b['amount'].compareTo(a['amount']));
-      
+
+      if (!mounted) return;
       setState(() {
         _totalIncome = income;
         _totalExpense = expense;
@@ -96,45 +117,54 @@ class _ReportScreenState extends State<ReportScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Load report error: $e');
-      setState(() => _isLoading = false);
+      debugPrint('Load report error: $e');
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FC), // Slightly bluish-gray background to match the mockup
+      backgroundColor: const Color(
+        0xFFF8F9FC,
+      ), // Slightly bluish-gray background to match the mockup
       body: SafeArea(
-        child: _isLoading 
+        child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(),
-                    const SizedBox(height: 24),
-                    _buildDatePicker(),
-                    const SizedBox(height: 24),
-                    _buildSummaryCards(),
-                    const SizedBox(height: 32),
-                    _buildTrendChart(),
-                    const SizedBox(height: 32),
-                    Text(
-                      'Terbesar Bulan Ini',
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary,
+            : RefreshIndicator(
+                onRefresh: _loadReport,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 24),
+                      _buildDatePicker(),
+                      const SizedBox(height: 24),
+                      _buildSummaryCards(),
+                      const SizedBox(height: 32),
+                      _buildTrendChart(),
+                      const SizedBox(height: 32),
+                      Text(
+                        'Terbesar Bulan Ini',
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textPrimary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildExpenseList(),
-                    const SizedBox(height: 32),
-                    _buildExportButton(),
-                    const SizedBox(height: 80), // Extra space for bottom nav
-                  ],
+                      const SizedBox(height: 16),
+                      _buildExpenseList(),
+                      const SizedBox(height: 32),
+                      _buildExportButton(),
+                      const SizedBox(height: 120),
+                    ],
+                  ),
                 ),
               ),
       ),
@@ -147,10 +177,13 @@ class _ReportScreenState extends State<ReportScreen> {
         if (widget.onBack != null)
           GestureDetector(
             onTap: widget.onBack,
-            child: const Icon(Icons.arrow_back, color: AppTheme.textPrimary, size: 24),
+            child: const Icon(
+              Icons.arrow_back,
+              color: AppTheme.textPrimary,
+              size: 24,
+            ),
           ),
-        if (widget.onBack != null)
-          const SizedBox(width: 16),
+        if (widget.onBack != null) const SizedBox(width: 16),
         Text(
           'Laporan Keuangan',
           style: GoogleFonts.inter(
@@ -174,7 +207,11 @@ class _ReportScreenState extends State<ReportScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.chevron_left, size: 16, color: AppTheme.textSecondary),
+            const Icon(
+              Icons.chevron_left,
+              size: 16,
+              color: AppTheme.textSecondary,
+            ),
             const SizedBox(width: 16),
             Text(
               _formatMonthYear(DateTime.now()),
@@ -185,7 +222,11 @@ class _ReportScreenState extends State<ReportScreen> {
               ),
             ),
             const SizedBox(width: 16),
-            const Icon(Icons.chevron_right, size: 16, color: AppTheme.textSecondary),
+            const Icon(
+              Icons.chevron_right,
+              size: 16,
+              color: AppTheme.textSecondary,
+            ),
           ],
         ),
       ),
@@ -270,7 +311,10 @@ class _ReportScreenState extends State<ReportScreen> {
               const Spacer(),
               if (badgeText != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: badgeColor,
                     borderRadius: BorderRadius.circular(12),
@@ -409,7 +453,7 @@ class _ReportScreenState extends State<ReportScreen> {
         ),
       );
     }
-    
+
     return Column(
       children: _expenseCategories.map((cat) {
         return Padding(
@@ -420,7 +464,7 @@ class _ReportScreenState extends State<ReportScreen> {
             iconColor: cat['iconColor'],
             title: cat['title'],
             amount: _currencyFormat.format(cat['amount']),
-            percentage: cat['percentage'],
+            percentage: (cat['percentage'] as num).toDouble(),
             barColor: cat['barColor'],
           ),
         );

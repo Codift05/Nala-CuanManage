@@ -54,16 +54,20 @@ class ExpenseItemCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textPrimary,
+                    Expanded(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
                       amount,
                       style: GoogleFonts.inter(
@@ -89,7 +93,9 @@ class ExpenseItemCard extends StatelessWidget {
                             return Stack(
                               children: [
                                 Container(
-                                  width: constraints.maxWidth * (percentage / 100),
+                                  width:
+                                      constraints.maxWidth *
+                                      (percentage.clamp(0, 100) / 100),
                                   height: 6,
                                   decoration: BoxDecoration(
                                     color: barColor,
