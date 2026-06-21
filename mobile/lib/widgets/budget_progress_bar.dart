@@ -19,7 +19,7 @@ class BudgetProgressBar extends StatelessWidget {
   Widget build(BuildContext context) {
     // Determine the color: if percentage > 100, we can force it to red if needed,
     // but we can also just let the caller pass the correct activeColor based on logic.
-    final displayPercent = percentage > 100 ? 100.0 : percentage;
+    final displayPercent = percentage.clamp(0, 100).toDouble();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,7 +32,9 @@ class BudgetProgressBar extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 14,
                 color: const Color(0xFF1A1A1A),
-                fontWeight: percentage > 100 ? FontWeight.bold : FontWeight.w500,
+                fontWeight: percentage > 100
+                    ? FontWeight.bold
+                    : FontWeight.w500,
               ),
             ),
             Text(

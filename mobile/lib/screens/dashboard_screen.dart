@@ -8,8 +8,11 @@ import 'health_screen.dart';
 import '../services/wallet_service.dart';
 import '../services/transaction_service.dart';
 import '../services/health_service.dart';
+import '../services/budget_service.dart';
+import '../services/auth_service.dart';
 import '../models/wallet.dart';
 import '../models/transaction.dart';
+import '../models/budget.dart';
 import 'budget_screen.dart';
 import 'add_transaction_screen.dart';
 import 'package:telephony/telephony.dart';
@@ -26,7 +29,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final WalletService _walletService = WalletService();
   final TransactionService _transactionService = TransactionService();
   final HealthService _healthService = HealthService();
-  
+  final BudgetService _budgetService = BudgetService();
+  final AuthService _authService = AuthService();
+
   bool _isLoading = true;
   double _totalBalance = 0;
   List<Wallet> _wallets = [];
@@ -34,8 +39,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _healthScore = 0;
   String _healthStatus = 'Memuat...';
   String _nudgeMessage = '';
+  String _userName = 'Pengguna';
+  List<Budget> _budgets = [];
+  Map<String, double> _expenseByCategory = {};
+  double _monthlyExpense = 0;
+  double _monthlyBudget = 0;
 
-  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'id_ID',
+    symbol: 'Rp ',
+    decimalDigits: 0,
+  );
   final Telephony telephony = Telephony.instance;
 
   @override
@@ -49,7 +63,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _initHomeWidget() {
     HomeWidget.widgetClicked.listen((Uri? uri) {
       if (uri?.host == 'add_transaction' && mounted) {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const AddTransactionScreen()));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
+        );
       }
     });
   }
@@ -62,14 +79,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
           onNewMessage: (SmsMessage message) {
             if (!mounted) return;
             String text = message.body?.toLowerCase() ?? '';
-            if (text.contains('berhasil') && (text.contains('gopay') || text.contains('bca'))) {
+            if (text.contains('berhasil') &&
+                (text.contains('gopay') || text.contains('bca'))) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: const Text('Ada SMS pemotongan dana terdeteksi!'),
                   action: SnackBarAction(
                     label: 'Catat ke Nala',
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const AddTransactionScreen()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AddTransactionScreen(),
+                        ),
+                      );
                     },
                   ),
                   duration: const Duration(seconds: 10),
@@ -81,30 +104,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
         );
       }
     } catch (e) {
-      print('SMS listener error: $e');
+      debugPrint('SMS listener error: $e');
     }
   }
 
   Future<void> _loadData() async {
-    setState(() => _isLoading = true);
-    
+    if (mounted) setState(() => _isLoading = true);
+
     try {
       final wallets = await _walletService.getWallets();
-      final transactions = await _transactionService.getTransactions(limit: 3);
+      final transactions = await _transactionService.getTransactions();
       final healthData = await _healthService.getHealthScore();
-      
+      final now = DateTime.now();
+      final budgets = await _budgetService.getBudgets(
+        month: now.month,
+        year: now.year,
+      );
+      final user = await _authService.getCurrentUser();
+
       double total = 0;
       for (var w in wallets) {
         total += w.balance;
       }
-      
+
+      final monthlyTransactions = transactions.where(
+        (tx) => tx.date.month == now.month && tx.date.year == now.year,
+      );
+      final expenseByCategory = <String, double>{};
+      double monthlyExpense = 0;
+      for (final tx in monthlyTransactions) {
+        if (tx.type != 'EXPENSE') continue;
+        monthlyExpense += tx.amount;
+        final category = tx.categoryId ?? 'Lainnya';
+        expenseByCategory[category] =
+            (expenseByCategory[category] ?? 0) + tx.amount;
+      }
+
+      if (!mounted) return;
+
       setState(() {
         _wallets = wallets;
         _totalBalance = total;
-        _recentTransactions = transactions;
+        _recentTransactions = transactions.take(3).toList();
+        _budgets = budgets;
+        _monthlyBudget = budgets.fold(0.0, (sum, item) => sum + item.amount);
+        _monthlyExpense = monthlyExpense;
+        _expenseByCategory = expenseByCategory;
+        _userName = (user?['name'] as String?)?.trim().isNotEmpty == true
+            ? user!['name'] as String
+            : 'Pengguna';
         if (healthData != null) {
-          _healthScore = healthData['score'];
-          _healthStatus = healthData['status'];
+          _healthScore = (healthData['score'] as num?)?.toInt() ?? 0;
+          _healthStatus = healthData['status'] as String? ?? 'Belum tersedia';
           _nudgeMessage = healthData['nudgeMessage'] ?? '';
         } else {
           _healthScore = 72; // Fallback
@@ -113,8 +164,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading dashboard data: $e');
-      setState(() => _isLoading = false);
+      debugPrint('Error loading dashboard data: $e');
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -123,41 +174,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: _isLoading 
+        child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(),
-                    if (_nudgeMessage.isNotEmpty) ...[
+            : RefreshIndicator(
+                onRefresh: _loadData,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(),
+                      if (_nudgeMessage.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        _buildNudgeBanner(),
+                      ],
+                      const SizedBox(height: 24),
+                      _buildBalanceCard(),
+                      const SizedBox(height: 24),
+                      _buildHealthCard(context),
+                      const SizedBox(height: 32),
+                      _buildSectionTitle('Pengeluaran Bulan Ini', null),
                       const SizedBox(height: 16),
-                      _buildNudgeBanner(),
+                      _buildExpenseChart(),
+                      const SizedBox(height: 32),
+                      _buildSectionTitle('Budget Bulan Ini', () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const BudgetScreen(),
+                          ),
+                        );
+                      }),
+                      const SizedBox(height: 16),
+                      _buildBudgetCard(),
+                      const SizedBox(height: 32),
+                      _buildSectionTitle('Terakhir', () {}),
+                      const SizedBox(height: 16),
+                      _buildRecentTransactions(),
+                      const SizedBox(height: 120),
                     ],
-                    const SizedBox(height: 24),
-                    _buildBalanceCard(),
-                    const SizedBox(height: 24),
-                    _buildHealthCard(context),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Pengeluaran Bulan Ini', null),
-                    const SizedBox(height: 16),
-                    _buildExpenseChart(),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Budget Bulan Ini', () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const BudgetScreen()),
-                      );
-                    }),
-                    const SizedBox(height: 16),
-                    _buildBudgetCard(),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Terakhir', () {}),
-                    const SizedBox(height: 16),
-                    _buildRecentTransactions(),
-                    const SizedBox(height: 80), // Extra space for bottom nav
-                  ],
+                  ),
                 ),
               ),
       ),
@@ -165,6 +225,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildHeader() {
+    final parts = _userName
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .take(2)
+        .toList();
+    final initials = parts.isEmpty
+        ? 'NA'
+        : parts.map((part) => part[0].toUpperCase()).join();
+
     return Row(
       children: [
         Container(
@@ -176,7 +245,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           child: Center(
             child: Text(
-              'MI',
+              initials,
               style: GoogleFonts.inter(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -186,18 +255,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         const SizedBox(width: 12),
-        Text(
-          'Haii, Mip',
-          style: GoogleFonts.inter(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
+        Expanded(
+          child: Text(
+            'Hai, $_userName',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
+            ),
           ),
         ),
-        const Spacer(),
         Stack(
           children: [
-            const Icon(Icons.notifications_none, size: 28, color: AppTheme.textPrimary),
+            const Icon(
+              Icons.notifications_none,
+              size: 28,
+              color: AppTheme.textPrimary,
+            ),
             Positioned(
               right: 2,
               top: 2,
@@ -223,7 +299,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFFFFF4E5), // Light orange/yellow background
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFFFB74D).withValues(alpha: 0.3)),
+        border: Border.all(
+          color: const Color(0xFFFFB74D).withValues(alpha: 0.3),
+        ),
       ),
       child: Row(
         children: [
@@ -233,7 +311,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               color: Color(0xFFFFB74D),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.tips_and_updates, color: Colors.white, size: 20),
+            child: const Icon(
+              Icons.tips_and_updates,
+              color: Colors.white,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -280,16 +362,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   fontSize: 14,
                 ),
               ),
-              Icon(Icons.visibility_outlined, color: Colors.white.withValues(alpha: 0.7), size: 20),
+              Icon(
+                Icons.visibility_outlined,
+                color: Colors.white.withValues(alpha: 0.7),
+                size: 20,
+              ),
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            _currencyFormat.format(_totalBalance),
-            style: GoogleFonts.outfit(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              _currencyFormat.format(_totalBalance),
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -306,8 +396,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon = Icons.favorite;
                 color = Colors.lightBlueAccent;
               }
-              
-              String label = '${wallet.name} ${_currencyFormat.format(wallet.balance)}';
+
+              String label =
+                  '${wallet.name} ${_currencyFormat.format(wallet.balance)}';
               return _buildAccountChip(icon, label, color);
             }).toList(),
           ),
@@ -318,6 +409,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildAccountChip(IconData icon, String label, Color iconColor) {
     return Container(
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.sizeOf(context).width - 80,
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.1),
@@ -329,12 +423,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           Icon(icon, color: iconColor, size: 14),
           const SizedBox(width: 6),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              color: Colors.white.withValues(alpha: 0.9),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.inter(
+                color: Colors.white.withValues(alpha: 0.9),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -344,16 +442,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildSectionTitle(String title, VoidCallback? onSeeAll) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: GoogleFonts.inter(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
+            ),
           ),
         ),
+        const SizedBox(width: 12),
         if (onSeeAll != null)
           GestureDetector(
             onTap: onSeeAll,
@@ -371,6 +473,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildExpenseChart() {
+    final entries = _expenseByCategory.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    const colors = [
+      AppTheme.errorColor,
+      AppTheme.infoColor,
+      AppTheme.warningColor,
+      AppTheme.successColor,
+      AppTheme.secondaryColor,
+    ];
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -384,66 +496,85 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              SizedBox(
-                width: 100,
-                height: 100,
-                child: DonutChart(
-                  strokeWidth: 14,
-                  data: [
-                    DonutChartData(32, AppTheme.errorColor),
-                    DonutChartData(18, AppTheme.infoColor),
-                    DonutChartData(14, AppTheme.warningColor),
-                    DonutChartData(36, AppTheme.neutralColor),
-                  ],
+      child: entries.isEmpty
+          ? Text(
+              'Belum ada pengeluaran bulan ini.',
+              style: GoogleFonts.inter(color: AppTheme.textSecondary),
+            )
+          : Column(
+              children: [
+                SizedBox(
+                  width: 120,
+                  height: 120,
+                  child: DonutChart(
+                    strokeWidth: 15,
+                    data: entries.asMap().entries.map((entry) {
+                      return DonutChartData(
+                        entry.value.value,
+                        colors[entry.key % colors.length],
+                      );
+                    }).toList(),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 24),
-              Expanded(
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(child: _buildLegendItem(AppTheme.errorColor, 'Makan 32%')),
-                        Expanded(child: _buildLegendItem(AppTheme.infoColor, 'Transport 18%')),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(child: _buildLegendItem(AppTheme.warningColor, 'Belanja 14%')),
-                        Expanded(child: _buildLegendItem(AppTheme.neutralColor, 'Lainnya 36%')),
-                      ],
-                    ),
-                  ],
+                const SizedBox(height: 20),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final itemWidth = (constraints.maxWidth - 12) / 2;
+                    return Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: entries.asMap().entries.map((entry) {
+                        final percentage = _monthlyExpense > 0
+                            ? (entry.value.value / _monthlyExpense) * 100
+                            : 0.0;
+                        return SizedBox(
+                          width: itemWidth,
+                          child: _buildLegendItem(
+                            colors[entry.key % colors.length],
+                            '${entry.value.key} ${percentage.toStringAsFixed(0)}%',
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Divider(color: Colors.grey.withValues(alpha: 0.2)),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Text(
-                'Total ',
-                style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
-              ),
-              Text(
-                'Rp 1.840.000',
-                style: GoogleFonts.inter(color: AppTheme.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                ' dari Rp 2.500.000 budget',
-                style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
-              ),
-            ],
-          ),
-        ],
-      ),
+                const SizedBox(height: 20),
+                Divider(color: Colors.grey.withValues(alpha: 0.2)),
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        'Total ',
+                        style: GoogleFonts.inter(
+                          color: AppTheme.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                      Text(
+                        _currencyFormat.format(_monthlyExpense),
+                        style: GoogleFonts.inter(
+                          color: AppTheme.textPrimary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        _monthlyBudget > 0
+                            ? ' dari ${_currencyFormat.format(_monthlyBudget)} budget'
+                            : ' • belum ada budget',
+                        style: GoogleFonts.inter(
+                          color: AppTheme.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
@@ -456,11 +587,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 6),
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            color: AppTheme.textSecondary,
-            fontSize: 12,
+        Expanded(
+          child: Text(
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              color: AppTheme.textSecondary,
+              fontSize: 12,
+            ),
           ),
         ),
       ],
@@ -481,27 +616,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      child: const Column(
-        children: [
-          BudgetProgressBar(
-            label: 'Makan',
-            percentage: 78,
-            activeColor: AppTheme.warningColor,
-          ),
-          SizedBox(height: 20),
-          BudgetProgressBar(
-            label: 'Transport',
-            percentage: 52,
-            activeColor: AppTheme.successColor,
-          ),
-          SizedBox(height: 20),
-          BudgetProgressBar(
-            label: 'Belanja',
-            percentage: 102,
-            activeColor: AppTheme.errorColor,
-          ),
-        ],
-      ),
+      child: _budgets.isEmpty
+          ? Text(
+              'Belum ada budget bulan ini.',
+              style: GoogleFonts.inter(color: AppTheme.textSecondary),
+            )
+          : Column(
+              children: _budgets.asMap().entries.expand((entry) {
+                final budget = entry.value;
+                final spent = _expenseByCategory[budget.categoryId] ?? 0;
+                final percentage = budget.amount > 0
+                    ? (spent / budget.amount) * 100
+                    : 0.0;
+                final color = percentage > 100
+                    ? AppTheme.errorColor
+                    : percentage >= 75
+                    ? AppTheme.warningColor
+                    : AppTheme.successColor;
+
+                return [
+                  if (entry.key > 0) const SizedBox(height: 20),
+                  BudgetProgressBar(
+                    label: budget.categoryId,
+                    percentage: percentage,
+                    activeColor: color,
+                  ),
+                ];
+              }).toList(),
+            ),
     );
   }
 
@@ -509,7 +651,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (_recentTransactions.isEmpty) {
       return const Text("Belum ada transaksi.");
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
@@ -527,11 +669,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: _recentTransactions.asMap().entries.map((entry) {
           int index = entry.key;
           TransactionItem item = entry.value;
-          
-          IconData icon = item.type == 'INCOME' ? Icons.arrow_downward : Icons.shopping_bag_outlined;
-          Color color = item.type == 'INCOME' ? AppTheme.successColor : AppTheme.errorColor;
+
+          IconData icon = item.type == 'INCOME'
+              ? Icons.arrow_downward
+              : Icons.shopping_bag_outlined;
+          Color color = item.type == 'INCOME'
+              ? AppTheme.successColor
+              : AppTheme.errorColor;
           String prefix = item.type == 'INCOME' ? '+' : '-';
-          
+
           return _buildTransactionItem(
             icon,
             item.merchant ?? 'Transaksi',
@@ -545,11 +691,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildTransactionItem(IconData icon, String title, String subtitle, String amount, Color amountColor, {bool isLast = false}) {
+  Widget _buildTransactionItem(
+    IconData icon,
+    String title,
+    String subtitle,
+    String amount,
+    Color amountColor, {
+    bool isLast = false,
+  }) {
     return Column(
       children: [
         ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 4,
+          ),
           leading: Container(
             width: 48,
             height: 48,
@@ -586,7 +742,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (!isLast)
           Padding(
             padding: const EdgeInsets.only(left: 80, right: 20),
-            child: Divider(color: Colors.grey.withValues(alpha: 0.1), height: 1),
+            child: Divider(
+              color: Colors.grey.withValues(alpha: 0.1),
+              height: 1,
+            ),
           ),
       ],
     );
@@ -605,7 +764,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         decoration: BoxDecoration(
           color: const Color(0xFFE2E8FF), // Light blue tint
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFF1954C2).withValues(alpha: 0.1)),
+          border: Border.all(
+            color: const Color(0xFF1954C2).withValues(alpha: 0.1),
+          ),
         ),
         child: Row(
           children: [
@@ -615,7 +776,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 color: Color(0xFF1954C2),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.health_and_safety, color: Colors.white, size: 24),
+              child: const Icon(
+                Icons.health_and_safety,
+                color: Colors.white,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
