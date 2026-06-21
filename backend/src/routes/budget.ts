@@ -5,11 +5,11 @@ import {
   updateBudget,
   deleteBudget
 } from '../controllers/budget';
-import { authenticateToken } from '../middlewares/auth';
+import { authenticate } from '../middleware/auth';
 
 const router = Router();
 
-router.use(authenticateToken);
+router.use(authenticate);
 
 router.post('/', createBudget);
 router.get('/', getBudgets);
