@@ -3,8 +3,12 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'nala_super_secret_key_2026';
 
-export const authenticateToken = (
-  req: Request,
+export interface AuthRequest extends Request {
+  user?: any;
+}
+
+export const authenticate = (
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ): void => {
@@ -23,6 +27,7 @@ export const authenticateToken = (
     }
 
     req.userId = decoded.userId;
+    req.user = decoded;
     next();
   });
 };
