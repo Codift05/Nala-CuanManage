@@ -23,65 +23,92 @@ async function main() {
     },
   });
 
-  console.log('User created:', user.email);
+  console.log('Development user ready:', user.email);
 
   // 2. Create Wallets
-  const cashWallet = await prisma.wallet.create({
-    data: {
-      userId: user.id,
-      name: 'Cash',
-      type: 'CASH',
-      balance: 1500000,
-    }
-  });
+  const cashWallet = await prisma.wallet.findFirst({
+    where: { userId: user.id, name: 'Cash', type: 'CASH' }
+  }) ?? await prisma.wallet.create({
+      data: {
+        userId: user.id,
+        name: 'Cash',
+        type: 'CASH',
+        balance: 1500000,
+      }
+    });
 
-  const gopayWallet = await prisma.wallet.create({
-    data: {
-      userId: user.id,
-      name: 'GoPay',
-      type: 'EWALLET',
-      balance: 500000,
-    }
-  });
-  console.log('Wallets created');
+  const gopayWallet = await prisma.wallet.findFirst({
+    where: { userId: user.id, name: 'GoPay', type: 'EWALLET' }
+  }) ?? await prisma.wallet.create({
+      data: {
+        userId: user.id,
+        name: 'GoPay',
+        type: 'EWALLET',
+        balance: 500000,
+      }
+    });
+  console.log('Development wallets ready');
 
   // 3. Create Budget
-  await prisma.budget.create({
-    data: {
+  const month = new Date().getMonth() + 1;
+  const year = new Date().getFullYear();
+  await prisma.budget.upsert({
+    where: {
+      userId_categoryId_month_year: {
+        userId: user.id,
+        categoryId: 'Food',
+        month,
+        year,
+      }
+    },
+    update: {},
+    create: {
       userId: user.id,
       categoryId: 'Food',
       amount: 1000000,
-      month: new Date().getMonth() + 1,
-      year: new Date().getFullYear()
-    }
+      month,
+      year,
+    },
   });
-  console.log('Budget created');
+  console.log('Development budget ready');
 
   // 4. Create Transactions
-  await prisma.transaction.create({
-    data: {
-      userId: user.id,
-      walletId: cashWallet.id,
-      type: 'EXPENSE',
-      amount: 50000,
-      categoryId: 'Food',
-      merchant: 'Warung Nasi',
-      notes: 'Makan siang',
-    }
+  const lunchTransaction = await prisma.transaction.findFirst({
+    where: { userId: user.id, merchant: 'Warung Nasi', notes: 'Makan siang' }
   });
+  if (!lunchTransaction) {
+    await prisma.transaction.create({
+      data: {
+        userId: user.id,
+        walletId: cashWallet.id,
+        type: 'EXPENSE',
+        amount: 50000,
+        categoryId: 'Food',
+        merchant: 'Warung Nasi',
+        notes: 'Makan siang',
+      }
+    });
+  }
 
-  await prisma.transaction.create({
-    data: {
-      userId: user.id,
-      walletId: gopayWallet.id,
-      type: 'INCOME',
-      amount: 2000000,
-      categoryId: 'Salary',
-      merchant: 'Company',
-      notes: 'Gaji bulanan',
-    }
+  const salaryTransaction = await prisma.transaction.findFirst({
+    where: { userId: user.id, merchant: 'Company', notes: 'Gaji bulanan' }
   });
-  console.log('Transactions created');
+  if (!salaryTransaction) {
+    await prisma.transaction.create({
+      data: {
+        userId: user.id,
+        walletId: gopayWallet.id,
+        type: 'INCOME',
+        amount: 2000000,
+        categoryId: 'Salary',
+        merchant: 'Company',
+        notes: 'Gaji bulanan',
+      }
+    });
+  }
+  console.log('Development transactions ready');
+
+  await prisma.$disconnect();
 }
 
 main()
