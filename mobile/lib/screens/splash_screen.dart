@@ -70,33 +70,25 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Placeholder for Logo
-              Container(
-                width: 100,
-                height: 100,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.account_balance_wallet,
-                  size: 50,
-                  color: AppTheme.primaryColor,
-                ),
+              Image.asset(
+                'img/Logo Nala 4.png',
+                width: 210,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.high,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
               Text(
-                'NALA Finance',
+                'NALA',
                 style: GoogleFonts.outfit(
-                  fontSize: 36,
+                  fontSize: 38,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  letterSpacing: 1.5,
+                  letterSpacing: 4,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'AI-Powered Personal Finance',
+                'Smart Cuan Management',
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   color: Colors.white.withValues(alpha: 0.8),
