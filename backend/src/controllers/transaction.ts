@@ -35,6 +35,11 @@ export const createTransaction = async (req: Request, res: Response) => {
 
     const balanceChange = type === 'INCOME' ? numericAmount : -numericAmount;
 
+    let warning: string | undefined;
+    if (type === 'EXPENSE' && wallet.balance < numericAmount) {
+      warning = 'Saldo dompet menjadi minus setelah transaksi ini.';
+    }
+
     // Use a transaction to ensure both operations succeed or fail together
     const [transaction, updatedWallet] = await prisma.$transaction([
       prisma.transaction.create({
@@ -59,7 +64,7 @@ export const createTransaction = async (req: Request, res: Response) => {
       })
     ]);
 
-    res.status(201).json({ message: 'Transaction created successfully', transaction, wallet: updatedWallet });
+    res.status(201).json({ message: 'Transaction created successfully', transaction, wallet: updatedWallet, warning });
   } catch (error) {
     console.error('Create transaction error:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -165,6 +170,86 @@ export const deleteTransaction = async (req: Request, res: Response) => {
     res.json({ message: 'Transaction deleted successfully' });
   } catch (error) {
     console.error('Delete transaction error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const updateTransaction = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const userId = req.userId;
+    const { walletId, type, amount, categoryId, merchant, notes, date } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    if (!walletId || !type || amount === undefined) {
+      return res.status(400).json({ message: 'walletId, type, and amount are required' });
+    }
+
+    const numericAmount = Number(amount);
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+      return res.status(400).json({ message: 'amount must be a positive number' });
+    }
+
+    const oldTransaction = await prisma.transaction.findFirst({
+      where: { id, userId }
+    });
+
+    if (!oldTransaction) {
+      return res.status(404).json({ message: 'Transaction not found' });
+    }
+
+    const newWallet = await prisma.wallet.findFirst({ where: { id: walletId, userId } });
+    if (!newWallet) return res.status(404).json({ message: 'New Wallet not found' });
+
+    let warning: string | undefined;
+
+    await prisma.$transaction(async (tx) => {
+      // 1. Revert old transaction
+      const revertAmount = oldTransaction.type === 'INCOME' ? -oldTransaction.amount : oldTransaction.amount;
+      await tx.wallet.update({
+        where: { id: oldTransaction.walletId },
+        data: { balance: { increment: revertAmount } }
+      });
+
+      // 2. Apply new transaction
+      const applyAmount = type === 'INCOME' ? numericAmount : -numericAmount;
+
+      const currentNewWallet = await tx.wallet.findUnique({ where: { id: walletId } });
+      if (type === 'EXPENSE' && currentNewWallet && (currentNewWallet.balance - numericAmount < 0)) {
+        warning = 'Saldo dompet menjadi minus setelah transaksi ini.';
+      }
+
+      await tx.wallet.update({
+        where: { id: walletId },
+        data: { balance: { increment: applyAmount } }
+      });
+
+      // 3. Update transaction record
+      await tx.transaction.update({
+        where: { id },
+        data: {
+          walletId,
+          type,
+          amount: numericAmount,
+          categoryId,
+          merchant,
+          notes,
+          date: date ? new Date(date) : undefined
+        }
+      });
+    });
+
+    const updatedTransaction = await prisma.transaction.findUnique({
+      where: { id },
+      include: { wallet: { select: { name: true, type: true } } }
+    });
+
+    res.json({ message: 'Transaction updated successfully', transaction: updatedTransaction, warning });
+  } catch (error) {
+    console.error('Update transaction error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
