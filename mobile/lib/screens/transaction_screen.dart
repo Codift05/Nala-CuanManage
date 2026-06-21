@@ -100,6 +100,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
               'amount': tx.type == 'EXPENSE' ? -tx.amount : tx.amount,
               'icon': icon,
               'iconColor': iconColor,
+              'rawTransaction': tx,
             };
           }).toList(),
         });
@@ -439,8 +440,19 @@ class _TransactionScreenState extends State<TransactionScreen> {
     final amount = (tx['amount'] as num).toDouble();
     final isIncome = amount > 0;
     final iconColor = tx['iconColor'] as Color;
+    final rawTx = tx['rawTransaction'] as TransactionItem;
 
-    return Column(
+    return InkWell(
+      onTap: () async {
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AddTransactionScreen(transactionToEdit: rawTx)),
+        );
+        if (result == true) {
+          _loadTransactions();
+        }
+      },
+      child: Column(
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),
@@ -502,6 +514,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
             endIndent: 16,
           ),
       ],
+    ),
     );
   }
 }

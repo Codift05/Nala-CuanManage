@@ -4,7 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/transaction.dart';
 
 class TransactionService {
-  static const String baseUrl = 'http://10.0.2.2:3000/api';
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://127.0.0.1:3001/api',
+  );
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -41,7 +44,7 @@ class TransactionService {
     }
   }
 
-  Future<TransactionItem?> createTransaction({
+  Future<Map<String, dynamic>?> createTransaction({
     required String walletId,
     required String type,
     required double amount,
@@ -71,11 +74,85 @@ class TransactionService {
 
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        return TransactionItem.fromJson(data['transaction']);
+        return {
+          'transaction': TransactionItem.fromJson(data['transaction']),
+          'warning': data['warning'],
+        };
       }
       return null;
     } catch (e) {
       print('Create transaction error: $e');
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> scanReceipt(String base64Image) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No token found');
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/transactions/scan'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'imageBase64': base64Image,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      } else {
+        print('Scan receipt error: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Scan receipt exception: $e');
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> updateTransaction({
+    required String id,
+    required String walletId,
+    required String type,
+    required double amount,
+    String? categoryId,
+    String? merchant,
+    String? notes,
+  }) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No token found');
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/transactions/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'walletId': walletId,
+          'type': type,
+          'amount': amount,
+          if (categoryId != null) 'categoryId': categoryId,
+          if (merchant != null) 'merchant': merchant,
+          if (notes != null) 'notes': notes,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'transaction': TransactionItem.fromJson(data['transaction']),
+          'warning': data['warning'],
+        };
+      }
+      return null;
+    } catch (e) {
+      print('Update transaction error: $e');
       return null;
     }
   }
