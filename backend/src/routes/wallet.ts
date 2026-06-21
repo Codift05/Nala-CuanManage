@@ -6,11 +6,11 @@ import {
   updateWallet,
   deleteWallet
 } from '../controllers/wallet';
-import { authenticateToken } from '../middlewares/auth';
+import { authenticate } from '../middleware/auth';
 
 const router = Router();
 
-router.use(authenticateToken);
+router.use(authenticate);
 
 router.post('/', createWallet);
 router.get('/', getWallets);
