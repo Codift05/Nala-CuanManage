@@ -52,21 +52,21 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _selectedIndex, children: _screens),
       floatingActionButton: SizedBox(
         height: 56,
         width: 56,
         child: Transform.translate(
           offset: const Offset(0, 16), // Lowered the FAB slightly more
           child: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              final result = await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ScanScreen()),
               );
+              if (result == true && mounted) {
+                setState(() => _refreshScreen(_selectedIndex));
+              }
             },
             backgroundColor: const Color(0xFF1954C2),
             elevation: 4,
@@ -86,14 +86,16 @@ class _MainShellState extends State<MainShell> {
           child: Row(
             children: [
               Expanded(child: _buildNavItem(Icons.home, 'Home', 0)),
-              Expanded(child: _buildNavItem(Icons.receipt_long, 'Transaksi', 1)),
+              Expanded(
+                child: _buildNavItem(Icons.receipt_long, 'Transaksi', 1),
+              ),
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const SizedBox(height: 24), // Same height as the icons
-                    const SizedBox(height: 4),  // Same gap as the icons
+                    const SizedBox(height: 4), // Same gap as the icons
                     Text(
                       'Scan',
                       style: GoogleFonts.inter(
@@ -125,7 +127,9 @@ class _MainShellState extends State<MainShell> {
         children: [
           Icon(
             icon,
-            color: isSelected ? const Color(0xFF1954C2) : AppTheme.textSecondary,
+            color: isSelected
+                ? const Color(0xFF1954C2)
+                : AppTheme.textSecondary,
             size: 24,
           ),
           const SizedBox(height: 4),
@@ -134,7 +138,9 @@ class _MainShellState extends State<MainShell> {
             style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              color: isSelected ? const Color(0xFF1954C2) : AppTheme.textSecondary,
+              color: isSelected
+                  ? const Color(0xFF1954C2)
+                  : AppTheme.textSecondary,
             ),
           ),
         ],
