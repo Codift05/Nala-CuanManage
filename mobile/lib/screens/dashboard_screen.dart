@@ -94,7 +94,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         MaterialPageRoute(
                           builder: (_) => const AddTransactionScreen(),
                         ),
-                      );
+                      ).then((result) {
+                        if (result == true && mounted) _loadData();
+                      });
                     },
                   ),
                   duration: const Duration(seconds: 10),
