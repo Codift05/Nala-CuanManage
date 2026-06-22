@@ -58,6 +58,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   Future<void> _loadWallets() async {
     final wallets = await _walletService.getWallets();
+    if (!mounted) return;
     setState(() {
       _wallets = wallets;
       if (_wallets.isNotEmpty) {
