@@ -118,6 +118,36 @@ async function main() {
       })
     ]);
   }
+
+  // Older development data created the sample transactions without applying
+  // them to the wallets. Recalculate the two seeded wallets from their opening
+  // balances so existing local databases are repaired and future seed runs stay
+  // idempotent.
+  const syncSeededWalletBalance = async (
+    walletId: string,
+    openingBalance: number,
+  ) => {
+    const transactions = await prisma.transaction.findMany({
+      where: { userId: user.id, walletId },
+      select: { type: true, amount: true },
+    });
+    const transactionBalance = transactions.reduce(
+      (total, transaction) =>
+        total +
+        (transaction.type === "INCOME"
+          ? Number(transaction.amount)
+          : -Number(transaction.amount)),
+      0,
+    );
+
+    await prisma.wallet.update({
+      where: { id: walletId },
+      data: { balance: openingBalance + transactionBalance },
+    });
+  };
+
+  await syncSeededWalletBalance(cashWallet.id, 1500000);
+  await syncSeededWalletBalance(gopayWallet.id, 500000);
   console.log('Development transactions ready');
 
   await prisma.$disconnect();
