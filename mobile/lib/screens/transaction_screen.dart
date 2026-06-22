@@ -36,12 +36,38 @@ class _TransactionScreenState extends State<TransactionScreen> {
   }
 
   String _formatMonthYear(DateTime d) {
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const months = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
     return '${months[d.month - 1]} ${d.year}';
   }
-  
+
   String _formatDate(DateTime d) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Ags',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
     return '${d.day} ${months[d.month - 1]} ${d.year}';
   }
 
@@ -67,25 +93,25 @@ class _TransactionScreenState extends State<TransactionScreen> {
         } else {
           expense += tx.amount;
         }
-        
+
         String dateStr = _formatDate(tx.date);
 
         final today = DateTime(now.year, now.month, now.day);
         final yesterday = today.subtract(const Duration(days: 1));
         final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
-        
+
         if (txDate == today) {
           dateStr = 'Hari Ini, $dateStr';
         } else if (txDate == yesterday) {
           dateStr = 'Kemarin, $dateStr';
         }
-        
+
         if (!grouped.containsKey(dateStr)) {
           grouped[dateStr] = [];
         }
         grouped[dateStr]!.add(tx);
       }
-      
+
       List<Map<String, dynamic>> groups = [];
       grouped.forEach((key, value) {
         value.sort((a, b) => b.date.compareTo(a.date));
@@ -94,18 +120,19 @@ class _TransactionScreenState extends State<TransactionScreen> {
           'transactions': value.map((tx) {
             IconData icon = Icons.receipt_long;
             Color iconColor = Colors.grey;
-            
+
             if (tx.type == 'INCOME') {
               icon = Icons.account_balance_wallet;
               iconColor = Colors.green;
             } else if (tx.categoryId == 'Food' || tx.categoryId == 'Makanan') {
               icon = Icons.restaurant;
               iconColor = Colors.orange;
-            } else if (tx.categoryId == 'Transport' || tx.categoryId == 'Transportasi') {
+            } else if (tx.categoryId == 'Transport' ||
+                tx.categoryId == 'Transportasi') {
               icon = Icons.directions_bus;
               iconColor = Colors.blue;
             }
-            
+
             return {
               'title': tx.merchant ?? tx.categoryId ?? tx.type,
               'category': tx.categoryId ?? 'Lainnya',
@@ -118,7 +145,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
           }).toList(),
         });
       });
-      
+
       setState(() {
         _totalIncome = income;
         _totalExpense = expense;
@@ -130,8 +157,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Load transactions error: $e');
-      setState(() => _isLoading = false);
+      debugPrint('Load transactions error: $e');
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -146,43 +173,44 @@ class _TransactionScreenState extends State<TransactionScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: _isLoading 
+        child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildHeader(),
-                          const SizedBox(height: 24),
-                          _buildSummaryCard(),
-                        const SizedBox(height: 24),
-                        _buildFilterRow(),
-                        const SizedBox(height: 16),
-                      ],
+            : RefreshIndicator(
+                onRefresh: _loadTransactions,
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildHeader(),
+                            const SizedBox(height: 24),
+                            _buildSummaryCard(),
+                            const SizedBox(height: 24),
+                            _buildFilterRow(),
+                            const SizedBox(height: 16),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final group = _transactionGroups[index];
-                        return _buildTransactionGroup(group);
-                      },
-                      childCount: _transactionGroups.length,
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final group = _transactionGroups[index];
+                          return _buildTransactionGroup(group);
+                        }, childCount: _transactionGroups.length),
+                      ),
                     ),
-                  ),
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: 80), // Padding for FAB
+                    ),
+                  ],
                 ),
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: 80), // Padding for FAB
-                ),
-              ],
-            ),
+              ),
       ),
     );
   }
@@ -215,7 +243,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   ),
                 ),
                 const SizedBox(width: 4),
-                const Icon(Icons.keyboard_arrow_down, size: 16, color: AppTheme.textSecondary),
+                const Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 16,
+                  color: AppTheme.textSecondary,
+                ),
               ],
             ),
           ],
@@ -235,11 +267,17 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 ],
               ),
               child: IconButton(
-                icon: const Icon(Icons.add, color: AppTheme.textPrimary, size: 20),
+                icon: const Icon(
+                  Icons.add,
+                  color: AppTheme.textPrimary,
+                  size: 20,
+                ),
                 onPressed: () async {
                   final result = await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => const AddTransactionScreen(),
+                    ),
                   );
                   if (result == true) {
                     _loadTransactions();
@@ -261,7 +299,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 ],
               ),
               child: IconButton(
-                icon: const Icon(Icons.search, color: AppTheme.textPrimary, size: 20),
+                icon: const Icon(
+                  Icons.search,
+                  color: AppTheme.textPrimary,
+                  size: 20,
+                ),
                 onPressed: () {},
               ),
             ),
@@ -315,11 +357,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   AppTheme.successColor,
                 ),
               ),
-              Container(
-                height: 40,
-                width: 1,
-                color: Colors.grey[200],
-              ),
+              Container(height: 40, width: 1, color: Colors.grey[200]),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 16),
@@ -338,7 +376,12 @@ class _TransactionScreenState extends State<TransactionScreen> {
     );
   }
 
-  Widget _buildSummaryItem(String label, double amount, IconData icon, Color color) {
+  Widget _buildSummaryItem(
+    String label,
+    double amount,
+    IconData icon,
+    Color color,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -462,75 +505,79 @@ class _TransactionScreenState extends State<TransactionScreen> {
       onTap: () async {
         final result = await Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => AddTransactionScreen(transactionToEdit: rawTx)),
+          MaterialPageRoute(
+            builder: (_) => AddTransactionScreen(transactionToEdit: rawTx),
+          ),
         );
         if (result == true) {
           _loadTransactions();
         }
       },
       child: Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    tx['icon'] as IconData,
+                    color: iconColor,
+                    size: 20,
+                  ),
                 ),
-                child: Icon(
-                  tx['icon'] as IconData,
-                  color: iconColor,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      tx['title'] as String,
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textPrimary,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tx['title'] as String,
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      tx['account'] as String,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: AppTheme.textSecondary,
+                      const SizedBox(height: 4),
+                      Text(
+                        tx['account'] as String,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Text(
-                _formatCurrency(amount),
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: isIncome ? AppTheme.successColor : AppTheme.errorColor,
+                Text(
+                  _formatCurrency(amount),
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: isIncome
+                        ? AppTheme.successColor
+                        : AppTheme.errorColor,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        if (showDivider)
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: Colors.grey[100],
-            indent: 64,
-            endIndent: 16,
-          ),
-      ],
-    ),
+          if (showDivider)
+            Divider(
+              height: 1,
+              thickness: 1,
+              color: Colors.grey[100],
+              indent: 64,
+              endIndent: 16,
+            ),
+        ],
+      ),
     );
   }
 }
