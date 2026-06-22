@@ -66,7 +66,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
-        );
+        ).then((result) {
+          if (result == true && mounted) _loadData();
+        });
       }
     });
   }
