@@ -25,9 +25,25 @@ class _MainShellState extends State<MainShell> {
     const ProfileScreen(),
   ];
 
+  void _refreshScreen(int index) {
+    if (index == 0) {
+      _screens[0] = DashboardScreen(key: UniqueKey());
+    } else if (index == 1) {
+      _screens[1] = TransactionScreen(key: UniqueKey());
+    } else if (index == 3) {
+      _screens[3] = ReportScreen(
+        key: UniqueKey(),
+        onBack: () => _onItemTapped(0),
+      );
+    }
+  }
+
   void _onItemTapped(int index) {
     if (index == 2) return; // Ignore scan button area
     setState(() {
+      // IndexedStack keeps each tab alive. Recreate data-driven tabs when they
+      // are opened so wallet balances and newly saved transactions stay in sync.
+      _refreshScreen(index);
       _selectedIndex = index;
     });
   }
