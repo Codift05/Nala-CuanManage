@@ -61,7 +61,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     if (!mounted) return;
     setState(() {
       _wallets = wallets;
-      if (_wallets.isNotEmpty) {
+      if (_selectedWalletId == null && _wallets.isNotEmpty) {
         _selectedWalletId = _wallets.first.id;
       }
     });
