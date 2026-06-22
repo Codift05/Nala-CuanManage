@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../services/transaction_service.dart';
+import '../services/wallet_service.dart';
 import '../models/transaction.dart';
 import 'add_transaction_screen.dart';
 
@@ -15,11 +16,17 @@ class TransactionScreen extends StatefulWidget {
 
 class _TransactionScreenState extends State<TransactionScreen> {
   final TransactionService _transactionService = TransactionService();
-  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
-  
+  final WalletService _walletService = WalletService();
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'id_ID',
+    symbol: 'Rp ',
+    decimalDigits: 0,
+  );
+
   bool _isLoading = true;
   double _totalIncome = 0;
   double _totalExpense = 0;
+  double _totalBalance = 0;
   List<Map<String, dynamic>> _transactionGroups = [];
 
   @override
@@ -41,13 +48,20 @@ class _TransactionScreenState extends State<TransactionScreen> {
   Future<void> _loadTransactions() async {
     setState(() => _isLoading = true);
     try {
-      final transactions = await _transactionService.getTransactions();
-      
+      final transactionsFuture = _transactionService.getTransactions();
+      final walletsFuture = _walletService.getWallets();
+      final transactions = await transactionsFuture;
+      final wallets = await walletsFuture;
+      final now = DateTime.now();
+      final monthlyTransactions = transactions.where(
+        (tx) => tx.date.month == now.month && tx.date.year == now.year,
+      );
+
       double income = 0;
       double expense = 0;
       Map<String, List<TransactionItem>> grouped = {};
-      
-      for (var tx in transactions) {
+
+      for (var tx in monthlyTransactions) {
         if (tx.type == 'INCOME') {
           income += tx.amount;
         } else {
@@ -55,8 +69,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
         }
         
         String dateStr = _formatDate(tx.date);
-        
-        final now = DateTime.now();
+
         final today = DateTime(now.year, now.month, now.day);
         final yesterday = today.subtract(const Duration(days: 1));
         final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
@@ -109,6 +122,10 @@ class _TransactionScreenState extends State<TransactionScreen> {
       setState(() {
         _totalIncome = income;
         _totalExpense = expense;
+        _totalBalance = wallets.fold(
+          0.0,
+          (total, wallet) => total + wallet.balance,
+        );
         _transactionGroups = groups;
         _isLoading = false;
       });
@@ -255,7 +272,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
   }
 
   Widget _buildSummaryCard() {
-    final balance = _totalIncome - _totalExpense;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -273,7 +289,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Sisa Saldo',
+            'Total Saldo',
             style: GoogleFonts.inter(
               fontSize: 14,
               color: AppTheme.textSecondary,
@@ -281,7 +297,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            _currencyFormat.format(balance),
+            _currencyFormat.format(_totalBalance),
             style: GoogleFonts.inter(
               fontSize: 28,
               fontWeight: FontWeight.bold,
