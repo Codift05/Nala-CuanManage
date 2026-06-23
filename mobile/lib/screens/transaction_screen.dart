@@ -29,12 +29,22 @@ class _TransactionScreenState extends State<TransactionScreen> {
   double _totalBalance = 0;
   List<Map<String, dynamic>> _transactionGroups = [];
   String _selectedFilter = 'Semua';
-  List<TransactionItem> _allMonthlyTransactions = [];
+  List<TransactionItem> _allTransactions = [];
+  List<TransactionItem> _filteredMonthlyTransactions = [];
+  DateTime _selectedMonth = DateTime.now();
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadTransactions();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   String _formatMonthYear(DateTime d) {
@@ -78,29 +88,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
     try {
       final transactionsFuture = _transactionService.getTransactions();
       final walletsFuture = _walletService.getWallets();
-      final transactions = await transactionsFuture;
+      
+      _allTransactions = await transactionsFuture;
       final wallets = await walletsFuture;
-      final now = DateTime.now();
-      final monthlyTransactions = transactions.where(
-        (tx) => tx.date.month == now.month && tx.date.year == now.year,
-      ).toList();
-
-      double income = 0;
-      double expense = 0;
-
-      for (var tx in monthlyTransactions) {
-        if (tx.type == 'INCOME') {
-          income += tx.amount;
-        } else {
-          expense += tx.amount;
-        }
-      }
-
-      _allMonthlyTransactions = monthlyTransactions;
-
+      
       setState(() {
-        _totalIncome = income;
-        _totalExpense = expense;
         _totalBalance = wallets.fold(
           0.0,
           (total, wallet) => total + wallet.balance,
@@ -108,24 +100,60 @@ class _TransactionScreenState extends State<TransactionScreen> {
         _isLoading = false;
       });
 
-      _updateTransactionGroups();
+      _applyFilters();
     } catch (e) {
       debugPrint('Load transactions error: $e');
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
+  void _applyFilters() {
+    final query = _searchController.text.toLowerCase();
+    
+    _filteredMonthlyTransactions = _allTransactions.where((tx) {
+      // Filter by Month and Year
+      if (tx.date.month != _selectedMonth.month || tx.date.year != _selectedMonth.year) {
+        return false;
+      }
+      // Filter by Search Query
+      if (query.isNotEmpty) {
+        final title = (tx.merchant ?? tx.categoryId ?? tx.type).toLowerCase();
+        final notes = (tx.notes ?? '').toLowerCase();
+        if (!title.contains(query) && !notes.contains(query)) {
+          return false;
+        }
+      }
+      // Filter by Type (Semua/Pemasukan/Pengeluaran)
+      if (_selectedFilter == 'Pemasukan' && tx.type != 'INCOME') return false;
+      if (_selectedFilter == 'Pengeluaran' && tx.type != 'EXPENSE') return false;
+      
+      return true;
+    }).toList();
+
+    double income = 0;
+    double expense = 0;
+
+    for (var tx in _filteredMonthlyTransactions) {
+      if (tx.type == 'INCOME') {
+        income += tx.amount;
+      } else {
+        expense += tx.amount;
+      }
+    }
+
+    setState(() {
+      _totalIncome = income;
+      _totalExpense = expense;
+    });
+
+    _updateTransactionGroups();
+  }
+
   void _updateTransactionGroups() {
     Map<String, List<TransactionItem>> grouped = {};
     final now = DateTime.now();
 
-    final filtered = _allMonthlyTransactions.where((tx) {
-      if (_selectedFilter == 'Pemasukan' && tx.type != 'INCOME') return false;
-      if (_selectedFilter == 'Pengeluaran' && tx.type != 'EXPENSE') return false;
-      return true;
-    });
-
-    for (var tx in filtered) {
+    for (var tx in _filteredMonthlyTransactions) {
       String dateStr = _formatDate(tx.date);
 
       final today = DateTime(now.year, now.month, now.day);
@@ -237,6 +265,64 @@ class _TransactionScreenState extends State<TransactionScreen> {
   }
 
   Widget _buildHeader() {
+    if (_isSearching) {
+      return Row(
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: _searchController,
+                autofocus: true,
+                style: GoogleFonts.inter(fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: 'Cari transaksi...',
+                  hintStyle: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 14),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  prefixIcon: const Icon(Icons.search, color: AppTheme.textSecondary, size: 20),
+                ),
+                onChanged: (value) => _applyFilters(),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.close, color: AppTheme.textPrimary, size: 20),
+              onPressed: () {
+                setState(() {
+                  _isSearching = false;
+                  _searchController.clear();
+                });
+                _applyFilters();
+              },
+            ),
+          ),
+        ],
+      );
+    }
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -253,23 +339,26 @@ class _TransactionScreenState extends State<TransactionScreen> {
               ),
             ),
             const SizedBox(height: 4),
-            Row(
-              children: [
-                Text(
-                  _formatMonthYear(DateTime.now()),
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+            GestureDetector(
+              onTap: _showMonthPicker,
+              child: Row(
+                children: [
+                  Text(
+                    _formatMonthYear(_selectedMonth),
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 16,
                     color: AppTheme.textSecondary,
                   ),
-                ),
-                const SizedBox(width: 4),
-                const Icon(
-                  Icons.keyboard_arrow_down,
-                  size: 16,
-                  color: AppTheme.textSecondary,
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -325,7 +414,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   color: AppTheme.textPrimary,
                   size: 20,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  setState(() {
+                    _isSearching = true;
+                  });
+                },
               ),
             ),
           ],
@@ -458,7 +551,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
         setState(() {
           _selectedFilter = label;
         });
-        _updateTransactionGroups();
+        _applyFilters();
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -608,6 +701,76 @@ class _TransactionScreenState extends State<TransactionScreen> {
             ),
         ],
       ),
+    );
+  }
+
+  void _showMonthPicker() {
+    final now = DateTime.now();
+    final List<DateTime> months = [];
+    for (int i = 0; i < 12; i++) {
+      months.add(DateTime(now.year, now.month - i, 1));
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Pilih Bulan',
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: months.length,
+                  itemBuilder: (context, index) {
+                    final month = months[index];
+                    final isSelected = month.month == _selectedMonth.month && month.year == _selectedMonth.year;
+                    return ListTile(
+                      title: Text(
+                        _formatMonthYear(month),
+                        style: GoogleFonts.inter(
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected ? AppTheme.primaryColor : AppTheme.textPrimary,
+                        ),
+                      ),
+                      trailing: isSelected ? const Icon(Icons.check, color: AppTheme.primaryColor) : null,
+                      onTap: () {
+                        setState(() {
+                          _selectedMonth = month;
+                        });
+                        _applyFilters();
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
