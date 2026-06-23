@@ -33,6 +33,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
   List<TransactionItem> _filteredMonthlyTransactions = [];
   DateTime _selectedMonth = DateTime.now();
   bool _isSearching = false;
+  bool _isMonthPickerOpen = false;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -352,10 +353,14 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(
-                    Icons.keyboard_arrow_down,
-                    size: 16,
-                    color: AppTheme.textSecondary,
+                  AnimatedRotation(
+                    turns: _isMonthPickerOpen ? 0.5 : 0.0,
+                    duration: const Duration(milliseconds: 300),
+                    child: const Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 16,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -704,14 +709,18 @@ class _TransactionScreenState extends State<TransactionScreen> {
     );
   }
 
-  void _showMonthPicker() {
+  Future<void> _showMonthPicker() async {
+    setState(() {
+      _isMonthPickerOpen = true;
+    });
+
     final now = DateTime.now();
     final List<DateTime> months = [];
     for (int i = 0; i < 12; i++) {
       months.add(DateTime(now.year, now.month - i, 1));
     }
 
-    showModalBottomSheet(
+    await showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
@@ -772,5 +781,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
         );
       },
     );
+
+    if (mounted) {
+      setState(() {
+        _isMonthPickerOpen = false;
+      });
+    }
   }
 }
