@@ -42,6 +42,7 @@ dependencies:
   telephony: ^0.2.0
   home_widget: ^0.9.3
   image_picker: ^1.2.2
+  fl_chart: ^1.2.0
 
 dev_dependencies:
   flutter_test:

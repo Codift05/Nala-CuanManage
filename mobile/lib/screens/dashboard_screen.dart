@@ -33,6 +33,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final AuthService _authService = AuthService();
 
   bool _isLoading = true;
+  bool _isBalanceVisible = true;
   double _totalBalance = 0;
   List<Wallet> _wallets = [];
   List<TransactionItem> _recentTransactions = [];
@@ -271,27 +272,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
         ),
-        Stack(
-          children: [
-            const Icon(
-              Icons.notifications_none,
-              size: 28,
-              color: AppTheme.textPrimary,
-            ),
-            Positioned(
-              right: 2,
-              top: 2,
-              child: Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: AppTheme.errorColor,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppTheme.backgroundColor, width: 2),
+        GestureDetector(
+          onTap: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Belum ada notifikasi baru saat ini.'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          },
+          child: Stack(
+            children: [
+              const Icon(
+                Icons.notifications_none,
+                size: 28,
+                color: AppTheme.textPrimary,
+              ),
+              Positioned(
+                right: 2,
+                top: 2,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: AppTheme.errorColor,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppTheme.backgroundColor, width: 2),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -366,10 +377,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   fontSize: 14,
                 ),
               ),
-              Icon(
-                Icons.visibility_outlined,
-                color: Colors.white.withValues(alpha: 0.7),
-                size: 20,
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isBalanceVisible = !_isBalanceVisible;
+                  });
+                },
+                child: Icon(
+                  _isBalanceVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  color: Colors.white.withValues(alpha: 0.7),
+                  size: 20,
+                ),
               ),
             ],
           ),
@@ -378,7 +396,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
-              _currencyFormat.format(_totalBalance),
+              _isBalanceVisible ? _currencyFormat.format(_totalBalance) : 'Rp •••••••',
               style: GoogleFonts.outfit(
                 color: Colors.white,
                 fontSize: 32,
@@ -401,8 +419,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 color = Colors.lightBlueAccent;
               }
 
-              String label =
-                  '${wallet.name} ${_currencyFormat.format(wallet.balance)}';
+              String label = _isBalanceVisible
+                  ? '${wallet.name} ${_currencyFormat.format(wallet.balance)}'
+                  : '${wallet.name} •••••••';
               return _buildAccountChip(icon, label, color);
             }).toList(),
           ),

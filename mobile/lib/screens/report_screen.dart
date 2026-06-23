@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../widgets/expense_item_card.dart';
 import '../services/transaction_service.dart';
 
@@ -26,6 +27,8 @@ class _ReportScreenState extends State<ReportScreen> {
   double _totalIncome = 0;
   double _totalExpense = 0;
   List<Map<String, dynamic>> _expenseCategories = [];
+  DateTime _selectedDate = DateTime.now();
+  List<Map<String, dynamic>> _trendData = [];
 
   @override
   void initState() {
@@ -51,13 +54,30 @@ class _ReportScreenState extends State<ReportScreen> {
     return '${months[d.month - 1]} ${d.year}';
   }
 
+  String _formatMonthShort(DateTime d) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Ags',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
+    return months[d.month - 1];
+  }
+
   Future<void> _loadReport() async {
     setState(() => _isLoading = true);
     try {
       final transactions = await _transactionService.getTransactions();
-      final now = DateTime.now();
       final monthlyTransactions = transactions.where(
-        (tx) => tx.date.month == now.month && tx.date.year == now.year,
+        (tx) => tx.date.month == _selectedDate.month && tx.date.year == _selectedDate.year,
       );
 
       double income = 0;
@@ -109,11 +129,29 @@ class _ReportScreenState extends State<ReportScreen> {
 
       catList.sort((a, b) => b['amount'].compareTo(a['amount']));
 
+      List<Map<String, dynamic>> trendData = [];
+      for (int i = 2; i >= 0; i--) {
+        DateTime monthDate = DateTime(_selectedDate.year, _selectedDate.month - i);
+        final monthTxs = transactions.where((tx) => tx.date.month == monthDate.month && tx.date.year == monthDate.year);
+        double inc = 0;
+        double exp = 0;
+        for (var tx in monthTxs) {
+          if (tx.type == 'INCOME') inc += tx.amount;
+          else exp += tx.amount;
+        }
+        trendData.add({
+          'month': _formatMonthShort(monthDate),
+          'income': inc,
+          'expense': exp,
+        });
+      }
+
       if (!mounted) return;
       setState(() {
         _totalIncome = income;
         _totalExpense = expense;
         _expenseCategories = catList;
+        _trendData = trendData;
         _isLoading = false;
       });
     } catch (e) {
@@ -207,14 +245,23 @@ class _ReportScreenState extends State<ReportScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.chevron_left,
-              size: 16,
-              color: AppTheme.textSecondary,
+            GestureDetector(
+              onTap: () {
+                setState(() => _selectedDate = DateTime(_selectedDate.year, _selectedDate.month - 1));
+                _loadReport();
+              },
+              child: const Padding(
+                padding: EdgeInsets.all(4.0),
+                child: Icon(
+                  Icons.chevron_left,
+                  size: 20,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
             ),
             const SizedBox(width: 16),
             Text(
-              _formatMonthYear(DateTime.now()),
+              _formatMonthYear(_selectedDate),
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -222,10 +269,19 @@ class _ReportScreenState extends State<ReportScreen> {
               ),
             ),
             const SizedBox(width: 16),
-            const Icon(
-              Icons.chevron_right,
-              size: 16,
-              color: AppTheme.textSecondary,
+            GestureDetector(
+              onTap: () {
+                setState(() => _selectedDate = DateTime(_selectedDate.year, _selectedDate.month + 1));
+                _loadReport();
+              },
+              child: const Padding(
+                padding: EdgeInsets.all(4.0),
+                child: Icon(
+                  Icons.chevron_right,
+                  size: 20,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
             ),
           ],
         ),
@@ -394,17 +450,90 @@ class _ReportScreenState extends State<ReportScreen> {
                   _buildLegendDot(AppTheme.errorColor, 'Keluar'),
                 ],
               ),
-              const Spacer(),
-              // Placeholder for the actual chart bars
-              const Divider(color: Color(0xFFEEEEEE), height: 1),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildXAxisLabel('Mar', false),
-                  _buildXAxisLabel('Apr', false),
-                  _buildXAxisLabel('Mei', true),
-                ],
+              const SizedBox(height: 16),
+              Expanded(
+                child: _trendData.isEmpty
+                    ? const SizedBox()
+                    : BarChart(
+                        BarChartData(
+                          alignment: BarChartAlignment.center,
+                          groupsSpace: 50,
+                          maxY: _trendData.fold<double>(0, (max, e) {
+                                final inc = e['income'] as double;
+                                final exp = e['expense'] as double;
+                                final val = inc > exp ? inc : exp;
+                                return val > max ? val : max;
+                              }) *
+                              1.2,
+                          barTouchData: BarTouchData(enabled: false),
+                          titlesData: FlTitlesData(
+                            show: true,
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                getTitlesWidget: (double value, TitleMeta meta) {
+                                  final index = value.toInt();
+                                  if (index >= 0 && index < _trendData.length) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: 8.0),
+                                      child: Text(
+                                        _trendData[index]['month'],
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          fontWeight: index == 2
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                          color: index == 2
+                                              ? const Color(0xFF1954C2)
+                                              : AppTheme.textSecondary,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  return const Text('');
+                                },
+                              ),
+                            ),
+                            leftTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false)),
+                            topTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false)),
+                            rightTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false)),
+                          ),
+                          gridData: const FlGridData(show: false),
+                          borderData: FlBorderData(
+                            show: true,
+                            border: const Border(
+                              bottom: BorderSide(
+                                  color: Color(0xFFEEEEEE), width: 1),
+                            ),
+                          ),
+                          barGroups: _trendData.asMap().entries.map((e) {
+                            final index = e.key;
+                            final data = e.value;
+                            return BarChartGroupData(
+                              x: index,
+                              barRods: [
+                                BarChartRodData(
+                                  toY: data['income'],
+                                  color: const Color(0xFF1954C2),
+                                  width: 12,
+                                  borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(4)),
+                                ),
+                                BarChartRodData(
+                                  toY: data['expense'],
+                                  color: AppTheme.errorColor,
+                                  width: 12,
+                                  borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(4)),
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
               ),
             ],
           ),
