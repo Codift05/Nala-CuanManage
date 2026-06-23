@@ -274,17 +274,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         GestureDetector(
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                elevation: 0,
-                backgroundColor: Colors.transparent,
-                behavior: SnackBarBehavior.floating,
-                margin: EdgeInsets.only(
-                  bottom: MediaQuery.sizeOf(context).height - 150,
-                  left: 24,
-                  right: 24,
-                ),
-                content: Container(
+            final overlay = Overlay.of(context);
+            late OverlayEntry overlayEntry;
+            
+            overlayEntry = OverlayEntry(
+              builder: (context) => TweenAnimationBuilder<double>(
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeOutBack,
+                tween: Tween(begin: -100.0, end: MediaQuery.of(context).padding.top + 40),
+                builder: (context, value, child) {
+                  return Positioned(
+                    top: value,
+                    left: 24,
+                    right: 24,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: child,
+                    ),
+                  );
+                },
+                child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -329,9 +338,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ],
                   ),
                 ),
-                duration: const Duration(seconds: 3),
               ),
             );
+
+            overlay.insert(overlayEntry);
+            Future.delayed(const Duration(seconds: 3), () {
+              if (overlayEntry.mounted) {
+                overlayEntry.remove();
+              }
+            });
           },
           child: Stack(
             children: [
