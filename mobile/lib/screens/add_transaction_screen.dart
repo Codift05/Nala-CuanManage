@@ -30,13 +30,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   List<Wallet> _wallets = [];
   bool _isLoading = false;
 
-  final List<String> _categories = [
+  List<String> _categories = [
     'Food',
     'Transport',
     'Entertainment',
     'Shopping',
     'Bills',
     'Income',
+    'Salary',
     'Others',
   ];
 
@@ -49,6 +50,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         0,
       );
       _selectedCategory = widget.transactionToEdit!.categoryId;
+      if (_selectedCategory != null && !_categories.contains(_selectedCategory!)) {
+        _categories.add(_selectedCategory!);
+      }
       _selectedWalletId = widget.transactionToEdit!.walletId;
       _merchantController.text = widget.transactionToEdit!.merchant ?? '';
       _notesController.text = widget.transactionToEdit!.notes ?? '';

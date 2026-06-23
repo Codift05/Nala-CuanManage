@@ -28,6 +28,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
   double _totalExpense = 0;
   double _totalBalance = 0;
   List<Map<String, dynamic>> _transactionGroups = [];
+  String _selectedFilter = 'Semua';
+  List<TransactionItem> _allMonthlyTransactions = [];
 
   @override
   void initState() {
@@ -81,11 +83,10 @@ class _TransactionScreenState extends State<TransactionScreen> {
       final now = DateTime.now();
       final monthlyTransactions = transactions.where(
         (tx) => tx.date.month == now.month && tx.date.year == now.year,
-      );
+      ).toList();
 
       double income = 0;
       double expense = 0;
-      Map<String, List<TransactionItem>> grouped = {};
 
       for (var tx in monthlyTransactions) {
         if (tx.type == 'INCOME') {
@@ -93,58 +94,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
         } else {
           expense += tx.amount;
         }
-
-        String dateStr = _formatDate(tx.date);
-
-        final today = DateTime(now.year, now.month, now.day);
-        final yesterday = today.subtract(const Duration(days: 1));
-        final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
-
-        if (txDate == today) {
-          dateStr = 'Hari Ini, $dateStr';
-        } else if (txDate == yesterday) {
-          dateStr = 'Kemarin, $dateStr';
-        }
-
-        if (!grouped.containsKey(dateStr)) {
-          grouped[dateStr] = [];
-        }
-        grouped[dateStr]!.add(tx);
       }
 
-      List<Map<String, dynamic>> groups = [];
-      grouped.forEach((key, value) {
-        value.sort((a, b) => b.date.compareTo(a.date));
-        groups.add({
-          'date': key,
-          'transactions': value.map((tx) {
-            IconData icon = Icons.receipt_long;
-            Color iconColor = Colors.grey;
-
-            if (tx.type == 'INCOME') {
-              icon = Icons.account_balance_wallet;
-              iconColor = Colors.green;
-            } else if (tx.categoryId == 'Food' || tx.categoryId == 'Makanan') {
-              icon = Icons.restaurant;
-              iconColor = Colors.orange;
-            } else if (tx.categoryId == 'Transport' ||
-                tx.categoryId == 'Transportasi') {
-              icon = Icons.directions_bus;
-              iconColor = Colors.blue;
-            }
-
-            return {
-              'title': tx.merchant ?? tx.categoryId ?? tx.type,
-              'category': tx.categoryId ?? 'Lainnya',
-              'account': tx.wallet?.name ?? 'Wallet',
-              'amount': tx.type == 'EXPENSE' ? -tx.amount : tx.amount,
-              'icon': icon,
-              'iconColor': iconColor,
-              'rawTransaction': tx,
-            };
-          }).toList(),
-        });
-      });
+      _allMonthlyTransactions = monthlyTransactions;
 
       setState(() {
         _totalIncome = income;
@@ -153,13 +105,82 @@ class _TransactionScreenState extends State<TransactionScreen> {
           0.0,
           (total, wallet) => total + wallet.balance,
         );
-        _transactionGroups = groups;
         _isLoading = false;
       });
+
+      _updateTransactionGroups();
     } catch (e) {
       debugPrint('Load transactions error: $e');
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _updateTransactionGroups() {
+    Map<String, List<TransactionItem>> grouped = {};
+    final now = DateTime.now();
+
+    final filtered = _allMonthlyTransactions.where((tx) {
+      if (_selectedFilter == 'Pemasukan' && tx.type != 'INCOME') return false;
+      if (_selectedFilter == 'Pengeluaran' && tx.type != 'EXPENSE') return false;
+      return true;
+    });
+
+    for (var tx in filtered) {
+      String dateStr = _formatDate(tx.date);
+
+      final today = DateTime(now.year, now.month, now.day);
+      final yesterday = today.subtract(const Duration(days: 1));
+      final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
+
+      if (txDate == today) {
+        dateStr = 'Hari Ini, $dateStr';
+      } else if (txDate == yesterday) {
+        dateStr = 'Kemarin, $dateStr';
+      }
+
+      if (!grouped.containsKey(dateStr)) {
+        grouped[dateStr] = [];
+      }
+      grouped[dateStr]!.add(tx);
+    }
+
+    List<Map<String, dynamic>> groups = [];
+    grouped.forEach((key, value) {
+      value.sort((a, b) => b.date.compareTo(a.date));
+      groups.add({
+        'date': key,
+        'transactions': value.map((tx) {
+          IconData icon = Icons.receipt_long;
+          Color iconColor = Colors.grey;
+
+          if (tx.type == 'INCOME') {
+            icon = Icons.account_balance_wallet;
+            iconColor = Colors.green;
+          } else if (tx.categoryId == 'Food' || tx.categoryId == 'Makanan') {
+            icon = Icons.restaurant;
+            iconColor = Colors.orange;
+          } else if (tx.categoryId == 'Transport' ||
+              tx.categoryId == 'Transportasi') {
+            icon = Icons.directions_bus;
+            iconColor = Colors.blue;
+          }
+
+          return {
+            'title': tx.merchant ?? tx.categoryId ?? tx.type,
+            'category': tx.categoryId ?? 'Lainnya',
+            'account': tx.wallet?.name ?? 'Wallet',
+            'amount': tx.type == 'EXPENSE' ? -tx.amount : tx.amount,
+            'icon': icon,
+            'iconColor': iconColor,
+            'rawTransaction': tx,
+          };
+        }).toList(),
+      });
+    });
+
+    setState(() {
+      _transactionGroups = groups;
+    });
   }
 
   String _formatCurrency(double amount) {
@@ -421,31 +442,40 @@ class _TransactionScreenState extends State<TransactionScreen> {
   Widget _buildFilterRow() {
     return Row(
       children: [
-        _buildFilterChip('Semua', true),
+        _buildFilterChip('Semua'),
         const SizedBox(width: 8),
-        _buildFilterChip('Pemasukan', false),
+        _buildFilterChip('Pemasukan'),
         const SizedBox(width: 8),
-        _buildFilterChip('Pengeluaran', false),
+        _buildFilterChip('Pengeluaran'),
       ],
     );
   }
 
-  Widget _buildFilterChip(String label, bool isSelected) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isSelected ? AppTheme.primaryColor : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isSelected ? AppTheme.primaryColor : Colors.grey[300]!,
+  Widget _buildFilterChip(String label) {
+    bool isSelected = _selectedFilter == label;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedFilter = label;
+        });
+        _updateTransactionGroups();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.primaryColor : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppTheme.primaryColor : Colors.grey[300]!,
+          ),
         ),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 13,
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-          color: isSelected ? Colors.white : AppTheme.textSecondary,
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            color: isSelected ? Colors.white : AppTheme.textSecondary,
+          ),
         ),
       ),
     );
