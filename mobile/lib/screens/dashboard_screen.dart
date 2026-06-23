@@ -276,13 +276,60 @@ class _DashboardScreenState extends State<DashboardScreen> {
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('Belum ada notifikasi baru saat ini.'),
+                elevation: 0,
+                backgroundColor: Colors.transparent,
                 behavior: SnackBarBehavior.floating,
                 margin: EdgeInsets.only(
                   bottom: MediaQuery.sizeOf(context).height - 150,
-                  left: 16,
-                  right: 16,
+                  left: 24,
+                  right: 24,
                 ),
+                content: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF1954C2).withValues(alpha: 0.15),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: const Color(0xFF1954C2).withValues(alpha: 0.1),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1954C2).withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.notifications_active,
+                          color: Color(0xFF1954C2),
+                          size: 18,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Belum ada notifikasi baru',
+                          style: GoogleFonts.inter(
+                            color: AppTheme.textPrimary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                duration: const Duration(seconds: 3),
               ),
             );
           },
