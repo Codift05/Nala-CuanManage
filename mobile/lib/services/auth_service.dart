@@ -149,10 +149,15 @@ class AuthService {
     }
   }
 
-  Future<bool> updateProfile(String name, String email) async {
+  Future<bool> updateProfile(String name, String email, {String? avatarBase64}) async {
     try {
       final token = await _getToken();
       if (token == null) return false;
+
+      final bodyData = <String, dynamic>{'name': name, 'email': email};
+      if (avatarBase64 != null) {
+        bodyData['avatar'] = avatarBase64;
+      }
 
       final response = await http.put(
         Uri.parse('$baseUrl/auth/profile'),
@@ -160,7 +165,7 @@ class AuthService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({'name': name, 'email': email}),
+        body: jsonEncode(bodyData),
       );
 
       return response.statusCode == 200;
@@ -190,6 +195,29 @@ class AuthService {
       return response.statusCode == 200;
     } catch (e) {
       debugPrint('Change password error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> deleteAccount() async {
+    try {
+      final token = await _getToken();
+      if (token == null) return false;
+
+      final response = await http.delete(
+        Uri.parse('$baseUrl/auth/me'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        await logout();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Delete account error: $e');
       return false;
     }
   }

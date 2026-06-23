@@ -142,7 +142,7 @@ export const me = async (req: AuthRequest, res: Response) => {
 
     const user = await prisma.user.findUnique({
       where: { id: req.userId },
-      select: { id: true, name: true, email: true, createdAt: true }
+      select: { id: true, name: true, email: true, avatar: true, createdAt: true }
     });
 
     if (!user) {
@@ -159,7 +159,7 @@ export const me = async (req: AuthRequest, res: Response) => {
 export const updateProfile = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
-    const { name, email } = req.body;
+    const { name, email, avatar } = req.body;
 
     if (!userId) {
       res.status(401).json({ message: 'Unauthorized' });
@@ -168,10 +168,10 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
 
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { name, email }
+      data: { name, email, avatar }
     });
 
-    res.json({ message: 'Profile updated', user: { id: user.id, name: user.name, email: user.email } });
+    res.json({ message: 'Profile updated', user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar } });
   } catch (error) {
     console.error('Update profile error:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -209,6 +209,30 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
     res.json({ message: 'Password changed successfully' });
   } catch (error) {
     console.error('Change password error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const deleteAccount = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.transaction.deleteMany({ where: { userId } });
+      await tx.recurringBill.deleteMany({ where: { userId } });
+      await tx.budget.deleteMany({ where: { userId } });
+      await tx.wallet.deleteMany({ where: { userId } });
+      await tx.user.delete({ where: { id: userId } });
+    });
+
+    res.json({ message: 'Account deleted successfully' });
+  } catch (error) {
+    console.error('Delete account error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

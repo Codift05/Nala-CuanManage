@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
@@ -5,12 +6,57 @@ import '../services/auth_service.dart';
 import 'login_screen.dart';
 import 'wallet_management_screen.dart';
 import 'recurring_bills_screen.dart';
+import 'edit_profile_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  Map<String, dynamic>? _user;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await AuthService().getCurrentUser();
+    if (mounted) {
+      setState(() {
+        _user = user;
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _navigateToEditProfile() async {
+    if (_user == null) return;
+    final updated = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditProfileScreen(user: _user!),
+      ),
+    );
+    if (updated == true) {
+      _loadUser();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: AppTheme.backgroundColor,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
@@ -54,17 +100,25 @@ class ProfileScreen extends StatelessWidget {
                     offset: const Offset(0, 4),
                   ),
                 ],
+                image: _user?['avatar'] != null
+                    ? DecorationImage(
+                        image: MemoryImage(base64Decode(_user!['avatar'])),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
               ),
-              child: Center(
-                child: Text(
-                  'MI',
-                  style: GoogleFonts.inter(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+              child: _user?['avatar'] == null
+                  ? Center(
+                      child: Text(
+                        _user?['name']?.substring(0, 1).toUpperCase() ?? 'U',
+                        style: GoogleFonts.inter(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  : null,
             ),
             Container(
               padding: const EdgeInsets.all(6),
@@ -85,7 +139,7 @@ class ProfileScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          'Haii, Mip',
+          _user?['name'] ?? 'Haii, Pengguna',
           style: GoogleFonts.inter(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -94,7 +148,7 @@ class ProfileScreen extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'mip@example.com',
+          _user?['email'] ?? 'pengguna@example.com',
           style: GoogleFonts.inter(
             fontSize: 14,
             color: AppTheme.textSecondary,
@@ -102,7 +156,7 @@ class ProfileScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         ElevatedButton(
-          onPressed: () {},
+          onPressed: _navigateToEditProfile,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,
             foregroundColor: AppTheme.primaryColor,
@@ -133,7 +187,7 @@ class ProfileScreen extends StatelessWidget {
           icon: Icons.person_outline,
           iconColor: const Color(0xFF1954C2),
           title: 'Informasi Pribadi',
-          onTap: () => _showEditProfileDialog(context),
+          onTap: _navigateToEditProfile,
         ),
         _buildDivider(),
         _buildMenuTile(
@@ -358,63 +412,6 @@ class ProfileScreen extends StatelessWidget {
         height: 1,
         thickness: 1,
         color: Colors.grey.withValues(alpha: 0.1),
-      ),
-    );
-  }
-
-  void _showEditProfileDialog(BuildContext context) {
-    final nameController = TextEditingController();
-    final emailController = TextEditingController();
-    bool isLoading = false;
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text('Edit Profil', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: 'Nama Lengkap',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Batal', style: GoogleFonts.inter(color: Colors.grey)),
-            ),
-            ElevatedButton(
-              onPressed: isLoading ? null : () async {
-                setState(() => isLoading = true);
-                final success = await AuthService().updateProfile(nameController.text, emailController.text);
-                setState(() => isLoading = false);
-                if (success && context.mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profil berhasil diperbarui')));
-                } else if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gagal memperbarui profil')));
-                }
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor),
-              child: isLoading ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text('Simpan', style: GoogleFonts.inter(color: Colors.white)),
-            ),
-          ],
-        ),
       ),
     );
   }
