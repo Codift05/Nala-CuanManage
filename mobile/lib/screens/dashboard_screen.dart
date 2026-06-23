@@ -275,9 +275,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         GestureDetector(
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Belum ada notifikasi baru saat ini.'),
+              SnackBar(
+                content: const Text('Belum ada notifikasi baru saat ini.'),
                 behavior: SnackBarBehavior.floating,
+                margin: EdgeInsets.only(
+                  bottom: MediaQuery.sizeOf(context).height - 150,
+                  left: 16,
+                  right: 16,
+                ),
               ),
             );
           },
