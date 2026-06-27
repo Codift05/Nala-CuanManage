@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../theme/app_theme.dart';
 import '../screens/dashboard_screen.dart';
 import '../screens/report_screen.dart';
 import '../screens/transaction_screen.dart';
@@ -48,77 +47,88 @@ class _MainShellState extends State<MainShell> {
   void _onItemTapped(int index) {
     if (index == 2) return; // Ignore scan button area
     setState(() {
-      // IndexedStack keeps each tab alive. Recreate data-driven tabs when they
-      // are opened so wallet balances and newly saved transactions stay in sync.
-      _refreshScreen(index);
       _selectedIndex = index;
     });
+  }
+
+  Future<void> _openScan() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ScanScreen()),
+    );
+    if (result == true && mounted) {
+      setState(() => _refreshScreen(_selectedIndex));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: const Color(0xFFF4F6FA),
       body: IndexedStack(index: _selectedIndex, children: _screens),
-      floatingActionButton: SizedBox(
-        height: 56,
-        width: 56,
-        child: Transform.translate(
-          offset: const Offset(0, 16), // Lowered the FAB slightly more
-          child: FloatingActionButton(
-            onPressed: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ScanScreen()),
-              );
-              if (result == true && mounted) {
-                setState(() => _refreshScreen(_selectedIndex));
-              }
-            },
-            backgroundColor: const Color(0xFF1954C2),
-            elevation: 4,
-            shape: const CircleBorder(),
-            child: const Icon(Icons.add, size: 28, color: Colors.white),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          child: Container(
+            height: 72,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFE8ECF2)),
+            ),
+            child: Row(
+              children: [
+                Expanded(child: _buildNavItem(Icons.home_rounded, 'Home', 0)),
+                Expanded(
+                  child:
+                      _buildNavItem(Icons.receipt_long_rounded, 'Transaksi', 1),
+                ),
+                Expanded(child: _buildScanNavItem()),
+                Expanded(
+                    child:
+                        _buildNavItem(Icons.bar_chart_rounded, 'Laporan', 3)),
+                Expanded(
+                    child: _buildNavItem(Icons.person_rounded, 'Profil', 4)),
+              ],
+            ),
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        elevation: 10,
-        shadowColor: Colors.black.withValues(alpha: 0.1),
-        // No shape to make it flat
-        child: SizedBox(
-          height: 60,
-          child: Row(
-            children: [
-              Expanded(child: _buildNavItem(Icons.home, 'Home', 0)),
-              Expanded(
-                child: _buildNavItem(Icons.receipt_long, 'Transaksi', 1),
-              ),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 24), // Same height as the icons
-                    const SizedBox(height: 4), // Same gap as the icons
-                    Text(
-                      'Scan',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(child: _buildNavItem(Icons.bar_chart, 'Laporan', 3)),
-              Expanded(child: _buildNavItem(Icons.person_outline, 'Profil', 4)),
-            ],
+    );
+  }
+
+  Widget _buildScanNavItem() {
+    return GestureDetector(
+      onTap: _openScan,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: const BoxDecoration(
+              color: Color(0xFF0057FF),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.add_rounded,
+              size: 25,
+              color: Colors.white,
+            ),
           ),
-        ),
+          const SizedBox(height: 3),
+          Text(
+            'Scan',
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF8A94A3),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -134,20 +144,19 @@ class _MainShellState extends State<MainShell> {
         children: [
           Icon(
             icon,
-            color: isSelected
-                ? const Color(0xFF1954C2)
-                : AppTheme.textSecondary,
-            size: 24,
+            color:
+                isSelected ? const Color(0xFF0057FF) : const Color(0xFF8A94A3),
+            size: 23,
           ),
           const SizedBox(height: 4),
           Text(
             label,
             style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
               color: isSelected
-                  ? const Color(0xFF1954C2)
-                  : AppTheme.textSecondary,
+                  ? const Color(0xFF0057FF)
+                  : const Color(0xFF8A94A3),
             ),
           ),
         ],
