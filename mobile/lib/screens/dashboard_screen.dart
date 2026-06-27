@@ -617,63 +617,89 @@ class DashboardScreenState extends State<DashboardScreen> {
                   },
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: _wallets.map((wallet) {
-              IconData icon = Icons.account_balance_wallet;
-              Color color = Colors.white;
-              if (wallet.type == 'CASH') {
-                icon = Icons.money;
-                color = Colors.greenAccent;
-              } else if (wallet.type == 'EWALLET') {
-                icon = Icons.favorite;
-                color = Colors.lightBlueAccent;
-              }
-
-              String label = _isBalanceVisible
-                  ? '${wallet.name} ${_currencyFormat.format(wallet.balance)}'
-                  : '${wallet.name} •••••••';
-              return _buildAccountChip(icon, label, color);
-            }).toList(),
+              const SizedBox(width: 10),
+              Expanded(
+                flex: 5,
+                child: _buildQuickAction(
+                    Icons.arrow_forward_rounded, 'Send', () {}),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                width: 56,
+                child: _buildQuickAction(Icons.more_horiz_rounded, '', () {}),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAccountChip(IconData icon, String label, Color iconColor) {
+  Widget _buildWalletBadge(String type) {
+    final colors = switch (type) {
+      'EWALLET' => [const Color(0xFF1BA8FF), const Color(0xFF1457D9)],
+      'BANK' => [const Color(0xFF4F46E5), const Color(0xFF111827)],
+      _ => [const Color(0xFFFF4F6D), const Color(0xFFFB923C)],
+    };
+
     return Container(
-      constraints: BoxConstraints(
-        maxWidth: MediaQuery.sizeOf(context).width - 80,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      width: 48,
+      height: 48,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: colors,
+        ),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: iconColor, size: 14),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(
-                color: Colors.white.withValues(alpha: 0.9),
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+      child: Center(
+        child: Icon(
+          type == 'EWALLET'
+              ? Icons.account_balance_wallet_rounded
+              : type == 'BANK'
+                  ? Icons.account_balance_rounded
+                  : Icons.payments_rounded,
+          color: Colors.white,
+          size: 23,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickAction(IconData icon, String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 42,
+        padding: EdgeInsets.symmetric(horizontal: label.isEmpty ? 14 : 16),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF1F5FB),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 18, color: const Color(0xFF0057FF)),
+            if (label.isNotEmpty) ...[
+              const SizedBox(width: 5),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF0057FF),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
-            ),
-          ),
-        ],
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -687,9 +713,9 @@ class DashboardScreenState extends State<DashboardScreen> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.inter(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF7D8794),
             ),
           ),
         ),
@@ -698,11 +724,11 @@ class DashboardScreenState extends State<DashboardScreen> {
           GestureDetector(
             onTap: onSeeAll,
             child: Text(
-              'Lihat semua \u2192',
+              'See all',
               style: GoogleFonts.inter(
                 fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF1954C2),
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF0057FF),
               ),
             ),
           ),
@@ -710,40 +736,111 @@ class DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Widget _buildHealthCard(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const HealthScreen()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: const BoxDecoration(
+                color: Color(0xFFEEF3FF),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.health_and_safety_rounded,
+                color: Color(0xFF0057FF),
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Kesehatan Keuangan',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF101217),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Skor $_healthScore • $_healthStatus',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF0057FF),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: Color(0xFF8A94A3)),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildExpenseChart() {
     final entries = _expenseByCategory.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     const colors = [
-      AppTheme.errorColor,
-      AppTheme.infoColor,
-      AppTheme.warningColor,
-      AppTheme.successColor,
-      AppTheme.secondaryColor,
+      Color(0xFFFF4F6D),
+      Color(0xFF0057FF),
+      Color(0xFFF59E0B),
+      Color(0xFF10B981),
+      Color(0xFF7C3AED),
     ];
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: entries.isEmpty
           ? Text(
               'Belum ada pengeluaran bulan ini.',
-              style: GoogleFonts.inter(color: AppTheme.textSecondary),
+              style: GoogleFonts.inter(
+                color: const Color(0xFF7D8794),
+                fontWeight: FontWeight.w600,
+              ),
             )
           : Column(
               children: [
                 SizedBox(
-                  width: 120,
-                  height: 120,
+                  width: 124,
+                  height: 124,
                   child: DonutChart(
                     strokeWidth: 15,
                     data: entries.asMap().entries.map((entry) {
@@ -754,7 +851,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                     }).toList(),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final itemWidth = (constraints.maxWidth - 12) / 2;
@@ -776,39 +873,42 @@ class DashboardScreenState extends State<DashboardScreen> {
                     );
                   },
                 ),
-                const SizedBox(height: 20),
-                Divider(color: Colors.grey.withValues(alpha: 0.2)),
-                const SizedBox(height: 12),
+                const SizedBox(height: 18),
+                const Divider(color: Color(0xFFE8ECF2), height: 1),
+                const SizedBox(height: 14),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Text(
-                        'Total ',
-                        style: GoogleFonts.inter(
-                          color: AppTheme.textSecondary,
-                          fontSize: 13,
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Total ',
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFF7D8794),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      Text(
-                        _currencyFormat.format(_monthlyExpense),
-                        style: GoogleFonts.inter(
-                          color: AppTheme.textPrimary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                        TextSpan(
+                          text: _currencyFormat.format(_monthlyExpense),
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFF101217),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
-                      ),
-                      Text(
-                        _monthlyBudget > 0
-                            ? ' dari ${_currencyFormat.format(_monthlyBudget)} budget'
-                            : ' • belum ada budget',
-                        style: GoogleFonts.inter(
-                          color: AppTheme.textSecondary,
-                          fontSize: 13,
+                        TextSpan(
+                          text: _monthlyBudget > 0
+                              ? ' dari ${_currencyFormat.format(_monthlyBudget)} budget'
+                              : ' • belum ada budget',
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFF7D8794),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -824,15 +924,16 @@ class DashboardScreenState extends State<DashboardScreen> {
           height: 8,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 7),
         Expanded(
           child: Text(
             label,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.inter(
-              color: AppTheme.textSecondary,
+              color: const Color(0xFF7D8794),
               fontSize: 12,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
@@ -842,10 +943,10 @@ class DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildBudgetCard() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
