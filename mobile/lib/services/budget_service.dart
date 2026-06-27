@@ -2,12 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/budget.dart';
+import '../config/api_config.dart';
 
 class BudgetService {
-  static const String baseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://127.0.0.1:3001/api',
-  );
+  static String get baseUrl => ApiConfig.baseUrl;
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -23,7 +21,7 @@ class BudgetService {
       List<String> queryParams = [];
       if (month != null) queryParams.add('month=$month');
       if (year != null) queryParams.add('year=$year');
-      
+
       if (queryParams.isNotEmpty) {
         url += '?${queryParams.join('&')}';
       }
