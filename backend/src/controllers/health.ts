@@ -136,70 +136,95 @@ export const getHealthScore = async (req: AuthRequest, res: Response): Promise<v
       return;
     }
 
-    // Get all budgets for the user
-    const budgets = await prisma.budget.findMany({
-      where: { userId }
-    });
-
-    const totalBudget = budgets.reduce((sum, b) => sum + Number(b.amount), 0);
-
-    // Get current month's transactions
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    
-    const transactions = await prisma.transaction.findMany({
-      where: {
-        wallet: { userId },
-        type: 'EXPENSE',
-        date: { gte: startOfMonth }
-      }
+    const monthRanges = [-2, -1, 0].map((offset) => getMonthRange(now, offset));
+    const currentRange = monthRanges[2]!;
+    const trend = [];
+
+    const wallets = await prisma.wallet.findMany({
+      where: { userId },
+      select: { type: true, balance: true },
     });
 
-    const totalExpense = transactions.reduce((sum, tx) => sum + Number(tx.amount), 0);
+    for (const range of monthRanges) {
+      const [transactions, budgets] = await Promise.all([
+        prisma.transaction.findMany({
+          where: {
+            userId,
+            date: { gte: range.start, lt: range.end },
+          },
+          select: { type: true, amount: true, categoryId: true, date: true },
+        }),
+        prisma.budget.findMany({
+          where: { userId, month: range.month, year: range.year },
+          select: { amount: true },
+        }),
+      ]);
 
-    let score = 100;
-    
-    if (totalBudget > 0) {
-      const expenseRatio = totalExpense / totalBudget;
-      
-      if (expenseRatio > 1) {
-        score = Math.max(0, 100 - ((expenseRatio - 1) * 100)); // Drops if over budget
-      } else {
-        score = 100 - (expenseRatio * 20); // 80-100 range if under budget
-      }
-    } else {
-      // If no budget, simple fallback: score depends on whether they have income vs expense
-      const incomeTx = await prisma.transaction.findMany({
-        where: { wallet: { userId }, type: 'INCOME', date: { gte: startOfMonth } }
+      const totalBudget = budgets.reduce((sum, budget) => sum + Number(budget.amount), 0);
+      const score = calculateScore(transactions, wallets, totalBudget, range.start, range.end);
+
+      trend.push({
+        label: monthNames[range.start.getMonth()],
+        month: range.month,
+        year: range.year,
+        score: score.score,
       });
-      const totalIncome = incomeTx.reduce((sum, tx) => sum + Number(tx.amount), 0);
-      
-      if (totalIncome > 0) {
-        const ratio = totalExpense / totalIncome;
-        score = ratio > 1 ? 40 : 100 - (ratio * 50);
-      } else {
-        score = totalExpense > 0 ? 30 : 85; // No income, but expenses = bad. Nothing = neutral 85
-      }
     }
 
-    // Ensure score is between 0 and 100
-    score = Math.min(100, Math.max(0, Math.round(score)));
+    const currentTransactions = await prisma.transaction.findMany({
+      where: {
+        userId,
+        date: { gte: currentRange.start, lt: currentRange.end },
+      },
+      orderBy: { date: 'desc' },
+      select: { type: true, amount: true, categoryId: true, date: true },
+    });
+    const currentBudgets = await prisma.budget.findMany({
+      where: { userId, month: currentRange.month, year: currentRange.year },
+      select: { amount: true },
+    });
 
-    let status = 'Sangat Sehat';
-    let nudgeMessage = 'Keuanganmu aman terkendali! Lanjutkan kebiasaan baik ini. 🚀';
-    
-    if (score < 40) {
-      status = 'Kritis';
-      nudgeMessage = 'Waduh, pengeluaranmu udah over limit banget nih! Stop jajan dulu ya minggu ini! 🛑';
-    } else if (score < 60) {
-      status = 'Perlu Perhatian';
-      nudgeMessage = 'Hati-hati, pengeluaranmu mulai mendekati batas budget! Ngerem dikit ya. ⚠️';
-    } else if (score < 80) {
-      status = 'Cukup Sehat';
-      nudgeMessage = 'Masih aman, tapi jangan mentang-mentang ada sisa langsung dihabisin ya! 👀';
-    }
+    const totalBudget = currentBudgets.reduce((sum, budget) => sum + Number(budget.amount), 0);
+    const currentScore = calculateScore(
+      currentTransactions,
+      wallets,
+      totalBudget,
+      currentRange.start,
+      currentRange.end
+    );
+    const { status, nudgeMessage } = getStatus(currentScore.score);
 
-    res.json({ score, status, totalExpense, totalBudget, nudgeMessage });
+    const previousTrend = trend.length > 1 ? trend[trend.length - 2] : undefined;
+    const previousScore = previousTrend?.score ?? currentScore.score;
+    const delta = currentScore.score - previousScore;
+    const trendMessage = delta === 0
+      ? 'Stabil dari bulan lalu'
+      : `${delta > 0 ? 'Naik' : 'Turun'} ${Math.abs(delta)} poin dari bulan lalu`;
+
+    res.json({
+      score: currentScore.score,
+      status,
+      nudgeMessage,
+      totalIncome: currentScore.totalIncome,
+      totalExpense: currentScore.totalExpense,
+      totalBudget: currentScore.totalBudget,
+      transactionCount: currentScore.transactionCount,
+      updatedAt: new Date().toISOString(),
+      details: [
+        { key: 'savingRatio', label: 'Rasio Tabungan', score: currentScore.savingRatioScore },
+        { key: 'budgetCompliance', label: 'Kepatuhan Budget', score: currentScore.budgetComplianceScore },
+        { key: 'consistency', label: 'Konsistensi Catat', score: currentScore.consistencyScore },
+        { key: 'diversification', label: 'Diversifikasi', score: currentScore.diversificationScore },
+      ],
+      trend: {
+        labels: trend.map((item) => item.label),
+        scores: trend.map((item) => item.score),
+        normalized: trend.map((item) => item.score / 100),
+        delta,
+        message: trendMessage,
+      },
+    });
   } catch (error) {
     console.error('Error calculating health score:', error);
     res.status(500).json({ error: 'Failed to calculate health score' });
