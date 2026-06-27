@@ -949,32 +949,34 @@ class DashboardScreenState extends State<DashboardScreen> {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: _budgets.isEmpty
           ? Text(
               'Belum ada budget bulan ini.',
-              style: GoogleFonts.inter(color: AppTheme.textSecondary),
+              style: GoogleFonts.inter(
+                color: const Color(0xFF7D8794),
+                fontWeight: FontWeight.w600,
+              ),
             )
           : Column(
               children: _budgets.asMap().entries.expand((entry) {
                 final budget = entry.value;
                 final spent = _expenseByCategory[budget.categoryId] ?? 0;
-                final percentage = budget.amount > 0
-                    ? (spent / budget.amount) * 100
-                    : 0.0;
+                final percentage =
+                    budget.amount > 0 ? (spent / budget.amount) * 100 : 0.0;
                 final color = percentage > 100
                     ? AppTheme.errorColor
                     : percentage >= 75
-                    ? AppTheme.warningColor
-                    : AppTheme.successColor;
+                        ? AppTheme.warningColor
+                        : AppTheme.successColor;
 
                 return [
-                  if (entry.key > 0) const SizedBox(height: 20),
+                  if (entry.key > 0) const SizedBox(height: 18),
                   BudgetProgressBar(
                     label: budget.categoryId,
                     percentage: percentage,
@@ -988,19 +990,33 @@ class DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildRecentTransactions() {
     if (_recentTransactions.isEmpty) {
-      return const Text("Belum ada transaksi.");
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          'Belum ada transaksi.',
+          style: GoogleFonts.inter(
+            color: const Color(0xFF7D8794),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -1009,12 +1025,12 @@ class DashboardScreenState extends State<DashboardScreen> {
           int index = entry.key;
           TransactionItem item = entry.value;
 
-          IconData icon = item.type == 'INCOME'
-              ? Icons.arrow_downward
-              : Icons.shopping_bag_outlined;
-          Color color = item.type == 'INCOME'
-              ? AppTheme.successColor
-              : AppTheme.errorColor;
+          final icon = item.type == 'INCOME'
+              ? Icons.arrow_downward_rounded
+              : _categoryIcon(item.categoryId);
+          final color = item.type == 'INCOME'
+              ? const Color(0xFF10B981)
+              : const Color(0xFFFF4F6D);
           String prefix = item.type == 'INCOME' ? '+' : '-';
 
           return _buildTransactionItem(
@@ -1040,49 +1056,65 @@ class DashboardScreenState extends State<DashboardScreen> {
   }) {
     return Column(
       children: [
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 4,
-          ),
-          leading: Container(
-            width: 48,
-            height: 48,
-            decoration: const BoxDecoration(
-              color: AppTheme.backgroundColor, // light gray
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: const Color(0xFF4A4A4A)),
-          ),
-          title: Text(
-            title,
-            style: GoogleFonts.inter(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-          subtitle: Text(
-            subtitle,
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              color: AppTheme.textSecondary,
-            ),
-          ),
-          trailing: Text(
-            amount,
-            style: GoogleFonts.inter(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-              color: amountColor,
-            ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: amountColor.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: amountColor, size: 25),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                        color: const Color(0xFF101217),
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF7D8794),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                amount,
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
+                  color: const Color(0xFF101217),
+                ),
+              ),
+            ],
           ),
         ),
         if (!isLast)
           Padding(
-            padding: const EdgeInsets.only(left: 80, right: 20),
+            padding: const EdgeInsets.only(left: 62),
             child: Divider(
-              color: Colors.grey.withValues(alpha: 0.1),
+              color: const Color(0xFFE8ECF2),
               height: 1,
             ),
           ),
@@ -1090,63 +1122,163 @@ class DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildHealthCard(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const HealthScreen()),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: const Color(0xFFE2E8FF), // Light blue tint
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: const Color(0xFF1954C2).withValues(alpha: 0.1),
+  IconData _categoryIcon(String? category) {
+    final normalized = (category ?? '').toLowerCase();
+    if (normalized.contains('food') || normalized.contains('makan')) {
+      return Icons.restaurant_rounded;
+    }
+    if (normalized.contains('transport')) return Icons.directions_car_rounded;
+    if (normalized.contains('salary') || normalized.contains('gaji')) {
+      return Icons.work_rounded;
+    }
+    if (normalized.contains('grocer')) return Icons.local_grocery_store_rounded;
+    return Icons.shopping_bag_rounded;
+  }
+
+  Widget _buildWeeklyInsights(BuildContext context) {
+    final budgetUsage = _monthlyBudget > 0
+        ? ((_monthlyExpense / _monthlyBudget) * 100).clamp(0, 999).round()
+        : 0;
+    final topCategory = _expenseByCategory.entries.isEmpty
+        ? 'budget'
+        : (_expenseByCategory.entries.toList()
+              ..sort((a, b) => b.value.compareTo(a.value)))
+            .first
+            .key;
+
+    return SizedBox(
+      height: 184,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        children: [
+          _buildInsightCard(
+            icon: Icons.health_and_safety_rounded,
+            title: 'Financial score',
+            body: 'Skor kamu $_healthScore, $_healthStatus',
+            color: const Color(0xFF111827),
+            imageColor: const Color(0xFFEEF3FF),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HealthScreen()),
+              );
+            },
           ),
+          const SizedBox(width: 12),
+          _buildInsightCard(
+            icon: Icons.local_grocery_store_rounded,
+            title: 'Most spending',
+            body: 'Pengeluaran terbesar ada di $topCategory',
+            color: const Color(0xFFFF4F6D),
+            imageColor: const Color(0xFFFFEEF2),
+          ),
+          const SizedBox(width: 12),
+          _buildInsightCard(
+            icon: Icons.track_changes_rounded,
+            title: 'Budget progress',
+            body: _monthlyBudget > 0
+                ? '$budgetUsage% budget bulan ini sudah dipakai'
+                : 'Budget bulan ini belum dibuat',
+            color: const Color(0xFF0057FF),
+            imageColor: const Color(0xFFEEF3FF),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const BudgetScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInsightCard({
+    required IconData icon,
+    required String title,
+    required String body,
+    required Color color,
+    required Color imageColor,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 172,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+            ),
+          ],
         ),
-        child: Row(
+        child: Stack(
           children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
-                color: Color(0xFF1954C2),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.health_and_safety,
-                color: Colors.white,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Kesehatan Keuangan',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Skor $_healthScore • $_healthStatus',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF1954C2),
-                    ),
-                  ),
-                ],
+            Positioned(
+              right: -18,
+              bottom: -22,
+              child: Container(
+                width: 116,
+                height: 116,
+                decoration: BoxDecoration(
+                  color: imageColor,
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
-            const Icon(Icons.chevron_right, color: Color(0xFF1954C2)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(icon, color: Colors.white, size: 22),
+                    ),
+                    const Icon(
+                      Icons.close_rounded,
+                      color: Color(0xFF9AA3AF),
+                      size: 18,
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF7D8794),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  body,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF101217),
+                    fontSize: 16,
+                    height: 1.22,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
