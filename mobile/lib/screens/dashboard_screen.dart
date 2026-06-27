@@ -220,194 +220,136 @@ class DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: const Color(0xFFF4F6FA),
       body: SafeArea(
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
-                onRefresh: _loadData,
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
+            ? const Center(
+                child: CircularProgressIndicator(color: Color(0xFF1457D9)),
+              )
+            : Stack(
+                children: [
+                  RefreshIndicator(
+                    onRefresh: _loadData,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 22,
+                        vertical: 18,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildHeader(),
+                          const SizedBox(height: 18),
+                          _buildSearchBar(),
+                          const SizedBox(height: 16),
+                          _buildBalanceCard(),
+                          const SizedBox(height: 26),
+                          if (_nudgeMessage.isNotEmpty) ...[
+                            _buildNudgeBanner(),
+                            const SizedBox(height: 20),
+                          ],
+                          _buildHealthCard(context),
+                          const SizedBox(height: 26),
+                          _buildSectionTitle('Pengeluaran Bulan Ini', null),
+                          const SizedBox(height: 12),
+                          _buildExpenseChart(),
+                          const SizedBox(height: 26),
+                          _buildSectionTitle('Budget Bulan Ini', () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const BudgetScreen(),
+                              ),
+                            );
+                          }),
+                          const SizedBox(height: 12),
+                          _buildBudgetCard(),
+                          const SizedBox(height: 26),
+                          _buildSectionTitle('Transactions', () {}),
+                          const SizedBox(height: 12),
+                          _buildRecentTransactions(),
+                          const SizedBox(height: 26),
+                          _buildSectionTitle('Weekly insights', null),
+                          const SizedBox(height: 12),
+                          _buildWeeklyInsights(context),
+                          const SizedBox(height: 112),
+                        ],
+                      ),
+                    ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeader(),
-                      if (_nudgeMessage.isNotEmpty) ...[
-                        const SizedBox(height: 16),
-                        _buildNudgeBanner(),
-                      ],
-                      const SizedBox(height: 24),
-                      _buildBalanceCard(),
-                      const SizedBox(height: 24),
-                      _buildHealthCard(context),
-                      const SizedBox(height: 32),
-                      _buildSectionTitle('Pengeluaran Bulan Ini', null),
-                      const SizedBox(height: 16),
-                      _buildExpenseChart(),
-                      const SizedBox(height: 32),
-                      _buildSectionTitle('Budget Bulan Ini', () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const BudgetScreen(),
-                          ),
-                        );
-                      }),
-                      const SizedBox(height: 16),
-                      _buildBudgetCard(),
-                      const SizedBox(height: 32),
-                      _buildSectionTitle('Terakhir', () {}),
-                      const SizedBox(height: 16),
-                      _buildRecentTransactions(),
-                      const SizedBox(height: 120),
-                    ],
-                  ),
-                ),
+                  if (_isRefreshing)
+                    const Positioned(
+                      top: 0,
+                      left: 22,
+                      right: 22,
+                      child: LinearProgressIndicator(
+                        minHeight: 2,
+                        color: Color(0xFF1457D9),
+                        backgroundColor: Colors.transparent,
+                      ),
+                    ),
+                ],
               ),
       ),
     );
   }
 
   Widget _buildHeader() {
-    final parts = _userName
-        .split(RegExp(r'\s+'))
-        .where((part) => part.isNotEmpty)
-        .take(2)
-        .toList();
-    final initials = parts.isEmpty
-        ? 'NA'
-        : parts.map((part) => part[0].toUpperCase()).join();
-
     return Row(
       children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: const BoxDecoration(
-            color: Color(0xFF1954C2),
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              initials,
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
         Expanded(
-          child: Text(
-            'Hai, $_userName',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            final overlay = Overlay.of(context);
-            late OverlayEntry overlayEntry;
-            
-            overlayEntry = OverlayEntry(
-              builder: (context) => TweenAnimationBuilder<double>(
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeOutBack,
-                tween: Tween(begin: -100.0, end: MediaQuery.of(context).padding.top + 40),
-                builder: (context, value, child) {
-                  return Positioned(
-                    top: value,
-                    left: 24,
-                    right: 24,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: child,
-                    ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF1954C2).withValues(alpha: 0.15),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                    border: Border.all(
-                      color: const Color(0xFF1954C2).withValues(alpha: 0.1),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1954C2).withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.notifications_active,
-                          color: Color(0xFF1954C2),
-                          size: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Belum ada notifikasi baru',
-                          style: GoogleFonts.inter(
-                            color: AppTheme.textPrimary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Home',
+                style: GoogleFonts.inter(
+                  fontSize: 34,
+                  height: 1,
+                  letterSpacing: 0,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF101217),
                 ),
               ),
-            );
-
-            overlay.insert(overlayEntry);
-            Future.delayed(const Duration(seconds: 3), () {
-              if (overlayEntry.mounted) {
-                overlayEntry.remove();
-              }
-            });
-          },
-          child: Stack(
-            children: [
-              const Icon(
-                Icons.notifications_none,
-                size: 28,
-                color: AppTheme.textPrimary,
+              const SizedBox(height: 8),
+              Text(
+                'Hi, $_userName',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF7D8794),
+                ),
               ),
+            ],
+          ),
+        ),
+        _buildHeaderIcon(Icons.bar_chart_rounded, onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const HealthScreen()),
+          );
+        }),
+        const SizedBox(width: 14),
+        GestureDetector(
+          onTap: _showNotificationToast,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              _buildHeaderIcon(Icons.notifications_rounded),
               Positioned(
-                right: 2,
-                top: 2,
+                right: 1,
+                top: 1,
                 child: Container(
-                  width: 10,
-                  height: 10,
+                  width: 9,
+                  height: 9,
                   decoration: BoxDecoration(
-                    color: AppTheme.errorColor,
+                    color: const Color(0xFFFF2D7A),
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppTheme.backgroundColor, width: 2),
+                    border:
+                        Border.all(color: const Color(0xFFF4F6FA), width: 2),
                   ),
                 ),
               ),
@@ -418,28 +360,140 @@ class DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Widget _buildHeaderIcon(IconData icon, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: 32,
+        height: 32,
+        child: Icon(icon, size: 25, color: const Color(0xFF0E1116)),
+      ),
+    );
+  }
+
+  void _showNotificationToast() {
+    final overlay = Overlay.of(context);
+    late OverlayEntry overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => TweenAnimationBuilder<double>(
+        duration: const Duration(milliseconds: 420),
+        curve: Curves.easeOutBack,
+        tween:
+            Tween(begin: -100.0, end: MediaQuery.of(context).padding.top + 28),
+        builder: (context, value, child) {
+          return Positioned(
+            top: value,
+            left: 24,
+            right: 24,
+            child: Material(color: Colors.transparent, child: child),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.10),
+                blurRadius: 26,
+                offset: const Offset(0, 14),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFEEF3FF),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.notifications_active_rounded,
+                  color: Color(0xFF1457D9),
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Belum ada notifikasi baru',
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF101217),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+    Future.delayed(const Duration(seconds: 3), () {
+      if (overlayEntry.mounted) overlayEntry.remove();
+    });
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFECEFF4),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.search_rounded, size: 22, color: Color(0xFF7A8492)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Search',
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF8A94A3),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildNudgeBanner() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF4E5), // Light orange/yellow background
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFFFB74D).withValues(alpha: 0.3),
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            width: 42,
+            height: 42,
             decoration: const BoxDecoration(
-              color: Color(0xFFFFB74D),
+              color: Color(0xFFFFF0D9),
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              Icons.tips_and_updates,
-              color: Colors.white,
-              size: 20,
+              Icons.tips_and_updates_rounded,
+              color: Color(0xFFB45309),
+              size: 21,
             ),
           ),
           const SizedBox(width: 12),
@@ -448,9 +502,9 @@ class DashboardScreenState extends State<DashboardScreen> {
               _nudgeMessage,
               style: GoogleFonts.inter(
                 fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFFB45309), // Dark orange text
-                height: 1.4,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF4B5563),
+                height: 1.35,
               ),
             ),
           ),
@@ -460,17 +514,19 @@ class DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildBalanceCard() {
+    final primaryWallet = _wallets.isNotEmpty ? _wallets.first : null;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
       decoration: BoxDecoration(
-        color: AppTheme.primaryColor,
-        borderRadius: BorderRadius.circular(24),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryColor.withValues(alpha: 0.2),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 22,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -478,39 +534,88 @@ class DashboardScreenState extends State<DashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Total Saldo',
-                style: GoogleFonts.inter(
-                  color: Colors.white.withValues(alpha: 0.7),
-                  fontSize: 14,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isBalanceVisible = !_isBalanceVisible;
+                        });
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                _isBalanceVisible
+                                    ? _currencyFormat.format(_totalBalance)
+                                    : 'Rp •••••••',
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xFF101217),
+                                  fontSize: 31,
+                                  height: 1,
+                                  letterSpacing: 0,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            _isBalanceVisible
+                                ? Icons.keyboard_arrow_down_rounded
+                                : Icons.visibility_off_rounded,
+                            color: const Color(0xFF101217),
+                            size: 23,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      primaryWallet == null
+                          ? 'Tidak ada wallet aktif'
+                          : '${primaryWallet.name} · Active',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFF101217),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _isBalanceVisible = !_isBalanceVisible;
-                  });
-                },
-                child: Icon(
-                  _isBalanceVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                  color: Colors.white.withValues(alpha: 0.7),
-                  size: 20,
-                ),
-              ),
+              _buildWalletBadge(primaryWallet?.type ?? 'CASH'),
             ],
           ),
-          const SizedBox(height: 8),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              _isBalanceVisible ? _currencyFormat.format(_totalBalance) : 'Rp •••••••',
-              style: GoogleFonts.outfit(
-                color: Colors.white,
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
+          const SizedBox(height: 18),
+          Row(
+            children: [
+              Expanded(
+                flex: 6,
+                child: _buildQuickAction(
+                  Icons.add_rounded,
+                  'Add money',
+                  () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AddTransactionScreen(),
+                      ),
+                    ).then((result) {
+                      if (result == true && mounted) _loadData();
+                    });
+                  },
+                ),
               ),
             ),
           ),
