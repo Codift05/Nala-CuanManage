@@ -16,18 +16,25 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
+  final _dashboardKey = GlobalKey<DashboardScreenState>();
 
-  late final List<Widget> _screens = [
-    const DashboardScreen(),
-    const TransactionScreen(),
-    const SizedBox(), // Placeholder for Scan
-    ReportScreen(onBack: () => _onItemTapped(0)),
-    const ProfileScreen(),
-  ];
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      DashboardScreen(key: _dashboardKey),
+      const TransactionScreen(),
+      const SizedBox(),
+      ReportScreen(onBack: () => _onItemTapped(0)),
+      const ProfileScreen(),
+    ];
+  }
 
   void _refreshScreen(int index) {
     if (index == 0) {
-      _screens[0] = DashboardScreen(key: UniqueKey());
+      _dashboardKey.currentState?.refresh();
     } else if (index == 1) {
       _screens[1] = TransactionScreen(key: UniqueKey());
     } else if (index == 3) {
