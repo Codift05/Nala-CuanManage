@@ -127,31 +127,42 @@ class _HealthScreenState extends State<HealthScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FC),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(context),
-              const SizedBox(height: 24),
-              _buildSpeedometerCard(),
-              const SizedBox(height: 32),
-              Text(
-                'Rincian Skor',
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildScoreGrid(),
-              const SizedBox(height: 24),
-              _buildTrendCard(),
-              const SizedBox(height: 32),
-              _buildAdviceButton(context),
-              const SizedBox(height: 32),
-            ],
+        child: RefreshIndicator(
+          onRefresh: _loadHealthData,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(context),
+                const SizedBox(height: 24),
+                if (_isLoading)
+                  _buildLoadingCard()
+                else if (_errorMessage != null)
+                  _buildErrorCard()
+                else ...[
+                  _buildSpeedometerCard(),
+                  const SizedBox(height: 32),
+                  Text(
+                    'Rincian Skor',
+                    style: GoogleFonts.inter(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildScoreGrid(),
+                  const SizedBox(height: 24),
+                  _buildTrendCard(),
+                  const SizedBox(height: 32),
+                  _buildAdviceButton(context),
+                ],
+                const SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
       ),
@@ -163,34 +174,84 @@ class _HealthScreenState extends State<HealthScreen> {
       children: [
         GestureDetector(
           onTap: () => Navigator.pop(context),
-          child: const Icon(Icons.arrow_back, color: AppTheme.textPrimary, size: 24),
+          child: const Icon(Icons.arrow_back,
+              color: AppTheme.textPrimary, size: 24),
         ),
         const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Kesehatan Keuangan',
-              style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Kesehatan Keuangan',
+                style: GoogleFonts.inter(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
               ),
-            ),
-            Text(
-              'Diperbarui 4 Jun 2025',
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: AppTheme.textSecondary,
+              Text(
+                _updatedLabel,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: AppTheme.textSecondary,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
   }
 
+  Widget _buildLoadingCard() {
+    return Container(
+      height: 260,
+      width: double.infinity,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: const CircularProgressIndicator(color: Color(0xFF1954C2)),
+    );
+  }
+
+  Widget _buildErrorCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        children: [
+          const Icon(Icons.wifi_off_rounded,
+              color: Color(0xFFB91C1C), size: 32),
+          const SizedBox(height: 12),
+          Text(
+            _errorMessage!,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton(
+            onPressed: _loadHealthData,
+            child: const Text('Coba Lagi'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSpeedometerCard() {
+    final color = _colorForScore(_score);
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
       decoration: BoxDecoration(
@@ -206,18 +267,18 @@ class _HealthScreenState extends State<HealthScreen> {
       ),
       child: Column(
         children: [
-          const SpeedometerChart(
-            score: 72,
-            activeColor: Color(0xFF1954C2),
-            backgroundColor: Color(0xFFE2E8FF),
+          SpeedometerChart(
+            score: _score.toDouble(),
+            activeColor: color,
+            backgroundColor: const Color(0xFFE2E8FF),
           ),
           const SizedBox(height: 8),
           Text(
-            '72',
+            _score.toString(),
             style: GoogleFonts.outfit(
               fontSize: 56,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF1954C2),
+              color: color,
             ),
           ),
           const SizedBox(height: 8),
@@ -230,16 +291,18 @@ class _HealthScreenState extends State<HealthScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'Cukup Sehat',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1954C2),
+                Flexible(
+                  child: Text(
+                    _status,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: color,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 6),
-                const Icon(Icons.check_circle, size: 16, color: Color(0xFF1954C2)),
+                Icon(Icons.check_circle, size: 16, color: color),
               ],
             ),
           ),
@@ -256,12 +319,14 @@ class _HealthScreenState extends State<HealthScreen> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       childAspectRatio: 1.6,
-      children: [
-        _buildScoreGridItem('Rasio Tabungan', 80, const Color(0xFF1954C2)),
-        _buildScoreGridItem('Kepatuhan\nBudget', 65, const Color(0xFFB45309)),
-        _buildScoreGridItem('Konsistensi Catat', 75, const Color(0xFF1954C2)),
-        _buildScoreGridItem('Diversifikasi', 60, const Color(0xFFB45309)),
-      ],
+      children: _details.map((item) {
+        final score = ((item['score'] as num?) ?? 0).round().clamp(0, 100);
+        return _buildScoreGridItem(
+          item['label']?.toString() ?? '-',
+          score,
+          _colorForScore(score),
+        );
+      }).toList(),
     );
   }
 
@@ -290,6 +355,8 @@ class _HealthScreenState extends State<HealthScreen> {
               Expanded(
                 child: Text(
                   title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     color: AppTheme.textSecondary,
