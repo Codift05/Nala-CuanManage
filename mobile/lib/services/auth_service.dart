@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/foundation.dart' show debugPrint;
+import '../config/api_config.dart';
 
 class AuthResult {
   const AuthResult({required this.success, required this.message});
@@ -12,13 +13,7 @@ class AuthResult {
 }
 
 class AuthService {
-  static String get baseUrl {
-    const configuredUrl = String.fromEnvironment('API_BASE_URL');
-    if (configuredUrl.isNotEmpty) {
-      return configuredUrl;
-    }
-    return 'http://127.0.0.1:3001/api';
-  }
+  static String get baseUrl => ApiConfig.baseUrl;
 
   String _responseMessage(http.Response response, String fallback) {
     try {
@@ -149,7 +144,8 @@ class AuthService {
     }
   }
 
-  Future<bool> updateProfile(String name, String email, {String? avatarBase64}) async {
+  Future<bool> updateProfile(String name, String email,
+      {String? avatarBase64}) async {
     try {
       final token = await _getToken();
       if (token == null) return false;
