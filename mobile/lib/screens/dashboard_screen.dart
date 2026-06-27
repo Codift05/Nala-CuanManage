@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
-import '../widgets/donut_chart.dart';
 import '../widgets/budget_progress_bar.dart';
+import '../widgets/donut_chart.dart';
 import 'health_screen.dart';
 import '../services/wallet_service.dart';
 import '../services/transaction_service.dart';
@@ -22,10 +22,10 @@ class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  State<DashboardScreen> createState() => DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class DashboardScreenState extends State<DashboardScreen> {
   final WalletService _walletService = WalletService();
   final TransactionService _transactionService = TransactionService();
   final HealthService _healthService = HealthService();
@@ -33,6 +33,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final AuthService _authService = AuthService();
 
   bool _isLoading = true;
+  bool _isRefreshing = false;
   bool _isBalanceVisible = true;
   double _totalBalance = 0;
   List<Wallet> _wallets = [];
@@ -56,7 +57,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _loadData(showFullScreenLoader: true);
     _initHomeWidget();
     _initSmsListener();
   }
@@ -113,19 +114,55 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  Future<void> _loadData() async {
-    if (mounted) setState(() => _isLoading = true);
+  Future<T> _safeLoad<T>(Future<T> request, T fallback) async {
+    try {
+      return await request.timeout(const Duration(seconds: 8));
+    } catch (error) {
+      debugPrint('Dashboard request failed: $error');
+      return fallback;
+    }
+  }
+
+  Future<void> refresh() => _loadData();
+
+  Future<void> _loadData({bool showFullScreenLoader = false}) async {
+    if (mounted) {
+      setState(() {
+        _isLoading = showFullScreenLoader;
+        _isRefreshing = !showFullScreenLoader;
+      });
+    }
 
     try {
-      final wallets = await _walletService.getWallets();
-      final transactions = await _transactionService.getTransactions();
-      final healthData = await _healthService.getHealthScore();
       final now = DateTime.now();
-      final budgets = await _budgetService.getBudgets(
-        month: now.month,
-        year: now.year,
-      );
-      final user = await _authService.getCurrentUser();
+      final results = await Future.wait<Object?>([
+        _safeLoad<List<Wallet>>(
+          _walletService.getWallets(),
+          const <Wallet>[],
+        ),
+        _safeLoad<List<TransactionItem>>(
+          _transactionService.getTransactions(),
+          const <TransactionItem>[],
+        ),
+        _safeLoad<Map<String, dynamic>?>(
+          _healthService.getHealthScore(),
+          null,
+        ),
+        _safeLoad<List<Budget>>(
+          _budgetService.getBudgets(month: now.month, year: now.year),
+          const <Budget>[],
+        ),
+        _safeLoad<Map<String, dynamic>?>(
+          _authService.getCurrentUser(),
+          null,
+        ),
+      ]);
+
+      final wallets = results[0] as List<Wallet>;
+      final transactions = results[1] as List<TransactionItem>;
+      final healthData = results[2] as Map<String, dynamic>?;
+      final budgets = results[3] as List<Budget>;
+      final user = results[4] as Map<String, dynamic>?;
 
       double total = 0;
       for (var w in wallets) {
@@ -167,10 +204,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _healthStatus = 'Cukup Sehat';
         }
         _isLoading = false;
+        _isRefreshing = false;
       });
     } catch (e) {
       debugPrint('Error loading dashboard data: $e');
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _isRefreshing = false;
+        });
+      }
     }
   }
 
