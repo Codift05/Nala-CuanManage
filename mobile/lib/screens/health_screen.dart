@@ -363,6 +363,7 @@ class _HealthScreenState extends State<HealthScreen> {
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
               Text(
                 score.toString(),
                 style: GoogleFonts.inter(
@@ -421,45 +422,55 @@ class _HealthScreenState extends State<HealthScreen> {
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Tren 3 Bulan',
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+              Expanded(
+                child: Text(
+                  'Tren 3 Bulan',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE2E8FF),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.trending_up, size: 14, color: Color(0xFF1954C2)),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Naik 7 poin dari bulan lalu 🎉',
-                      style: GoogleFonts.inter(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF1954C2),
+              Flexible(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2E8FF),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.trending_up,
+                          size: 14, color: Color(0xFF1954C2)),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          _trendMessage,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1954C2),
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 24),
-          const Expanded(
+          Expanded(
             child: TrendLineChart(
-              dataPoints: [0.2, 0.4, 0.8], // Normalized data representing Apr, Mei, Jun
-              labels: ['Apr', 'Mei', 'Jun'],
-              lineColor: Color(0xFF1954C2),
+              dataPoints: _trendPoints,
+              labels: _trendLabels,
+              lineColor: const Color(0xFF1954C2),
             ),
           ),
         ],
@@ -478,7 +489,8 @@ class _HealthScreenState extends State<HealthScreen> {
             MaterialPageRoute(builder: (context) => const NalaChatScreen()),
           );
         },
-        icon: const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 20),
+        icon: const Icon(Icons.chat_bubble_outline,
+            color: Colors.white, size: 20),
         label: Text(
           'Minta Saran dari Nala',
           style: GoogleFonts.inter(
