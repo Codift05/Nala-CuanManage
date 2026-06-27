@@ -1,12 +1,126 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../services/health_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/speedometer_chart.dart';
 import '../widgets/trend_line_chart.dart';
 import 'nala_chat_screen.dart';
 
-class HealthScreen extends StatelessWidget {
+class HealthScreen extends StatefulWidget {
   const HealthScreen({super.key});
+
+  @override
+  State<HealthScreen> createState() => _HealthScreenState();
+}
+
+class _HealthScreenState extends State<HealthScreen> {
+  final HealthService _healthService = HealthService();
+  Map<String, dynamic>? _healthData;
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHealthData();
+  }
+
+  Future<void> _loadHealthData() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    final data = await _healthService.getHealthScore();
+    if (!mounted) return;
+
+    setState(() {
+      _healthData = data;
+      _isLoading = false;
+      _errorMessage =
+          data == null ? 'Data kesehatan keuangan belum bisa dimuat.' : null;
+    });
+  }
+
+  int get _score =>
+      ((_healthData?['score'] as num?) ?? 0).round().clamp(0, 100);
+  String get _status => (_healthData?['status'] as String?) ?? 'Belum tersedia';
+
+  List<dynamic> get _details {
+    final details = _healthData?['details'];
+    if (details is List && details.isNotEmpty) return details;
+    return const [
+      {'label': 'Rasio Tabungan', 'score': 0},
+      {'label': 'Kepatuhan Budget', 'score': 0},
+      {'label': 'Konsistensi Catat', 'score': 0},
+      {'label': 'Diversifikasi', 'score': 0},
+    ];
+  }
+
+  List<double> get _trendPoints {
+    final trend = _healthData?['trend'];
+    final normalized = trend is Map ? trend['normalized'] : null;
+    if (normalized is List && normalized.isNotEmpty) {
+      return normalized
+          .map((value) => ((value as num?)?.toDouble() ?? 0).clamp(0.0, 1.0))
+          .toList();
+    }
+    final scores = trend is Map ? trend['scores'] : null;
+    if (scores is List && scores.isNotEmpty) {
+      return scores
+          .map((value) =>
+              (((value as num?)?.toDouble() ?? 0) / 100).clamp(0.0, 1.0))
+          .toList();
+    }
+    return const [0, 0, 0];
+  }
+
+  List<String> get _trendLabels {
+    final trend = _healthData?['trend'];
+    final labels = trend is Map ? trend['labels'] : null;
+    if (labels is List && labels.isNotEmpty) {
+      return labels.map((label) => label.toString()).toList();
+    }
+    return const ['-', '-', '-'];
+  }
+
+  String get _trendMessage {
+    final trend = _healthData?['trend'];
+    if (trend is Map && trend['message'] is String) {
+      return trend['message'] as String;
+    }
+    return 'Menunggu data bulan ini';
+  }
+
+  String get _updatedLabel {
+    final rawDate = _healthData?['updatedAt'];
+    if (rawDate is! String) return 'Diperbarui saat data tersedia';
+
+    final date = DateTime.tryParse(rawDate)?.toLocal();
+    if (date == null) return 'Diperbarui saat data tersedia';
+
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agu',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des'
+    ];
+    return 'Diperbarui ${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
+  Color _colorForScore(int score) {
+    if (score >= 75) return const Color(0xFF1954C2);
+    if (score >= 55) return const Color(0xFFB45309);
+    return const Color(0xFFB91C1C);
+  }
 
   @override
   Widget build(BuildContext context) {
