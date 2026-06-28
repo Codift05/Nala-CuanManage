@@ -56,38 +56,38 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 60),
+                const SizedBox(height: 36),
+                Image.asset(
+                  'img/Nala baru2.png',
+                  width: 88,
+                  height: 88,
+                  fit: BoxFit.cover,
+                ),
+                const SizedBox(height: 20),
                 Text(
-                  'Welcome Back',
-                  style: GoogleFonts.outfit(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.textPrimary,
-                  ),
+                  'Selamat datang',
+                  style: Theme.of(context).textTheme.headlineLarge,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Sign in to continue to Nala Finance',
+                  'Masuk untuk melanjutkan ke Nala.',
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     color: AppTheme.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 36),
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(
                     labelText: 'Email',
                     prefixIcon: const Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
@@ -118,9 +118,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             : Icons.visibility_off_outlined,
                       ),
                     ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                   ),
                   obscureText: _obscurePassword,
                   textInputAction: TextInputAction.done,
@@ -138,14 +135,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 28),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _login,
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Login'),
+                        : const Text('Masuk'),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -153,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Don't have an account? ",
+                      'Belum punya akun? ',
                       style: GoogleFonts.inter(color: AppTheme.textSecondary),
                     ),
                     TextButton(
@@ -165,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         );
                       },
-                      child: const Text('Register'),
+                      child: const Text('Daftar'),
                     ),
                   ],
                 ),
