@@ -177,7 +177,7 @@ class _ScanScreenState extends State<ScanScreen> {
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
           'Scan Struk',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.interTight(
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
@@ -213,7 +213,7 @@ class _ScanScreenState extends State<ScanScreen> {
             _isProcessing
                 ? 'Menganalisis struk dengan AI...'
                 : 'Pilih metode input struk',
-            style: GoogleFonts.inter(color: Colors.white, fontSize: 16),
+            style: GoogleFonts.interTight(color: Colors.white, fontSize: 16),
           ),
           const SizedBox(height: 48),
           if (!_isProcessing)
@@ -254,7 +254,7 @@ class _ScanScreenState extends State<ScanScreen> {
           const SizedBox(height: 12),
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.interTight(
               color: Colors.white,
               fontWeight: FontWeight.w600,
             ),
@@ -312,14 +312,14 @@ class _ScanScreenState extends State<ScanScreen> {
                     children: [
                       Text(
                         'Struk Terdeteksi',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.interTight(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
                         'Periksa kembali data di bawah ini',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.interTight(
                           fontSize: 14,
                           color: AppTheme.textSecondary,
                         ),
@@ -330,17 +330,15 @@ class _ScanScreenState extends State<ScanScreen> {
               ],
             ),
             const SizedBox(height: 32),
-
             _buildTextField('Nominal (Rp)', _amountController, isNumber: true),
             const SizedBox(height: 16),
             _buildTextField('Merchant', _merchantController),
             const SizedBox(height: 16),
             _buildTextField('Catatan', _notesController),
             const SizedBox(height: 16),
-
             Text(
               'Kategori',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.interTight(
                 fontSize: 12,
                 color: AppTheme.textSecondary,
               ),
@@ -355,10 +353,9 @@ class _ScanScreenState extends State<ScanScreen> {
               onChanged: (v) => setState(() => _selectedCategory = v!),
             ),
             const SizedBox(height: 16),
-
             Text(
               'Sumber Dana',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.interTight(
                 fontSize: 12,
                 color: AppTheme.textSecondary,
               ),
@@ -373,7 +370,6 @@ class _ScanScreenState extends State<ScanScreen> {
               onChanged: (v) => setState(() => _selectedWallet = v),
             ),
             const SizedBox(height: 32),
-
             Row(
               children: [
                 Expanded(
@@ -390,7 +386,7 @@ class _ScanScreenState extends State<ScanScreen> {
                     ),
                     child: Text(
                       'Scan Ulang',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.interTight(
                         fontWeight: FontWeight.bold,
                         color: AppTheme.primaryColor,
                       ),
@@ -419,7 +415,7 @@ class _ScanScreenState extends State<ScanScreen> {
                           )
                         : Text(
                             'Simpan',
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.interTight(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -462,7 +458,8 @@ class _ScanScreenState extends State<ScanScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+          style: GoogleFonts.interTight(
+              fontSize: 12, color: AppTheme.textSecondary),
         ),
         const SizedBox(height: 8),
         TextField(
