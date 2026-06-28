@@ -29,17 +29,16 @@ class BudgetProgressBar extends StatelessWidget {
           children: [
             Text(
               label,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.interTight(
                 fontSize: 14,
                 color: const Color(0xFF1A1A1A),
-                fontWeight: percentage > 100
-                    ? FontWeight.bold
-                    : FontWeight.w500,
+                fontWeight:
+                    percentage > 100 ? FontWeight.bold : FontWeight.w500,
               ),
             ),
             Text(
               '${percentage.toInt()}%',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.interTight(
                 fontSize: 14,
                 color: percentage > 100 ? activeColor : const Color(0xFF1A1A1A),
                 fontWeight: FontWeight.bold,
