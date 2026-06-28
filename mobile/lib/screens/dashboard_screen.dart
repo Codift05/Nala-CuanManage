@@ -240,7 +240,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildHeader(),
-                          const SizedBox(height: 18),
+                          const SizedBox(height: 22),
                           _buildSearchBar(),
                           const SizedBox(height: 16),
                           _buildBalanceCard(),
@@ -296,71 +296,140 @@ class DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildHeader() {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Home',
-                style: GoogleFonts.inter(
-                  fontSize: 28,
-                  height: 1,
-                  letterSpacing: 0,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF101217),
+        Row(
+          children: [
+            Text(
+              'NALA',
+              style: GoogleFonts.interTight(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+            const Spacer(),
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HealthScreen()),
+                );
+              },
+              borderRadius: BorderRadius.circular(22),
+              child: Container(
+                height: 36,
+                padding: const EdgeInsets.symmetric(horizontal: 13),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: AppTheme.primaryColor),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.health_and_safety_outlined,
+                      size: 17,
+                      color: AppTheme.primaryColor,
+                    ),
+                    const SizedBox(width: 7),
+                    Text(
+                      'Skor $_healthScore',
+                      style: GoogleFonts.interTight(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Hi, $_userName',
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppTheme.textPrimary,
+                  width: 1.5,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.person_outline_rounded,
+                size: 24,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            const SizedBox(width: 11),
+            Expanded(
+              child: Text(
+                'Hai, $_userName!',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
-                  fontSize: 14,
+                style: GoogleFonts.interTight(
+                  fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF7D8794),
+                  color: AppTheme.textPrimary,
                 ),
               ),
-            ],
-          ),
-        ),
-        GestureDetector(
-          onTap: _showNotificationToast,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              _buildHeaderIcon(Icons.notifications_rounded),
-              Positioned(
-                right: 1,
-                top: 1,
-                child: Container(
-                  width: 9,
-                  height: 9,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF2D7A),
-                    shape: BoxShape.circle,
-                    border:
-                        Border.all(color: const Color(0xFFF4F6FA), width: 2),
-                  ),
+            ),
+            InkWell(
+              onTap: _showNotificationToast,
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const Icon(
+                          Icons.notifications_none_rounded,
+                          size: 25,
+                          color: AppTheme.textPrimary,
+                        ),
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: AppTheme.primaryColor,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Notifikasi',
+                      style: GoogleFonts.interTight(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ],
-    );
-  }
-
-  Widget _buildHeaderIcon(IconData icon, {VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        width: 32,
-        height: 32,
-        child: Icon(icon, size: 25, color: const Color(0xFF0E1116)),
-      ),
     );
   }
 
@@ -414,7 +483,7 @@ class DashboardScreenState extends State<DashboardScreen> {
               Expanded(
                 child: Text(
                   'Belum ada notifikasi baru',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.interTight(
                     color: const Color(0xFF101217),
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -448,7 +517,7 @@ class DashboardScreenState extends State<DashboardScreen> {
           Expanded(
             child: Text(
               'Search',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.interTight(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
                 color: const Color(0xFF8A94A3),
@@ -493,7 +562,7 @@ class DashboardScreenState extends State<DashboardScreen> {
           Expanded(
             child: Text(
               _nudgeMessage,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.interTight(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF4B5563),
@@ -550,7 +619,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                 _isBalanceVisible
                                     ? _currencyFormat.format(_totalBalance)
                                     : 'Rp •••••••',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.interTight(
                                   color: const Color(0xFF101217),
                                   fontSize: 31,
                                   height: 1,
@@ -578,7 +647,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                           : '${primaryWallet.name} · Active',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.interTight(
                         color: const Color(0xFF101217),
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -665,7 +734,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.interTight(
                     color: AppTheme.primaryColor,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -687,7 +756,7 @@ class DashboardScreenState extends State<DashboardScreen> {
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.interTight(
               fontSize: 15,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF7D8794),
@@ -700,7 +769,7 @@ class DashboardScreenState extends State<DashboardScreen> {
             onTap: onSeeAll,
             child: Text(
               'See all',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.interTight(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: AppTheme.primaryColor,
@@ -754,7 +823,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   Text(
                     'Kesehatan Keuangan',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.interTight(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFF101217),
@@ -763,7 +832,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                   const SizedBox(height: 4),
                   Text(
                     'Skor $_healthScore • $_healthStatus',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.interTight(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: AppTheme.primaryColor,
@@ -806,7 +875,7 @@ class DashboardScreenState extends State<DashboardScreen> {
       child: entries.isEmpty
           ? Text(
               'Belum ada pengeluaran bulan ini.',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.interTight(
                 color: const Color(0xFF7D8794),
                 fontWeight: FontWeight.w600,
               ),
@@ -858,7 +927,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                       children: [
                         TextSpan(
                           text: 'Total ',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.interTight(
                             color: const Color(0xFF7D8794),
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -866,7 +935,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                         ),
                         TextSpan(
                           text: _currencyFormat.format(_monthlyExpense),
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.interTight(
                             color: const Color(0xFF101217),
                             fontSize: 14,
                             fontWeight: FontWeight.w800,
@@ -876,7 +945,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                           text: _monthlyBudget > 0
                               ? ' dari ${_currencyFormat.format(_monthlyBudget)} budget'
                               : ' • belum ada budget',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.interTight(
                             color: const Color(0xFF7D8794),
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -905,7 +974,7 @@ class DashboardScreenState extends State<DashboardScreen> {
             label,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.interTight(
               color: const Color(0xFF7D8794),
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -933,7 +1002,7 @@ class DashboardScreenState extends State<DashboardScreen> {
       child: _budgets.isEmpty
           ? Text(
               'Belum ada budget bulan ini.',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.interTight(
                 color: const Color(0xFF7D8794),
                 fontWeight: FontWeight.w600,
               ),
@@ -974,7 +1043,7 @@ class DashboardScreenState extends State<DashboardScreen> {
         ),
         child: Text(
           'Belum ada transaksi.',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.interTight(
             color: const Color(0xFF7D8794),
             fontWeight: FontWeight.w600,
           ),
@@ -1053,7 +1122,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.interTight(
                         fontWeight: FontWeight.w800,
                         fontSize: 16,
                         color: const Color(0xFF101217),
@@ -1064,7 +1133,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.interTight(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFF7D8794),
@@ -1076,7 +1145,7 @@ class DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(width: 12),
               Text(
                 amount,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.interTight(
                   fontWeight: FontWeight.w800,
                   fontSize: 15,
                   color: const Color(0xFF101217),
@@ -1234,7 +1303,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.interTight(
                     color: const Color(0xFF7D8794),
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -1245,7 +1314,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                   body,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.interTight(
                     color: const Color(0xFF101217),
                     fontSize: 16,
                     height: 1.22,
