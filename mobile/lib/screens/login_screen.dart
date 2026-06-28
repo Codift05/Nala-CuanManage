@@ -77,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Masuk untuk melanjutkan ke Nala.',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.interTight(
                     fontSize: 16,
                     color: AppTheme.textSecondary,
                   ),
@@ -151,7 +151,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Text(
                       'Belum punya akun? ',
-                      style: GoogleFonts.inter(color: AppTheme.textSecondary),
+                      style:
+                          GoogleFonts.interTight(color: AppTheme.textSecondary),
                     ),
                     TextButton(
                       onPressed: () {
