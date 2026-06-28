@@ -95,7 +95,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
           const SizedBox(height: 16),
           Text(
             'Belum ada anggaran bulan ini',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.interTight(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: AppTheme.textSecondary,
@@ -155,7 +155,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
               children: [
                 Text(
                   budget.categoryId,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.interTight(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textPrimary,
@@ -164,7 +164,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 const SizedBox(height: 4),
                 Text(
                   'Batas: Rp ${budget.amount.toInt()}',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.interTight(
                     fontSize: 13,
                     color: AppTheme.textSecondary,
                   ),
@@ -258,7 +258,7 @@ class _AddBudgetSheetState extends State<_AddBudgetSheet> {
             children: [
               Text(
                 'Buat Anggaran Baru',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.interTight(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
@@ -274,7 +274,8 @@ class _AddBudgetSheetState extends State<_AddBudgetSheet> {
                 ),
                 items: _categories.map((c) {
                   return DropdownMenuItem(
-                      value: c, child: Text(c, style: GoogleFonts.inter()));
+                      value: c,
+                      child: Text(c, style: GoogleFonts.interTight()));
                 }).toList(),
                 onChanged: (val) {
                   if (val != null) setState(() => _categoryId = val);
@@ -284,7 +285,7 @@ class _AddBudgetSheetState extends State<_AddBudgetSheet> {
               TextFormField(
                 controller: _amountController,
                 keyboardType: TextInputType.number,
-                style: GoogleFonts.inter(),
+                style: GoogleFonts.interTight(),
                 decoration: InputDecoration(
                   labelText: 'Batas Anggaran Bulanan',
                   prefixText: 'Rp ',
@@ -310,7 +311,7 @@ class _AddBudgetSheetState extends State<_AddBudgetSheet> {
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
                           'Simpan Anggaran',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.interTight(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
