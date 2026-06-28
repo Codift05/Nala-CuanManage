@@ -20,7 +20,8 @@ class TrendLineChart extends StatelessWidget {
       children: [
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: CustomPaint(
               size: Size.infinite,
               painter: _TrendLinePainter(
@@ -36,7 +37,7 @@ class TrendLineChart extends StatelessWidget {
           children: labels.map((label) {
             return Text(
               label,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.interTight(
                 fontSize: 12,
                 color: AppTheme.textSecondary,
               ),
