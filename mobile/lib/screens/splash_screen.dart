@@ -77,7 +77,7 @@ class _SplashScreenState extends State<SplashScreen>
               const SizedBox(height: 18),
               Text(
                 'NALA',
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.interTight(
                   fontSize: 38,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
@@ -87,7 +87,7 @@ class _SplashScreenState extends State<SplashScreen>
               const SizedBox(height: 8),
               Text(
                 'Smart Cuan Management',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.interTight(
                   fontSize: 16,
                   color: AppTheme.textSecondary,
                   letterSpacing: 0.5,
