@@ -49,23 +49,15 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'Manajemen Dompet',
-          style: GoogleFonts.inter(
-            color: AppTheme.textPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
+        title: const Text('Manajemen Dompet'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: AppTheme.primaryColor),
+            tooltip: 'Tambah dompet',
+            icon: const Icon(Icons.add_rounded),
             onPressed: _showAddWalletSheet,
           ),
         ],
@@ -93,7 +85,8 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.account_balance_wallet_outlined, size: 64, color: Colors.grey[300]),
+          Icon(Icons.account_balance_wallet_outlined,
+              size: 64, color: Colors.grey[300]),
           const SizedBox(height: 16),
           Text(
             'Belum ada dompet',
@@ -125,7 +118,7 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
 
     if (wallet.type.toLowerCase() == 'bank') {
       icon = Icons.account_balance;
-      color = const Color(0xFF1954C2);
+      color = AppTheme.primaryColor;
     } else if (wallet.type.toLowerCase() == 'e-wallet') {
       icon = Icons.phone_iphone;
       color = const Color(0xFF388E3C);
@@ -139,14 +132,8 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        border: Border.all(color: AppTheme.borderColor),
       ),
       child: Row(
         children: [
@@ -208,26 +195,29 @@ class _AddWalletSheet extends StatefulWidget {
 class _AddWalletSheetState extends State<_AddWalletSheet> {
   final _formKey = GlobalKey<FormState>();
   final _walletService = WalletService();
-  
+
   final _nameController = TextEditingController();
   final _balanceController = TextEditingController();
   String _type = 'E-Wallet';
-  
+
   bool _isSaving = false;
 
   final List<String> _types = ['E-Wallet', 'Bank', 'Cash'];
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() => _isSaving = true);
-    
-    final balance = double.tryParse(_balanceController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-    
-    final wallet = await _walletService.createWallet(_nameController.text, _type, balance);
-    
+
+    final balance = double.tryParse(
+            _balanceController.text.replaceAll(RegExp(r'[^0-9]'), '')) ??
+        0;
+
+    final wallet =
+        await _walletService.createWallet(_nameController.text, _type, balance);
+
     setState(() => _isSaving = false);
-    
+
     if (wallet != null && mounted) {
       Navigator.pop(context);
       widget.onSaved();
@@ -270,19 +260,24 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
                 style: GoogleFonts.inter(),
                 decoration: InputDecoration(
                   labelText: 'Nama Dompet (Misal: BCA, GoPay)',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16)),
                 ),
-                validator: (val) => val == null || val.isEmpty ? 'Nama tidak boleh kosong' : null,
+                validator: (val) => val == null || val.isEmpty
+                    ? 'Nama tidak boleh kosong'
+                    : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _type,
                 decoration: InputDecoration(
                   labelText: 'Tipe Dompet',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16)),
                 ),
                 items: _types.map((t) {
-                  return DropdownMenuItem(value: t, child: Text(t, style: GoogleFonts.inter()));
+                  return DropdownMenuItem(
+                      value: t, child: Text(t, style: GoogleFonts.inter()));
                 }).toList(),
                 onChanged: (val) {
                   if (val != null) setState(() => _type = val);
@@ -296,9 +291,12 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
                 decoration: InputDecoration(
                   labelText: 'Saldo Awal',
                   prefixText: 'Rp ',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16)),
                 ),
-                validator: (val) => val == null || val.isEmpty ? 'Saldo awal tidak boleh kosong' : null,
+                validator: (val) => val == null || val.isEmpty
+                    ? 'Saldo awal tidak boleh kosong'
+                    : null,
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -308,7 +306,8 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
                   onPressed: _isSaving ? null : _save,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryColor,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25)),
                   ),
                   child: _isSaving
                       ? const CircularProgressIndicator(color: Colors.white)
