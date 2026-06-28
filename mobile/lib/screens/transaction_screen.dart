@@ -89,10 +89,10 @@ class _TransactionScreenState extends State<TransactionScreen> {
     try {
       final transactionsFuture = _transactionService.getTransactions();
       final walletsFuture = _walletService.getWallets();
-      
+
       _allTransactions = await transactionsFuture;
       final wallets = await walletsFuture;
-      
+
       setState(() {
         _totalBalance = wallets.fold(
           0.0,
@@ -110,10 +110,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
   void _applyFilters() {
     final query = _searchController.text.toLowerCase();
-    
+
     _filteredMonthlyTransactions = _allTransactions.where((tx) {
       // Filter by Month and Year
-      if (tx.date.month != _selectedMonth.month || tx.date.year != _selectedMonth.year) {
+      if (tx.date.month != _selectedMonth.month ||
+          tx.date.year != _selectedMonth.year) {
         return false;
       }
       // Filter by Search Query
@@ -126,8 +127,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
       }
       // Filter by Type (Semua/Pemasukan/Pengeluaran)
       if (_selectedFilter == 'Pemasukan' && tx.type != 'INCOME') return false;
-      if (_selectedFilter == 'Pengeluaran' && tx.type != 'EXPENSE') return false;
-      
+      if (_selectedFilter == 'Pengeluaran' && tx.type != 'EXPENSE')
+        return false;
+
       return true;
     }).toList();
 
@@ -191,7 +193,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
           } else if (tx.categoryId == 'Transport' ||
               tx.categoryId == 'Transportasi') {
             icon = Icons.directions_bus;
-            iconColor = Colors.blue;
+            iconColor = AppTheme.secondaryColor;
           }
 
           return {
@@ -256,7 +258,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       ),
                     ),
                     const SliverToBoxAdapter(
-                      child: SizedBox(height: 80), // Padding for FAB
+                      child: SizedBox(height: 24),
                     ),
                   ],
                 ),
@@ -288,10 +290,15 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 style: GoogleFonts.inter(fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Cari transaksi...',
-                  hintStyle: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 14),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  prefixIcon: const Icon(Icons.search, color: AppTheme.textSecondary, size: 20),
+                  hintStyle: GoogleFonts.inter(
+                      color: AppTheme.textSecondary, fontSize: 14),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide.none),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  prefixIcon: const Icon(Icons.search,
+                      color: AppTheme.textSecondary, size: 20),
                 ),
                 onChanged: (value) => _applyFilters(),
               ),
@@ -311,7 +318,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
               ],
             ),
             child: IconButton(
-              icon: const Icon(Icons.close, color: AppTheme.textPrimary, size: 20),
+              icon: const Icon(Icons.close,
+                  color: AppTheme.textPrimary, size: 20),
               onPressed: () {
                 setState(() {
                   _isSearching = false;
@@ -688,9 +696,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: isIncome
-                        ? AppTheme.successColor
-                        : AppTheme.errorColor,
+                    color:
+                        isIncome ? AppTheme.successColor : AppTheme.errorColor,
                   ),
                 ),
               ],
@@ -755,16 +762,23 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   itemCount: months.length,
                   itemBuilder: (context, index) {
                     final month = months[index];
-                    final isSelected = month.month == _selectedMonth.month && month.year == _selectedMonth.year;
+                    final isSelected = month.month == _selectedMonth.month &&
+                        month.year == _selectedMonth.year;
                     return ListTile(
                       title: Text(
                         _formatMonthYear(month),
                         style: GoogleFonts.inter(
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          color: isSelected ? AppTheme.primaryColor : AppTheme.textPrimary,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected
+                              ? AppTheme.primaryColor
+                              : AppTheme.textPrimary,
                         ),
                       ),
-                      trailing: isSelected ? const Icon(Icons.check, color: AppTheme.primaryColor) : null,
+                      trailing: isSelected
+                          ? const Icon(Icons.check,
+                              color: AppTheme.primaryColor)
+                          : null,
                       onTap: () {
                         setState(() {
                           _selectedMonth = month;
