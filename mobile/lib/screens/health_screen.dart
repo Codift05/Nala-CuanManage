@@ -117,15 +117,15 @@ class _HealthScreenState extends State<HealthScreen> {
   }
 
   Color _colorForScore(int score) {
-    if (score >= 75) return const Color(0xFF1954C2);
+    if (score >= 75) return AppTheme.primaryColor;
     if (score >= 55) return const Color(0xFFB45309);
-    return const Color(0xFFB91C1C);
+    return AppTheme.secondaryColor;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FC),
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _loadHealthData,
@@ -213,7 +213,7 @@ class _HealthScreenState extends State<HealthScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: const CircularProgressIndicator(color: Color(0xFF1954C2)),
+      child: const CircularProgressIndicator(color: AppTheme.primaryColor),
     );
   }
 
@@ -227,8 +227,11 @@ class _HealthScreenState extends State<HealthScreen> {
       ),
       child: Column(
         children: [
-          const Icon(Icons.wifi_off_rounded,
-              color: Color(0xFFB91C1C), size: 32),
+          const Icon(
+            Icons.wifi_off_rounded,
+            color: AppTheme.secondaryColor,
+            size: 32,
+          ),
           const SizedBox(height: 12),
           Text(
             _errorMessage!,
@@ -444,8 +447,11 @@ class _HealthScreenState extends State<HealthScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.trending_up,
-                          size: 14, color: Color(0xFF1954C2)),
+                      const Icon(
+                        Icons.trending_up,
+                        size: 14,
+                        color: AppTheme.primaryColor,
+                      ),
                       const SizedBox(width: 4),
                       Flexible(
                         child: Text(
@@ -455,7 +461,7 @@ class _HealthScreenState extends State<HealthScreen> {
                           style: GoogleFonts.inter(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1954C2),
+                            color: AppTheme.primaryColor,
                           ),
                         ),
                       ),
@@ -470,7 +476,7 @@ class _HealthScreenState extends State<HealthScreen> {
             child: TrendLineChart(
               dataPoints: _trendPoints,
               labels: _trendLabels,
-              lineColor: const Color(0xFF1954C2),
+              lineColor: AppTheme.primaryColor,
             ),
           ),
         ],
@@ -500,7 +506,7 @@ class _HealthScreenState extends State<HealthScreen> {
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF1954C2),
+          backgroundColor: AppTheme.primaryColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
