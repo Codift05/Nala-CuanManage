@@ -73,7 +73,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         const SizedBox(height: 48),
                         Text(
                           _pages[index]['title']!,
-                          style: GoogleFonts.outfit(
+                          style: GoogleFonts.interTight(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
                             color: AppTheme.textPrimary,
@@ -83,7 +83,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         const SizedBox(height: 16),
                         Text(
                           _pages[index]['description']!,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.interTight(
                             fontSize: 16,
                             color: AppTheme.textSecondary,
                             height: 1.5,
