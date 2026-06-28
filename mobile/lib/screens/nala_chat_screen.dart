@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/chat_service.dart';
+import '../theme/app_theme.dart';
 
 class ChatMessage {
   final String text;
@@ -20,9 +21,12 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
   final TextEditingController _textController = TextEditingController();
   final ChatService _chatService = ChatService();
   final ScrollController _scrollController = ScrollController();
-  
+
   List<ChatMessage> _messages = [
-    ChatMessage(text: 'Hei! Aku Nala, asisten keuangan pribadimu. Ada yang bisa aku bantu seputar keuanganmu bulan ini?', isUser: false),
+    ChatMessage(
+        text:
+            'Hei! Aku Nala, asisten keuangan pribadimu. Ada yang bisa aku bantu seputar keuanganmu bulan ini?',
+        isUser: false),
   ];
   bool _isLoading = false;
 
@@ -50,14 +54,16 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
     _scrollToBottom();
 
     final reply = await _chatService.sendMessage(text);
-    
+
     if (mounted) {
       setState(() {
         _isLoading = false;
         if (reply != null) {
           _messages.add(ChatMessage(text: reply, isUser: false));
         } else {
-          _messages.add(ChatMessage(text: 'Maaf, koneksi Nala terputus. Coba lagi nanti ya!', isUser: false));
+          _messages.add(ChatMessage(
+              text: 'Maaf, koneksi Nala terputus. Coba lagi nanti ya!',
+              isUser: false));
         }
       });
       _scrollToBottom();
@@ -67,14 +73,15 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.backgroundColor,
       appBar: _buildAppBar(),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
               itemCount: _messages.length + (_isLoading ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == _messages.length && _isLoading) {
@@ -103,10 +110,8 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.white,
-      elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: const Icon(Icons.arrow_back_ios_new_rounded),
         onPressed: () => Navigator.pop(context),
       ),
       title: Row(
@@ -114,7 +119,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: const BoxDecoration(
-              color: Color(0xFF1954C2),
+              color: AppTheme.primaryColor,
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.smart_toy, color: Colors.white, size: 20),
@@ -159,7 +164,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
           margin: const EdgeInsets.only(right: 8),
           padding: const EdgeInsets.all(8),
           decoration: const BoxDecoration(
-            color: Color(0xFF1954C2),
+            color: AppTheme.primaryColor,
             shape: BoxShape.circle,
           ),
           child: const Icon(Icons.smart_toy, color: Colors.white, size: 16),
@@ -200,7 +205,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
             margin: const EdgeInsets.only(right: 8),
             padding: const EdgeInsets.all(8),
             decoration: const BoxDecoration(
-              color: Color(0xFF1954C2),
+              color: AppTheme.primaryColor,
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.smart_toy, color: Colors.white, size: 16),
@@ -248,7 +253,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: const BoxDecoration(
-              color: Color(0xFF1954C2),
+              color: AppTheme.primaryColor,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -305,7 +310,8 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
                           fontSize: 14,
                         ),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 14),
                       ),
                       onSubmitted: (_) => _sendMessage(),
                     ),
@@ -314,7 +320,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
                 const SizedBox(width: 12),
                 Container(
                   decoration: const BoxDecoration(
-                    color: Color(0xFF1954C2),
+                    color: AppTheme.primaryColor,
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
