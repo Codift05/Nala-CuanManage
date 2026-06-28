@@ -81,7 +81,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Mulai kelola keuanganmu bersama Nala.',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.interTight(
                     fontSize: 16,
                     color: AppTheme.textSecondary,
                   ),
