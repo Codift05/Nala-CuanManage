@@ -123,7 +123,7 @@ class _MainShellState extends State<MainShell> {
           const SizedBox(height: 3),
           Text(
             'Scan',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.interTight(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF8A94A3),
@@ -151,7 +151,7 @@ class _MainShellState extends State<MainShell> {
           const SizedBox(height: 4),
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.interTight(
               fontSize: 11,
               fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
               color:
