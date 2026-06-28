@@ -17,17 +17,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<Map<String, String>> _pages = [
     {
       'title': 'Track Your Finances',
-      'description': 'Easily monitor your expenses, income, and overall budget in one place.',
+      'description':
+          'Easily monitor your expenses, income, and overall budget in one place.',
       'icon': 'account_balance_wallet',
     },
     {
       'title': 'AI-Powered Insights',
-      'description': 'Get intelligent recommendations to optimize your spending and save more.',
+      'description':
+          'Get intelligent recommendations to optimize your spending and save more.',
       'icon': 'psychology',
     },
     {
       'title': 'Achieve Your Goals',
-      'description': 'Set financial goals and let Nala guide you towards achieving them faster.',
+      'description':
+          'Set financial goals and let Nala guide you towards achieving them faster.',
       'icon': 'flag',
     },
   ];
@@ -54,11 +57,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          index == 0 ? Icons.account_balance_wallet : index == 1 ? Icons.psychology : Icons.flag,
-                          size: 120,
-                          color: AppTheme.primaryColor,
-                        ),
+                        if (index == 0)
+                          Image.asset(
+                            'img/Nala baru2.png',
+                            width: 150,
+                            height: 150,
+                            fit: BoxFit.cover,
+                          )
+                        else
+                          Icon(
+                            index == 1 ? Icons.psychology : Icons.flag,
+                            size: 112,
+                            color: AppTheme.primaryColor,
+                          ),
                         const SizedBox(height: 48),
                         Text(
                           _pages[index]['title']!,
@@ -86,7 +97,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -98,7 +110,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         width: _currentPage == index ? 24 : 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          color: _currentPage == index ? AppTheme.primaryColor : AppTheme.primaryColor.withValues(alpha: 0.2),
+                          color: _currentPage == index
+                              ? AppTheme.primaryColor
+                              : AppTheme.primaryColor.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -114,7 +128,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       } else {
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => const LoginScreen()),
+                          MaterialPageRoute(
+                              builder: (context) => const LoginScreen()),
                         );
                       }
                     },
@@ -122,9 +137,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 16),
                     ),
-                    child: Text(_currentPage == _pages.length - 1 ? 'Get Started' : 'Next'),
+                    child: Text(_currentPage == _pages.length - 1
+                        ? 'Get Started'
+                        : 'Next'),
                   ),
                 ],
               ),
