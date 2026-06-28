@@ -90,7 +90,7 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
           const SizedBox(height: 16),
           Text(
             'Belum ada dompet',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.interTight(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: AppTheme.textSecondary,
@@ -152,7 +152,7 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
               children: [
                 Text(
                   wallet.name,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.interTight(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textPrimary,
@@ -161,7 +161,7 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
                 const SizedBox(height: 4),
                 Text(
                   wallet.type,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.interTight(
                     fontSize: 13,
                     color: AppTheme.textSecondary,
                   ),
@@ -171,7 +171,7 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
           ),
           Text(
             'Rp ${wallet.balance.toInt()}',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.interTight(
               fontSize: 15,
               fontWeight: FontWeight.bold,
               color: AppTheme.textPrimary,
@@ -248,7 +248,7 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
             children: [
               Text(
                 'Tambah Dompet Baru',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.interTight(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
@@ -257,7 +257,7 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
               const SizedBox(height: 24),
               TextFormField(
                 controller: _nameController,
-                style: GoogleFonts.inter(),
+                style: GoogleFonts.interTight(),
                 decoration: InputDecoration(
                   labelText: 'Nama Dompet (Misal: BCA, GoPay)',
                   border: OutlineInputBorder(
@@ -277,7 +277,8 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
                 ),
                 items: _types.map((t) {
                   return DropdownMenuItem(
-                      value: t, child: Text(t, style: GoogleFonts.inter()));
+                      value: t,
+                      child: Text(t, style: GoogleFonts.interTight()));
                 }).toList(),
                 onChanged: (val) {
                   if (val != null) setState(() => _type = val);
@@ -287,7 +288,7 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
               TextFormField(
                 controller: _balanceController,
                 keyboardType: TextInputType.number,
-                style: GoogleFonts.inter(),
+                style: GoogleFonts.interTight(),
                 decoration: InputDecoration(
                   labelText: 'Saldo Awal',
                   prefixText: 'Rp ',
@@ -313,7 +314,7 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
                           'Simpan Dompet',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.interTight(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
