@@ -61,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.primaryColor,
+      backgroundColor: AppTheme.backgroundColor,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -69,8 +69,8 @@ class _SplashScreenState extends State<SplashScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
-                'img/Logo Nala 4.png',
-                width: 210,
+                'img/Nala baru2.png',
+                width: 190,
                 fit: BoxFit.contain,
                 filterQuality: FilterQuality.high,
               ),
@@ -80,8 +80,8 @@ class _SplashScreenState extends State<SplashScreen>
                 style: GoogleFonts.outfit(
                   fontSize: 38,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 4,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: 2,
                 ),
               ),
               const SizedBox(height: 8),
@@ -89,7 +89,7 @@ class _SplashScreenState extends State<SplashScreen>
                 'Smart Cuan Management',
                 style: GoogleFonts.inter(
                   fontSize: 16,
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: AppTheme.textSecondary,
                   letterSpacing: 0.5,
                 ),
               ),
