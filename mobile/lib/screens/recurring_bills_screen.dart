@@ -18,7 +18,8 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
   final _recurringService = RecurringService();
   bool _isLoading = true;
   List<RecurringBill> _bills = [];
-  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+  final NumberFormat _currencyFormat =
+      NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
   @override
   void initState() {
@@ -66,23 +67,15 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'Tagihan Rutin',
-          style: GoogleFonts.inter(
-            color: AppTheme.textPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
+        title: const Text('Tagihan Rutin'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: AppTheme.primaryColor),
+            tooltip: 'Tambah tagihan',
+            icon: const Icon(Icons.add_rounded),
             onPressed: _showAddBillSheet,
           ),
         ],
@@ -140,10 +133,12 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
     IconData icon = Icons.receipt_long;
     Color color = AppTheme.primaryColor;
 
-    if (bill.categoryId.toLowerCase() == 'bills' || bill.categoryId.toLowerCase() == 'tagihan') {
+    if (bill.categoryId.toLowerCase() == 'bills' ||
+        bill.categoryId.toLowerCase() == 'tagihan') {
       icon = Icons.receipt;
-      color = const Color(0xFF1954C2);
-    } else if (bill.categoryId.toLowerCase() == 'entertainment' || bill.categoryId.toLowerCase() == 'hiburan') {
+      color = AppTheme.primaryColor;
+    } else if (bill.categoryId.toLowerCase() == 'entertainment' ||
+        bill.categoryId.toLowerCase() == 'hiburan') {
       icon = Icons.movie;
       color = const Color(0xFFE91E63);
     }
@@ -153,14 +148,8 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        border: Border.all(color: AppTheme.borderColor),
       ),
       child: Row(
         children: [
@@ -210,7 +199,8 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
               const SizedBox(height: 4),
               GestureDetector(
                 onTap: () => _deleteBill(bill.id),
-                child: const Icon(Icons.delete_outline, size: 20, color: Colors.grey),
+                child: const Icon(Icons.delete_outline,
+                    size: 20, color: Colors.grey),
               ),
             ],
           ),
@@ -233,11 +223,11 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
   final _formKey = GlobalKey<FormState>();
   final _recurringService = RecurringService();
   final _walletService = WalletService();
-  
+
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _dueDateController = TextEditingController();
-  
+
   String _categoryId = 'Bills';
   String? _selectedWalletId;
   List<Wallet> _wallets = [];
@@ -271,12 +261,14 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate() || _selectedWalletId == null) return;
-    
+
     setState(() => _isSaving = true);
-    
-    final amount = double.tryParse(_amountController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+
+    final amount = double.tryParse(
+            _amountController.text.replaceAll(RegExp(r'[^0-9]'), '')) ??
+        0;
     final dueDate = int.tryParse(_dueDateController.text) ?? 1;
-    
+
     final bill = await _recurringService.createRecurringBill(
       title: _titleController.text,
       amount: amount,
@@ -284,9 +276,9 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
       walletId: _selectedWalletId!,
       dueDate: dueDate,
     );
-    
+
     setState(() => _isSaving = false);
-    
+
     if (bill != null && mounted) {
       Navigator.pop(context);
       widget.onSaved();
@@ -340,9 +332,12 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
                 style: GoogleFonts.inter(),
                 decoration: InputDecoration(
                   labelText: 'Nama Tagihan (Misal: Netflix, Listrik)',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16)),
                 ),
-                validator: (val) => val == null || val.isEmpty ? 'Nama tidak boleh kosong' : null,
+                validator: (val) => val == null || val.isEmpty
+                    ? 'Nama tidak boleh kosong'
+                    : null,
               ),
               const SizedBox(height: 16),
               Row(
@@ -356,9 +351,11 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
                       decoration: InputDecoration(
                         labelText: 'Nominal',
                         prefixText: 'Rp ',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16)),
                       ),
-                      validator: (val) => val == null || val.isEmpty ? 'Isi nominal' : null,
+                      validator: (val) =>
+                          val == null || val.isEmpty ? 'Isi nominal' : null,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -370,12 +367,14 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
                       style: GoogleFonts.inter(),
                       decoration: InputDecoration(
                         labelText: 'Tgl (1-31)',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16)),
                       ),
                       validator: (val) {
                         if (val == null || val.isEmpty) return 'Isi tgl';
                         final num = int.tryParse(val);
-                        if (num == null || num < 1 || num > 31) return 'Tgl tidak valid';
+                        if (num == null || num < 1 || num > 31)
+                          return 'Tgl tidak valid';
                         return null;
                       },
                     ),
@@ -387,10 +386,13 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
                 value: _selectedWalletId,
                 decoration: InputDecoration(
                   labelText: 'Sumber Dana (Otomatis potong)',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16)),
                 ),
                 items: _wallets.map((w) {
-                  return DropdownMenuItem(value: w.id, child: Text(w.name, style: GoogleFonts.inter()));
+                  return DropdownMenuItem(
+                      value: w.id,
+                      child: Text(w.name, style: GoogleFonts.inter()));
                 }).toList(),
                 onChanged: (val) {
                   if (val != null) setState(() => _selectedWalletId = val);
@@ -404,7 +406,8 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
                   onPressed: _isSaving ? null : _save,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryColor,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25)),
                   ),
                   child: _isSaving
                       ? const CircularProgressIndicator(color: Colors.white)
