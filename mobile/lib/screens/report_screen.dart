@@ -77,7 +77,9 @@ class _ReportScreenState extends State<ReportScreen> {
     try {
       final transactions = await _transactionService.getTransactions();
       final monthlyTransactions = transactions.where(
-        (tx) => tx.date.month == _selectedDate.month && tx.date.year == _selectedDate.year,
+        (tx) =>
+            tx.date.month == _selectedDate.month &&
+            tx.date.year == _selectedDate.year,
       );
 
       double income = 0;
@@ -99,7 +101,7 @@ class _ReportScreenState extends State<ReportScreen> {
         double percentage = expense > 0 ? (value / expense) * 100 : 0;
 
         IconData icon = Icons.receipt_long;
-        Color iconColor = const Color(0xFF1954C2);
+        Color iconColor = AppTheme.primaryColor;
         Color iconBgColor = const Color(0xFFE2E8F0);
 
         if (key == 'Food' || key == 'Makanan') {
@@ -131,13 +133,17 @@ class _ReportScreenState extends State<ReportScreen> {
 
       List<Map<String, dynamic>> trendData = [];
       for (int i = 2; i >= 0; i--) {
-        DateTime monthDate = DateTime(_selectedDate.year, _selectedDate.month - i);
-        final monthTxs = transactions.where((tx) => tx.date.month == monthDate.month && tx.date.year == monthDate.year);
+        DateTime monthDate =
+            DateTime(_selectedDate.year, _selectedDate.month - i);
+        final monthTxs = transactions.where((tx) =>
+            tx.date.month == monthDate.month && tx.date.year == monthDate.year);
         double inc = 0;
         double exp = 0;
         for (var tx in monthTxs) {
-          if (tx.type == 'INCOME') inc += tx.amount;
-          else exp += tx.amount;
+          if (tx.type == 'INCOME')
+            inc += tx.amount;
+          else
+            exp += tx.amount;
         }
         trendData.add({
           'month': _formatMonthShort(monthDate),
@@ -163,9 +169,7 @@ class _ReportScreenState extends State<ReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(
-        0xFFF8F9FC,
-      ), // Slightly bluish-gray background to match the mockup
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -200,7 +204,7 @@ class _ReportScreenState extends State<ReportScreen> {
                       _buildExpenseList(),
                       const SizedBox(height: 32),
                       _buildExportButton(),
-                      const SizedBox(height: 120),
+                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
@@ -247,7 +251,8 @@ class _ReportScreenState extends State<ReportScreen> {
           children: [
             GestureDetector(
               onTap: () {
-                setState(() => _selectedDate = DateTime(_selectedDate.year, _selectedDate.month - 1));
+                setState(() => _selectedDate =
+                    DateTime(_selectedDate.year, _selectedDate.month - 1));
                 _loadReport();
               },
               child: const Padding(
@@ -271,7 +276,8 @@ class _ReportScreenState extends State<ReportScreen> {
             const SizedBox(width: 16),
             GestureDetector(
               onTap: () {
-                setState(() => _selectedDate = DateTime(_selectedDate.year, _selectedDate.month + 1));
+                setState(() => _selectedDate =
+                    DateTime(_selectedDate.year, _selectedDate.month + 1));
                 _loadReport();
               },
               child: const Padding(
@@ -299,11 +305,11 @@ class _ReportScreenState extends State<ReportScreen> {
             title: 'Pemasukan',
             amount: _currencyFormat.format(_totalIncome),
             iconData: Icons.arrow_downward,
-            iconColor: const Color(0xFF1954C2),
+            iconColor: AppTheme.primaryColor,
             iconBgColor: const Color(0xFFE2E8FF),
             badgeText: '+12%',
             badgeColor: const Color(0xFFE2E8FF),
-            badgeTextColor: const Color(0xFF1954C2),
+            badgeTextColor: AppTheme.primaryColor,
           ),
           const SizedBox(width: 16),
           _buildSummaryCard(
@@ -445,7 +451,7 @@ class _ReportScreenState extends State<ReportScreen> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildLegendDot(const Color(0xFF1954C2), 'Masuk'),
+                  _buildLegendDot(AppTheme.primaryColor, 'Masuk'),
                   const SizedBox(width: 16),
                   _buildLegendDot(AppTheme.errorColor, 'Keluar'),
                 ],
@@ -471,7 +477,8 @@ class _ReportScreenState extends State<ReportScreen> {
                             bottomTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
-                                getTitlesWidget: (double value, TitleMeta meta) {
+                                getTitlesWidget:
+                                    (double value, TitleMeta meta) {
                                   final index = value.toInt();
                                   if (index >= 0 && index < _trendData.length) {
                                     return Padding(
@@ -484,7 +491,7 @@ class _ReportScreenState extends State<ReportScreen> {
                                               ? FontWeight.bold
                                               : FontWeight.normal,
                                           color: index == 2
-                                              ? const Color(0xFF1954C2)
+                                              ? AppTheme.primaryColor
                                               : AppTheme.textSecondary,
                                         ),
                                       ),
@@ -517,7 +524,7 @@ class _ReportScreenState extends State<ReportScreen> {
                               barRods: [
                                 BarChartRodData(
                                   toY: data['income'],
-                                  color: const Color(0xFF1954C2),
+                                  color: AppTheme.primaryColor,
                                   width: 12,
                                   borderRadius: const BorderRadius.vertical(
                                       top: Radius.circular(4)),
@@ -565,7 +572,7 @@ class _ReportScreenState extends State<ReportScreen> {
       style: GoogleFonts.inter(
         fontSize: 13,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        color: isSelected ? const Color(0xFF1954C2) : AppTheme.textSecondary,
+        color: isSelected ? AppTheme.primaryColor : AppTheme.textSecondary,
       ),
     );
   }
@@ -619,7 +626,7 @@ class _ReportScreenState extends State<ReportScreen> {
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF1954C2),
+          backgroundColor: AppTheme.primaryColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
