@@ -98,24 +98,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           'Hapus Akun Permanen',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.interTight(
               fontWeight: FontWeight.bold, color: AppTheme.errorColor),
         ),
         content: Text(
           'Perhatian: Tindakan ini tidak dapat dibatalkan. Seluruh data transaksi, dompet, dan tagihan Anda akan dihapus secara permanen. Lanjutkan?',
-          style: GoogleFonts.inter(),
+          style: GoogleFonts.interTight(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Batal', style: GoogleFonts.inter(color: Colors.grey)),
+            child: Text('Batal',
+                style: GoogleFonts.interTight(color: Colors.grey)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style:
                 ElevatedButton.styleFrom(backgroundColor: AppTheme.errorColor),
             child: Text('Hapus Permanen',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.interTight(
                     color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
@@ -150,7 +151,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Profil'),
+        title: const Text('Profil & data'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -169,9 +170,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         width: 92,
                         height: 92,
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryColor,
+                          color: Colors.white,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 4),
+                          border: Border.all(
+                            color: _avatarBase64 == null
+                                ? AppTheme.textPrimary
+                                : Colors.white,
+                            width: _avatarBase64 == null ? 1.5 : 4,
+                          ),
                           image: _avatarBase64 != null
                               ? DecorationImage(
                                   image:
@@ -181,18 +187,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               : null,
                         ),
                         child: _avatarBase64 == null
-                            ? Center(
-                                child: Text(
-                                  _nameController.text.isNotEmpty
-                                      ? _nameController.text
-                                          .substring(0, 1)
-                                          .toUpperCase()
-                                      : 'U',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                  ),
+                            ? const Center(
+                                child: Icon(
+                                  Icons.person_outline_rounded,
+                                  size: 48,
+                                  color: AppTheme.textPrimary,
                                 ),
                               )
                             : null,
@@ -218,50 +217,48 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
-              Text(
-                'INFORMASI PRIBADI',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.textSecondary,
+              const SizedBox(height: 36),
+              TextField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: 'Nama lengkap',
+                  prefixIcon: const Icon(Icons.person_outline_rounded),
+                  fillColor: Colors.white,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: AppTheme.borderColor),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: AppTheme.primaryColor,
+                      width: 1.5,
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppTheme.borderColor),
-                ),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        hintText: 'Nama lengkap',
-                        prefixIcon: Icon(Icons.person_outline_rounded),
-                        fillColor: Colors.transparent,
-                      ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: const Icon(Icons.email_outlined),
+                  fillColor: Colors.white,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: AppTheme.borderColor),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: AppTheme.primaryColor,
+                      width: 1.5,
                     ),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 52),
-                      child: Divider(),
-                    ),
-                    TextField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        hintText: 'Email',
-                        prefixIcon: Icon(Icons.email_outlined),
-                        fillColor: Colors.transparent,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _isLoading ? null : _saveProfile,
                 child: _isLoading
@@ -273,45 +270,30 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       )
                     : Text(
                         'Simpan Perubahan',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.interTight(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
               ),
-              const SizedBox(height: 32),
-              Text(
-                'ZONA BERBAHAYA',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppTheme.borderColor),
-                ),
-                child: TextButton(
-                  onPressed: _isLoading ? null : _deleteAccount,
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 52),
-                    foregroundColor: AppTheme.errorColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+              const SizedBox(height: 20),
+              TextButton(
+                onPressed: _isLoading ? null : _deleteAccount,
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 52),
+                  foregroundColor: AppTheme.errorColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: AppTheme.errorColor),
                   ),
-                  child: Text(
-                    'Hapus Akun',
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.errorColor,
-                    ),
+                ),
+                child: Text(
+                  'Hapus Akun',
+                  style: GoogleFonts.interTight(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.errorColor,
                   ),
                 ),
               ),
