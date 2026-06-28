@@ -16,7 +16,8 @@ Material components for accessibility and platform compatibility.
 - Border: `#E5E7EB`
 - Card radius: `16`
 - Control radius: `14`
-- Typeface: Inter
+- Typeface: Inter Tight, used as a license-safe approximation of the compact
+  hierarchy and proportions associated with Apple's SF Pro interface type.
 
 ## Brand Asset
 
