@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
@@ -50,7 +51,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         0,
       );
       _selectedCategory = widget.transactionToEdit!.categoryId;
-      if (_selectedCategory != null && !_categories.contains(_selectedCategory!)) {
+      if (_selectedCategory != null &&
+          !_categories.contains(_selectedCategory!)) {
         _categories.add(_selectedCategory!);
       }
       _selectedWalletId = widget.transactionToEdit!.walletId;
@@ -82,8 +84,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
     setState(() => _isLoading = true);
 
-    final amount =
-        double.tryParse(
+    final amount = double.tryParse(
           _amountController.text.replaceAll(RegExp(r'[^0-9]'), ''),
         ) ??
         0;
@@ -149,64 +150,50 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           widget.transactionToEdit != null
               ? 'Edit Transaksi'
               : 'Tambah Transaksi',
-          style: GoogleFonts.inter(
-            color: AppTheme.textPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
         ),
       ),
       body: _wallets.isEmpty && _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildTypeSelector(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 22),
                     _buildAmountInput(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 22),
                     _buildWalletSelector(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 22),
                     _buildCategorySelector(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 22),
                     _buildTextField(
                       label: 'Merchant / Toko',
                       controller: _merchantController,
                       hint: 'Misal: Indomaret, Gofood...',
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 22),
                     _buildTextField(
                       label: 'Catatan',
                       controller: _notesController,
                       hint: 'Tambahkan catatan opsional',
                       maxLines: 3,
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 30),
                     SizedBox(
                       width: double.infinity,
-                      height: 50,
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _saveTransaction,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                        ),
                         child: _isLoading
                             ? const CircularProgressIndicator(
                                 color: Colors.white,
@@ -229,75 +216,45 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   Widget _buildTypeSelector() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
+    return SizedBox(
+      width: double.infinity,
+      child: CupertinoSlidingSegmentedControl<String>(
+        groupValue: _type,
+        backgroundColor: const Color(0xFFE9ECF2),
+        thumbColor: Colors.white,
+        padding: const EdgeInsets.all(4),
+        children: {
+          'EXPENSE': _buildSegmentLabel(
+            'Pengeluaran',
+            _type == 'EXPENSE' ? AppTheme.errorColor : AppTheme.textSecondary,
+          ),
+          'INCOME': _buildSegmentLabel(
+            'Pemasukan',
+            _type == 'INCOME' ? AppTheme.successColor : AppTheme.textSecondary,
+          ),
+        },
+        onValueChanged: (value) {
+          if (value == null) return;
+          setState(() {
+            _type = value;
+            _selectedCategory = value == 'EXPENSE' ? 'Food' : 'Income';
+          });
+        },
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() {
-                _type = 'EXPENSE';
-                _selectedCategory = 'Food';
-              }),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                decoration: BoxDecoration(
-                  color: _type == 'EXPENSE'
-                      ? AppTheme.errorColor.withValues(alpha: 0.1)
-                      : Colors.transparent,
-                  borderRadius: const BorderRadius.horizontal(
-                    left: Radius.circular(16),
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    'Pengeluaran',
-                    style: GoogleFonts.inter(
-                      color: _type == 'EXPENSE'
-                          ? AppTheme.errorColor
-                          : AppTheme.textSecondary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() {
-                _type = 'INCOME';
-                _selectedCategory = 'Income';
-              }),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                decoration: BoxDecoration(
-                  color: _type == 'INCOME'
-                      ? AppTheme.successColor.withValues(alpha: 0.1)
-                      : Colors.transparent,
-                  borderRadius: const BorderRadius.horizontal(
-                    right: Radius.circular(16),
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    'Pemasukan',
-                    style: GoogleFonts.inter(
-                      color: _type == 'INCOME'
-                          ? AppTheme.successColor
-                          : AppTheme.textSecondary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+    );
+  }
+
+  Widget _buildSegmentLabel(String label, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 11),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: GoogleFonts.inter(
+          color: color,
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
@@ -309,7 +266,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         Text(
           'Nominal',
           style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
             color: AppTheme.textSecondary,
           ),
         ),
@@ -318,23 +276,18 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           controller: _amountController,
           keyboardType: TextInputType.number,
           style: GoogleFonts.inter(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+            fontSize: 28,
+            fontWeight: FontWeight.w800,
             color: AppTheme.textPrimary,
           ),
           decoration: InputDecoration(
+            hintText: '0',
             prefixText: 'Rp ',
             prefixStyle: GoogleFonts.inter(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
               color: AppTheme.textPrimary,
             ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            filled: true,
-            fillColor: Colors.white,
           ),
           validator: (value) {
             if (value == null || value.isEmpty)
@@ -354,21 +307,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         Text(
           'Dompet / Sumber Dana',
           style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
             color: AppTheme.textSecondary,
           ),
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: _selectedWalletId,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            filled: true,
-            fillColor: Colors.white,
-          ),
+          decoration: const InputDecoration(),
           items: _wallets.map((w) {
             return DropdownMenuItem(
               value: w.id,
@@ -392,21 +339,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         Text(
           'Kategori',
           style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
             color: AppTheme.textSecondary,
           ),
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: _selectedCategory,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            filled: true,
-            fillColor: Colors.white,
-          ),
+          decoration: const InputDecoration(),
           items: _categories.map((c) {
             return DropdownMenuItem(
               value: c,
@@ -435,7 +376,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         Text(
           label,
           style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
             color: AppTheme.textSecondary,
           ),
         ),
@@ -446,12 +388,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           style: GoogleFonts.inter(),
           decoration: InputDecoration(
             hintText: hint,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            filled: true,
-            fillColor: Colors.white,
           ),
         ),
       ],
