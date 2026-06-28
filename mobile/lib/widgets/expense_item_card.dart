@@ -60,7 +60,7 @@ class ExpenseItemCard extends StatelessWidget {
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.interTight(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: AppTheme.textPrimary,
@@ -70,7 +70,7 @@ class ExpenseItemCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       amount,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.interTight(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.textPrimary,
@@ -93,8 +93,7 @@ class ExpenseItemCard extends StatelessWidget {
                             return Stack(
                               children: [
                                 Container(
-                                  width:
-                                      constraints.maxWidth *
+                                  width: constraints.maxWidth *
                                       (percentage.clamp(0, 100) / 100),
                                   height: 6,
                                   decoration: BoxDecoration(
@@ -111,7 +110,7 @@ class ExpenseItemCard extends StatelessWidget {
                     const SizedBox(width: 12),
                     Text(
                       '${percentage.toInt()}%',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.interTight(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: AppTheme.textSecondary,
