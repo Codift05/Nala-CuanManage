@@ -147,7 +147,7 @@ class _HealthScreenState extends State<HealthScreen> {
                   const SizedBox(height: 32),
                   Text(
                     'Rincian Skor',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.interTight(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.textPrimary,
@@ -184,7 +184,7 @@ class _HealthScreenState extends State<HealthScreen> {
             children: [
               Text(
                 'Kesehatan Keuangan',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.interTight(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
@@ -192,7 +192,7 @@ class _HealthScreenState extends State<HealthScreen> {
               ),
               Text(
                 _updatedLabel,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.interTight(
                   fontSize: 12,
                   color: AppTheme.textSecondary,
                 ),
@@ -236,7 +236,7 @@ class _HealthScreenState extends State<HealthScreen> {
           Text(
             _errorMessage!,
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.interTight(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
@@ -278,7 +278,7 @@ class _HealthScreenState extends State<HealthScreen> {
           const SizedBox(height: 8),
           Text(
             _score.toString(),
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.interTight(
               fontSize: 56,
               fontWeight: FontWeight.bold,
               color: color,
@@ -297,7 +297,7 @@ class _HealthScreenState extends State<HealthScreen> {
                 Flexible(
                   child: Text(
                     _status,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.interTight(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: color,
@@ -360,7 +360,7 @@ class _HealthScreenState extends State<HealthScreen> {
                   title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.interTight(
                     fontSize: 13,
                     color: AppTheme.textSecondary,
                   ),
@@ -369,7 +369,7 @@ class _HealthScreenState extends State<HealthScreen> {
               const SizedBox(width: 8),
               Text(
                 score.toString(),
-                style: GoogleFonts.inter(
+                style: GoogleFonts.interTight(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: barColor,
@@ -429,7 +429,7 @@ class _HealthScreenState extends State<HealthScreen> {
               Expanded(
                 child: Text(
                   'Tren 3 Bulan',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.interTight(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textPrimary,
@@ -458,7 +458,7 @@ class _HealthScreenState extends State<HealthScreen> {
                           _trendMessage,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.interTight(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: AppTheme.primaryColor,
@@ -499,7 +499,7 @@ class _HealthScreenState extends State<HealthScreen> {
             color: Colors.white, size: 20),
         label: Text(
           'Minta Saran dari Nala',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.interTight(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: Colors.white,
