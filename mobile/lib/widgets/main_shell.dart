@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_theme.dart';
 import '../screens/dashboard_screen.dart';
 import '../screens/report_screen.dart';
 import '../screens/transaction_screen.dart';
@@ -64,7 +65,7 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FA),
+      backgroundColor: AppTheme.backgroundColor,
       body: IndexedStack(index: _selectedIndex, children: _screens),
       bottomNavigationBar: SafeArea(
         top: false,
@@ -110,7 +111,7 @@ class _MainShellState extends State<MainShell> {
             width: 38,
             height: 38,
             decoration: const BoxDecoration(
-              color: Color(0xFF0057FF),
+              color: AppTheme.primaryColor,
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -144,8 +145,7 @@ class _MainShellState extends State<MainShell> {
         children: [
           Icon(
             icon,
-            color:
-                isSelected ? const Color(0xFF0057FF) : const Color(0xFF8A94A3),
+            color: isSelected ? AppTheme.primaryColor : const Color(0xFF8A94A3),
             size: 23,
           ),
           const SizedBox(height: 4),
@@ -154,9 +154,8 @@ class _MainShellState extends State<MainShell> {
             style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-              color: isSelected
-                  ? const Color(0xFF0057FF)
-                  : const Color(0xFF8A94A3),
+              color:
+                  isSelected ? AppTheme.primaryColor : const Color(0xFF8A94A3),
             ),
           ),
         ],
