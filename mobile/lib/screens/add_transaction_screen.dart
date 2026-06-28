@@ -1,11 +1,39 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../services/transaction_service.dart';
 import '../services/wallet_service.dart';
 import '../models/wallet.dart';
 import '../models/transaction.dart';
+
+class RupiahInputFormatter extends TextInputFormatter {
+  final NumberFormat _formatter = NumberFormat.decimalPattern('id_ID');
+
+  String formatNumber(num value) => _formatter.format(value);
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) {
+      return const TextEditingValue();
+    }
+
+    final value = int.tryParse(digits);
+    if (value == null) return oldValue;
+
+    final formatted = _formatter.format(value);
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
 
 class AddTransactionScreen extends StatefulWidget {
   final TransactionItem? transactionToEdit;
@@ -27,6 +55,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _amountController = TextEditingController();
   final _merchantController = TextEditingController();
   final _notesController = TextEditingController();
+  final _rupiahFormatter = RupiahInputFormatter();
 
   List<Wallet> _wallets = [];
   bool _isLoading = false;
@@ -47,8 +76,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     super.initState();
     if (widget.transactionToEdit != null) {
       _type = widget.transactionToEdit!.type;
-      _amountController.text = widget.transactionToEdit!.amount.toStringAsFixed(
-        0,
+      _amountController.text = _rupiahFormatter.formatNumber(
+        widget.transactionToEdit!.amount.round(),
       );
       _selectedCategory = widget.transactionToEdit!.categoryId;
       if (_selectedCategory != null &&
@@ -200,7 +229,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                               )
                             : Text(
                                 'Simpan Transaksi',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.interTight(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
@@ -250,7 +279,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: Text(
         label,
         textAlign: TextAlign.center,
-        style: GoogleFonts.inter(
+        style: GoogleFonts.interTight(
           color: color,
           fontSize: 14,
           fontWeight: FontWeight.w700,
@@ -265,7 +294,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       children: [
         Text(
           'Nominal',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.interTight(
             fontSize: 13,
             fontWeight: FontWeight.w700,
             color: AppTheme.textSecondary,
@@ -275,24 +304,55 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         TextFormField(
           controller: _amountController,
           keyboardType: TextInputType.number,
-          style: GoogleFonts.inter(
+          inputFormatters: [_rupiahFormatter],
+          style: GoogleFonts.interTight(
             fontSize: 28,
             fontWeight: FontWeight.w800,
             color: AppTheme.textPrimary,
           ),
           decoration: InputDecoration(
             hintText: '0',
-            prefixText: 'Rp ',
-            prefixStyle: GoogleFonts.inter(
+            hintStyle: GoogleFonts.interTight(
               fontSize: 28,
               fontWeight: FontWeight.w800,
-              color: AppTheme.textPrimary,
+              color: AppTheme.textSecondary.withValues(alpha: 0.55),
+            ),
+            fillColor: Colors.white,
+            prefixIconConstraints: const BoxConstraints(
+              minWidth: 58,
+              minHeight: 56,
+            ),
+            prefixIcon: Center(
+              widthFactor: 1,
+              child: Text(
+                'Rp',
+                style: GoogleFonts.interTight(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppTheme.controlRadius),
+              borderSide: const BorderSide(color: AppTheme.borderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppTheme.controlRadius),
+              borderSide: const BorderSide(
+                color: AppTheme.textSecondary,
+                width: 1,
+              ),
             ),
           ),
           validator: (value) {
-            if (value == null || value.isEmpty)
+            final digits = value?.replaceAll(RegExp(r'[^0-9]'), '') ?? '';
+            if (digits.isEmpty) {
               return 'Nominal tidak boleh kosong';
-            if (double.tryParse(value) == null) return 'Nominal tidak valid';
+            }
+            if (int.tryParse(digits) == null || int.parse(digits) <= 0) {
+              return 'Nominal tidak valid';
+            }
             return null;
           },
         ),
@@ -306,7 +366,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       children: [
         Text(
           'Dompet / Sumber Dana',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.interTight(
             fontSize: 13,
             fontWeight: FontWeight.w700,
             color: AppTheme.textSecondary,
@@ -319,7 +379,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           items: _wallets.map((w) {
             return DropdownMenuItem(
               value: w.id,
-              child: Text(w.name, style: GoogleFonts.inter()),
+              child: Text(w.name, style: GoogleFonts.interTight()),
             );
           }).toList(),
           onChanged: (val) {
@@ -338,7 +398,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       children: [
         Text(
           'Kategori',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.interTight(
             fontSize: 13,
             fontWeight: FontWeight.w700,
             color: AppTheme.textSecondary,
@@ -351,7 +411,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           items: _categories.map((c) {
             return DropdownMenuItem(
               value: c,
-              child: Text(c, style: GoogleFonts.inter()),
+              child: Text(c, style: GoogleFonts.interTight()),
             );
           }).toList(),
           onChanged: (val) {
@@ -375,7 +435,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.interTight(
             fontSize: 13,
             fontWeight: FontWeight.w700,
             color: AppTheme.textSecondary,
@@ -385,7 +445,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         TextFormField(
           controller: controller,
           maxLines: maxLines,
-          style: GoogleFonts.inter(),
+          style: GoogleFonts.interTight(),
           decoration: InputDecoration(
             hintText: hint,
           ),
