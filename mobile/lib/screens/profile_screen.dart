@@ -65,13 +65,74 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Text(
+                'Profil dan Pengaturan',
+                style: GoogleFonts.interTight(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 26),
               _buildProfileHeader(),
-              const SizedBox(height: 24),
-              _buildAccountSection(context),
-              const SizedBox(height: 20),
-              _buildPreferencesSection(),
-              const SizedBox(height: 20),
-              _buildOthersSection(context),
+              const SizedBox(height: 32),
+              _buildMenuGroup(
+                children: [
+                  _buildMenuTile(
+                    icon: Icons.edit_outlined,
+                    title: 'Profil & data',
+                    onTap: _navigateToEditProfile,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildMenuGroup(
+                children: [
+                  _buildMenuTile(
+                    icon: Icons.shield_outlined,
+                    title: 'Keamanan akun',
+                    onTap: () => _showChangePasswordDialog(context),
+                  ),
+                  _buildDivider(),
+                  _buildMenuTile(
+                    icon: Icons.account_balance_wallet_outlined,
+                    title: 'Bank & Dompet',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const WalletManagementScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildDivider(),
+                  _buildMenuTile(
+                    icon: Icons.autorenew_rounded,
+                    title: 'Tagihan Berulang',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const RecurringBillsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildMenuGroup(
+                children: [
+                  _buildMenuTile(
+                    icon: Icons.logout_rounded,
+                    title: 'Keluar',
+                    textColor: AppTheme.errorColor,
+                    hideArrow: true,
+                    onTap: () => _confirmLogout(context),
+                  ),
+                ],
+              ),
               const SizedBox(height: 24),
             ],
           ),
@@ -81,287 +142,89 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileHeader() {
-    return InkWell(
-      onTap: _navigateToEditProfile,
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppTheme.borderColor),
-        ),
-        child: Row(
-          children: [
-            Stack(
-              alignment: Alignment.bottomRight,
-              children: [
-                Container(
-                  width: 68,
-                  height: 68,
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryColor,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppTheme.borderColor, width: 1),
-                    image: _user?['avatar'] != null
-                        ? DecorationImage(
-                            image: MemoryImage(base64Decode(_user!['avatar'])),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: _navigateToEditProfile,
+          child: Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              Container(
+                width: 92,
+                height: 92,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: _user?['avatar'] == null
+                        ? AppTheme.textPrimary
+                        : Colors.white,
+                    width: _user?['avatar'] == null ? 1.5 : 4,
                   ),
-                  child: _user?['avatar'] == null
-                      ? Center(
-                          child: Text(
-                            _user?['name']?.substring(0, 1).toUpperCase() ??
-                                'U',
-                            style: GoogleFonts.inter(
-                              fontSize: 25,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          ),
+                  image: _user?['avatar'] != null
+                      ? DecorationImage(
+                          image: MemoryImage(base64Decode(_user!['avatar'])),
+                          fit: BoxFit.cover,
                         )
                       : null,
                 ),
-                Container(
-                  width: 22,
-                  height: 22,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppTheme.borderColor),
-                  ),
-                  child: const Icon(
-                    Icons.camera_alt_rounded,
-                    size: 12,
-                    color: AppTheme.primaryColor,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _user?['name'] ?? 'Pengguna',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
+              ),
+              if (_user?['avatar'] == null)
+                const Positioned.fill(
+                  child: Center(
+                    child: Icon(
+                      Icons.person_outline_rounded,
+                      size: 48,
                       color: AppTheme.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _user?['email'] ?? 'pengguna@example.com',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Kelola profil',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.primaryColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: Color(0xFFB0B5BE),
-              size: 22,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAccountSection(BuildContext context) {
-    return _buildSectionCard(
-      title: 'AKUN & KEAMANAN',
-      children: [
-        _buildMenuTile(
-          icon: Icons.person_outline_rounded,
-          iconColor: AppTheme.primaryColor,
-          title: 'Informasi Pribadi',
-          onTap: _navigateToEditProfile,
-        ),
-        _buildDivider(),
-        _buildMenuTile(
-          icon: Icons.lock_outline_rounded,
-          iconColor: AppTheme.secondaryColor,
-          title: 'Keamanan & PIN',
-          onTap: () => _showChangePasswordDialog(context),
-        ),
-        _buildDivider(),
-        _buildMenuTile(
-          icon: Icons.account_balance_wallet_outlined,
-          iconColor: AppTheme.successColor,
-          title: 'Bank & Dompet',
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const WalletManagementScreen()),
-            );
-          },
-        ),
-        _buildDivider(),
-        _buildMenuTile(
-          icon: Icons.autorenew_rounded,
-          iconColor: AppTheme.secondaryColor,
-          title: 'Tagihan Berulang',
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const RecurringBillsScreen()),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPreferencesSection() {
-    return _buildSectionCard(
-      title: 'PREFERENSI',
-      children: [
-        _buildMenuTile(
-          icon: Icons.notifications_none_rounded,
-          iconColor: AppTheme.primaryColor,
-          title: 'Notifikasi',
-          onTap: () {},
-        ),
-        _buildDivider(),
-        _buildMenuTile(
-          icon: Icons.language_rounded,
-          iconColor: AppTheme.secondaryColor,
-          title: 'Bahasa',
-          subtitle: 'Bahasa Indonesia',
-          onTap: () {},
-        ),
-        _buildDivider(),
-        _buildMenuTile(
-          icon: Icons.light_mode_outlined,
-          iconColor: AppTheme.textSecondary,
-          title: 'Tampilan',
-          subtitle: 'Terang',
-          onTap: () {},
-        ),
-      ],
-    );
-  }
-
-  Widget _buildOthersSection(BuildContext context) {
-    return _buildSectionCard(
-      title: 'LAINNYA',
-      children: [
-        _buildMenuTile(
-          icon: Icons.help_outline_rounded,
-          iconColor: AppTheme.primaryColor,
-          title: 'Pusat Bantuan',
-          onTap: () {},
-        ),
-        _buildDivider(),
-        _buildMenuTile(
-          icon: Icons.description_outlined,
-          iconColor: AppTheme.textSecondary,
-          title: 'Syarat & Ketentuan',
-          onTap: () {},
-        ),
-        _buildDivider(),
-        _buildMenuTile(
-          icon: Icons.logout_rounded,
-          iconColor: AppTheme.errorColor,
-          title: 'Keluar',
-          textColor: AppTheme.errorColor,
-          hideArrow: true,
-          onTap: () async {
-            final confirm = await showDialog<bool>(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Keluar dari Nala?'),
-                content: const Text(
-                  'Kamu perlu masuk kembali untuk mengakses akun ini.',
                 ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: const Text('Batal'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: const Text(
-                      'Keluar',
-                      style: TextStyle(color: AppTheme.errorColor),
-                    ),
-                  ),
-                ],
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppTheme.borderColor),
+                ),
+                child: const Icon(
+                  Icons.camera_alt_rounded,
+                  size: 15,
+                  color: AppTheme.primaryColor,
+                ),
               ),
-            );
-
-            if (confirm == true) {
-              await AuthService().logout();
-              if (context.mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                  (Route<dynamic> route) => false,
-                );
-              }
-            }
-          },
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        Text(
+          _user?['name'] ?? 'Pengguna',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.interTight(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.textPrimary,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildSectionCard({
-    required String title,
-    required List<Widget> children,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 12, bottom: 8),
-          child: Text(
-            title,
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.textSecondary,
-            ),
-          ),
-        ),
-        Container(
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.borderColor),
-          ),
-          child: Column(children: children),
-        ),
-      ],
+  Widget _buildMenuGroup({required List<Widget> children}) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(children: children),
     );
   }
 
   Widget _buildMenuTile({
     required IconData icon,
-    required Color iconColor,
     required String title,
-    String? subtitle,
     Color? textColor,
     bool hideArrow = false,
     required VoidCallback onTap,
@@ -371,42 +234,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 17),
           child: Row(
             children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.11),
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: Icon(icon, color: iconColor, size: 18),
+              Icon(
+                icon,
+                color: textColor ?? AppTheme.primaryColor,
+                size: 22,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: textColor ?? AppTheme.textPrimary,
-                      ),
-                    ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: AppTheme.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ],
+                child: Text(
+                  title,
+                  style: GoogleFonts.interTight(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: textColor ?? AppTheme.textPrimary,
+                  ),
                 ),
               ),
               if (!hideArrow)
@@ -424,13 +268,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildDivider() {
     return const Padding(
-      padding: EdgeInsets.only(left: 58),
+      padding: EdgeInsets.only(left: 56),
       child: Divider(
         height: 1,
         thickness: 1,
         color: AppTheme.borderColor,
       ),
     );
+  }
+
+  Future<void> _confirmLogout(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Keluar dari Nala?'),
+        content: const Text(
+          'Kamu perlu masuk kembali untuk mengakses akun ini.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'Keluar',
+              style: TextStyle(color: AppTheme.errorColor),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await AuthService().logout();
+      if (context.mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          (Route<dynamic> route) => false,
+        );
+      }
+    }
   }
 
   void _showChangePasswordDialog(BuildContext context) {
@@ -445,7 +324,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Text('Ubah Password',
-              style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+              style: GoogleFonts.interTight(fontWeight: FontWeight.bold)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -473,8 +352,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child:
-                  Text('Batal', style: GoogleFonts.inter(color: Colors.grey)),
+              child: Text('Batal',
+                  style: GoogleFonts.interTight(color: Colors.grey)),
             ),
             ElevatedButton(
               onPressed: isLoading
@@ -505,7 +384,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: CircularProgressIndicator(
                           color: Colors.white, strokeWidth: 2))
                   : Text('Simpan',
-                      style: GoogleFonts.inter(color: Colors.white)),
+                      style: GoogleFonts.interTight(color: Colors.white)),
             ),
           ],
         ),
