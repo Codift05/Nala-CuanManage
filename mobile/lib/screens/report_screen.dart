@@ -194,7 +194,7 @@ class _ReportScreenState extends State<ReportScreen> {
                       const SizedBox(height: 32),
                       Text(
                         'Terbesar Bulan Ini',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.interTight(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.textPrimary,
@@ -214,27 +214,13 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   Widget _buildHeader() {
-    return Row(
-      children: [
-        if (widget.onBack != null)
-          GestureDetector(
-            onTap: widget.onBack,
-            child: const Icon(
-              Icons.arrow_back,
-              color: AppTheme.textPrimary,
-              size: 24,
-            ),
-          ),
-        if (widget.onBack != null) const SizedBox(width: 16),
-        Text(
-          'Laporan Keuangan',
-          style: GoogleFonts.inter(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
-          ),
-        ),
-      ],
+    return Text(
+      'Laporan Keuangan',
+      style: GoogleFonts.interTight(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        color: AppTheme.textPrimary,
+      ),
     );
   }
 
@@ -267,7 +253,7 @@ class _ReportScreenState extends State<ReportScreen> {
             const SizedBox(width: 16),
             Text(
               _formatMonthYear(_selectedDate),
-              style: GoogleFonts.inter(
+              style: GoogleFonts.interTight(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
@@ -365,7 +351,7 @@ class _ReportScreenState extends State<ReportScreen> {
               const SizedBox(width: 12),
               Text(
                 title,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.interTight(
                   fontSize: 13,
                   color: AppTheme.textSecondary,
                 ),
@@ -387,7 +373,7 @@ class _ReportScreenState extends State<ReportScreen> {
                       const SizedBox(width: 4),
                       Text(
                         badgeText,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.interTight(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           color: badgeTextColor,
@@ -401,7 +387,7 @@ class _ReportScreenState extends State<ReportScreen> {
           const SizedBox(height: 16),
           Text(
             amount,
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.interTight(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: AppTheme.textPrimary,
@@ -421,7 +407,7 @@ class _ReportScreenState extends State<ReportScreen> {
           children: [
             Text(
               'Tren 3 Bulan',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.interTight(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.textPrimary,
@@ -485,7 +471,7 @@ class _ReportScreenState extends State<ReportScreen> {
                                       padding: const EdgeInsets.only(top: 8.0),
                                       child: Text(
                                         _trendData[index]['month'],
-                                        style: GoogleFonts.inter(
+                                        style: GoogleFonts.interTight(
                                           fontSize: 12,
                                           fontWeight: index == 2
                                               ? FontWeight.bold
@@ -560,7 +546,8 @@ class _ReportScreenState extends State<ReportScreen> {
         const SizedBox(width: 6),
         Text(
           label,
-          style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+          style: GoogleFonts.interTight(
+              fontSize: 12, color: AppTheme.textSecondary),
         ),
       ],
     );
@@ -569,7 +556,7 @@ class _ReportScreenState extends State<ReportScreen> {
   Widget _buildXAxisLabel(String label, bool isSelected) {
     return Text(
       label,
-      style: GoogleFonts.inter(
+      style: GoogleFonts.interTight(
         fontSize: 13,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         color: isSelected ? AppTheme.primaryColor : AppTheme.textSecondary,
@@ -584,7 +571,7 @@ class _ReportScreenState extends State<ReportScreen> {
         child: Center(
           child: Text(
             'Belum ada pengeluaran bulan ini.',
-            style: GoogleFonts.inter(color: AppTheme.textSecondary),
+            style: GoogleFonts.interTight(color: AppTheme.textSecondary),
           ),
         ),
       );
@@ -619,7 +606,7 @@ class _ReportScreenState extends State<ReportScreen> {
         icon: const Icon(Icons.download, color: Colors.white, size: 20),
         label: Text(
           'Ekspor sebagai PDF',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.interTight(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: Colors.white,
