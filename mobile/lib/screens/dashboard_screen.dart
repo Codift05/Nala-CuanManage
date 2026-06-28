@@ -220,11 +220,11 @@ class DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FA),
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
         child: _isLoading
             ? const Center(
-                child: CircularProgressIndicator(color: Color(0xFF1457D9)),
+                child: CircularProgressIndicator(color: AppTheme.primaryColor),
               )
             : Stack(
                 children: [
@@ -273,7 +273,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                           _buildSectionTitle('Weekly insights', null),
                           const SizedBox(height: 12),
                           _buildWeeklyInsights(context),
-                          const SizedBox(height: 112),
+                          const SizedBox(height: 24),
                         ],
                       ),
                     ),
@@ -285,7 +285,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                       right: 22,
                       child: LinearProgressIndicator(
                         minHeight: 2,
-                        color: Color(0xFF1457D9),
+                        color: AppTheme.primaryColor,
                         backgroundColor: Colors.transparent,
                       ),
                     ),
@@ -305,7 +305,7 @@ class DashboardScreenState extends State<DashboardScreen> {
               Text(
                 'Home',
                 style: GoogleFonts.inter(
-                  fontSize: 34,
+                  fontSize: 28,
                   height: 1,
                   letterSpacing: 0,
                   fontWeight: FontWeight.w800,
@@ -326,13 +326,6 @@ class DashboardScreenState extends State<DashboardScreen> {
             ],
           ),
         ),
-        _buildHeaderIcon(Icons.bar_chart_rounded, onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const HealthScreen()),
-          );
-        }),
-        const SizedBox(width: 14),
         GestureDetector(
           onTap: _showNotificationToast,
           child: Stack(
@@ -413,7 +406,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                 ),
                 child: const Icon(
                   Icons.notifications_active_rounded,
-                  color: Color(0xFF1457D9),
+                  color: AppTheme.primaryColor,
                   size: 18,
                 ),
               ),
@@ -598,37 +591,19 @@ class DashboardScreenState extends State<DashboardScreen> {
             ],
           ),
           const SizedBox(height: 18),
-          Row(
-            children: [
-              Expanded(
-                flex: 6,
-                child: _buildQuickAction(
-                  Icons.add_rounded,
-                  'Add money',
-                  () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AddTransactionScreen(),
-                      ),
-                    ).then((result) {
-                      if (result == true && mounted) _loadData();
-                    });
-                  },
+          _buildQuickAction(
+            Icons.add_rounded,
+            'Tambah transaksi',
+            () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AddTransactionScreen(),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                flex: 5,
-                child: _buildQuickAction(
-                    Icons.arrow_forward_rounded, 'Send', () {}),
-              ),
-              const SizedBox(width: 10),
-              SizedBox(
-                width: 56,
-                child: _buildQuickAction(Icons.more_horiz_rounded, '', () {}),
-              ),
-            ],
+              ).then((result) {
+                if (result == true && mounted) _loadData();
+              });
+            },
           ),
         ],
       ),
@@ -637,9 +612,9 @@ class DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildWalletBadge(String type) {
     final colors = switch (type) {
-      'EWALLET' => [const Color(0xFF1BA8FF), const Color(0xFF1457D9)],
-      'BANK' => [const Color(0xFF4F46E5), const Color(0xFF111827)],
-      _ => [const Color(0xFFFF4F6D), const Color(0xFFFB923C)],
+      'EWALLET' => [AppTheme.primaryColor, AppTheme.secondaryColor],
+      'BANK' => [AppTheme.secondaryColor, AppTheme.primaryColor],
+      _ => [AppTheme.secondaryColor, AppTheme.primaryColor],
     };
 
     return Container(
@@ -682,7 +657,7 @@ class DashboardScreenState extends State<DashboardScreen> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 18, color: const Color(0xFF0057FF)),
+            Icon(icon, size: 18, color: AppTheme.primaryColor),
             if (label.isNotEmpty) ...[
               const SizedBox(width: 5),
               Flexible(
@@ -691,7 +666,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
-                    color: const Color(0xFF0057FF),
+                    color: AppTheme.primaryColor,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                   ),
@@ -728,7 +703,7 @@ class DashboardScreenState extends State<DashboardScreen> {
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF0057FF),
+                color: AppTheme.primaryColor,
               ),
             ),
           ),
@@ -768,7 +743,7 @@ class DashboardScreenState extends State<DashboardScreen> {
               ),
               child: const Icon(
                 Icons.health_and_safety_rounded,
-                color: Color(0xFF0057FF),
+                color: AppTheme.primaryColor,
                 size: 24,
               ),
             ),
@@ -791,7 +766,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF0057FF),
+                      color: AppTheme.primaryColor,
                     ),
                   ),
                 ],
@@ -808,9 +783,9 @@ class DashboardScreenState extends State<DashboardScreen> {
     final entries = _expenseByCategory.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     const colors = [
-      Color(0xFFFF4F6D),
-      Color(0xFF0057FF),
-      Color(0xFFF59E0B),
+      AppTheme.secondaryColor,
+      AppTheme.primaryColor,
+      AppTheme.primaryColor,
       Color(0xFF10B981),
       Color(0xFF7C3AED),
     ];
@@ -1030,7 +1005,7 @@ class DashboardScreenState extends State<DashboardScreen> {
               : _categoryIcon(item.categoryId);
           final color = item.type == 'INCOME'
               ? const Color(0xFF10B981)
-              : const Color(0xFFFF4F6D);
+              : AppTheme.secondaryColor;
           String prefix = item.type == 'INCOME' ? '+' : '-';
 
           return _buildTransactionItem(
@@ -1170,7 +1145,7 @@ class DashboardScreenState extends State<DashboardScreen> {
             icon: Icons.local_grocery_store_rounded,
             title: 'Most spending',
             body: 'Pengeluaran terbesar ada di $topCategory',
-            color: const Color(0xFFFF4F6D),
+            color: AppTheme.secondaryColor,
             imageColor: const Color(0xFFFFEEF2),
           ),
           const SizedBox(width: 12),
@@ -1180,7 +1155,7 @@ class DashboardScreenState extends State<DashboardScreen> {
             body: _monthlyBudget > 0
                 ? '$budgetUsage% budget bulan ini sudah dipakai'
                 : 'Budget bulan ini belum dibuat',
-            color: const Color(0xFF0057FF),
+            color: AppTheme.primaryColor,
             imageColor: const Color(0xFFEEF3FF),
             onTap: () {
               Navigator.push(
