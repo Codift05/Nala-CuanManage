@@ -130,7 +130,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
             children: [
               Text(
                 'Nala',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.interTight(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -138,7 +138,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
               ),
               Text(
                 'AI Financial Coach',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.interTight(
                   fontSize: 12,
                   color: Colors.grey[600],
                 ),
@@ -229,7 +229,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
                 ),
                 child: Text(
                   text,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.interTight(
                     fontSize: 14,
                     color: Colors.black87,
                     height: 1.5,
@@ -263,7 +263,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
             ),
             child: Text(
               text,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.interTight(
                 fontSize: 14,
                 color: Colors.white,
                 height: 1.5,
@@ -305,7 +305,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
                       controller: _textController,
                       decoration: InputDecoration(
                         hintText: 'Tanya Nala...',
-                        hintStyle: GoogleFonts.inter(
+                        hintStyle: GoogleFonts.interTight(
                           color: Colors.grey[500],
                           fontSize: 14,
                         ),
