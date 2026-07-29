@@ -1,154 +1,250 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
+
 import '../theme/app_theme.dart';
+import '../widgets/auth_visuals.dart';
 import 'login_screen.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
 
-  @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
-}
-
-class _OnboardingScreenState extends State<OnboardingScreen> {
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
-
-  final List<Map<String, String>> _pages = [
-    {
-      'title': 'Track Your Finances',
-      'description':
-          'Easily monitor your expenses, income, and overall budget in one place.',
-      'icon': 'account_balance_wallet',
-    },
-    {
-      'title': 'AI-Powered Insights',
-      'description':
-          'Get intelligent recommendations to optimize your spending and save more.',
-      'icon': 'psychology',
-    },
-    {
-      'title': 'Achieve Your Goals',
-      'description':
-          'Set financial goals and let Nala guide you towards achieving them faster.',
-      'icon': 'flag',
-    },
-  ];
+  void _openLogin(BuildContext context) {
+    HapticFeedback.lightImpact();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
-      body: SafeArea(
+      backgroundColor: const Color(0xFFFF9816),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxHeight < 720;
+          final panelHeight = compact ? 260.0 : 270.0;
+
+          return Stack(
+            children: [
+              Positioned.fill(
+                bottom: panelHeight - 32,
+                child: _WelcomeHero(compact: compact),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: panelHeight,
+                child: _WelcomePanel(
+                  compact: compact,
+                  onLogin: () => _openLogin(context),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _WelcomeHero extends StatelessWidget {
+  const _WelcomeHero({required this.compact});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
         child: Column(
           children: [
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentPage = index;
-                  });
-                },
-                itemCount: _pages.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(40.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (index == 0)
-                          Image.asset(
-                            'img/Nala baru2.png',
-                            width: 150,
-                            height: 150,
-                            fit: BoxFit.cover,
-                          )
-                        else
-                          Icon(
-                            index == 1 ? Icons.psychology : Icons.flag,
-                            size: 112,
-                            color: AppTheme.primaryColor,
-                          ),
-                        const SizedBox(height: 48),
-                        Text(
-                          _pages[index]['title']!,
-                          style: GoogleFonts.interTight(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _pages[index]['description']!,
-                          style: GoogleFonts.interTight(
-                            fontSize: 16,
-                            color: AppTheme.textSecondary,
-                            height: 1.5,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  );
-                },
+            Center(
+              child: Image.asset(
+                'img/Logo Nala 4.png',
+                width: compact ? 76 : 86,
+                height: compact ? 40 : 45,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.high,
+                semanticLabel: 'Logo Nala',
               ),
             ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: List.generate(
-                      _pages.length,
-                      (index) => Container(
-                        margin: const EdgeInsets.only(right: 8),
-                        width: _currentPage == index ? 24 : 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: _currentPage == index
-                              ? AppTheme.primaryColor
-                              : AppTheme.primaryColor.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                    ),
+            SizedBox(height: compact ? 6 : 10),
+            Text(
+              'Halo, selamat datang!',
+              style: appleStyle(
+                color: Colors.white,
+                fontSize: compact ? 19 : 21,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              'Kelola uangmu tanpa terasa rumit.',
+              style: appleStyle(
+                color: Colors.white.withValues(alpha: .88),
+                fontSize: compact ? 12 : 13,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            Expanded(
+              child: Image.asset(
+                'assets/illustrations/nala-welcome.png',
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.high,
+                semanticLabel: 'Dua anak muda mengelola keuangan bersama Nala',
+                errorBuilder: (context, error, stackTrace) => const Center(
+                  child: Icon(
+                    CupertinoIcons.person_2_fill,
+                    color: Colors.white,
+                    size: 72,
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_currentPage < _pages.length - 1) {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      } else {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const LoginScreen()),
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 32, vertical: 16),
-                    ),
-                    child: Text(_currentPage == _pages.length - 1
-                        ? 'Get Started'
-                        : 'Next'),
-                  ),
-                ],
+                ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _WelcomePanel extends StatelessWidget {
+  const _WelcomePanel({
+    required this.compact,
+    required this.onLogin,
+  });
+
+  final bool compact;
+  final VoidCallback onLogin;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(24, compact ? 17 : 20, 24, 14),
+      decoration: const BoxDecoration(
+        color: Color(0xFFF7F8FA),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(34)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            Text(
+              'Semua yang kamu butuhkan',
+              style: appleStyle(
+                color: AppTheme.textPrimary,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            SizedBox(height: compact ? 12 : 16),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _FeatureItem(
+                  icon: CupertinoIcons.doc_text,
+                  label: 'Catat\ntransaksi',
+                ),
+                _FeatureItem(
+                  icon: CupertinoIcons.chart_pie,
+                  label: 'Atur\nbudget',
+                ),
+                _FeatureItem(
+                  icon: CupertinoIcons.sparkles,
+                  label: 'Insight\nNala',
+                ),
+              ],
+            ),
+            SizedBox(height: compact ? 17 : 20),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 54,
+                    child: ElevatedButton(
+                      onPressed: onLogin,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: const Text('Masuk ke Nala'),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                SizedBox(
+                  width: 54,
+                  height: 54,
+                  child: OutlinedButton(
+                    onPressed: onLogin,
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      foregroundColor: AppTheme.primaryColor,
+                      side: const BorderSide(color: AppTheme.primaryColor),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Icon(Icons.fingerprint_rounded, size: 23),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FeatureItem extends StatelessWidget {
+  const _FeatureItem({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 82,
+      child: Column(
+        children: [
+          Container(
+            width: 45,
+            height: 45,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: const Color(0xFFFFD8A1)),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x0D111318),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Icon(icon, color: AppTheme.primaryColor, size: 21),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: appleStyle(
+              color: AppTheme.textPrimary,
+              fontSize: 12,
+              height: 1.2,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
