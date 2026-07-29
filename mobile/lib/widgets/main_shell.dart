@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/cupertino.dart';
 import '../theme/app_theme.dart';
 import '../screens/dashboard_screen.dart';
 import '../screens/report_screen.dart';
@@ -69,30 +69,38 @@ class _MainShellState extends State<MainShell> {
       body: IndexedStack(index: _selectedIndex, children: _screens),
       bottomNavigationBar: SafeArea(
         top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-          child: Container(
-            height: 72,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFE8ECF2)),
+        child: Container(
+          height: 66,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              top: BorderSide(color: AppTheme.borderColor),
             ),
-            child: Row(
-              children: [
-                Expanded(child: _buildNavItem(Icons.home_rounded, 'Home', 0)),
-                Expanded(
-                  child:
-                      _buildNavItem(Icons.receipt_long_rounded, 'Transaksi', 1),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildNavItem(CupertinoIcons.house_fill, 'Beranda', 0),
+              ),
+              Expanded(
+                child: _buildNavItem(
+                  CupertinoIcons.list_bullet,
+                  'Transaksi',
+                  1,
                 ),
-                Expanded(child: _buildScanNavItem()),
-                Expanded(
-                    child:
-                        _buildNavItem(Icons.bar_chart_rounded, 'Laporan', 3)),
-                Expanded(
-                    child: _buildNavItem(Icons.person_rounded, 'Profil', 4)),
-              ],
-            ),
+              ),
+              Expanded(child: _buildScanNavItem()),
+              Expanded(
+                child: _buildNavItem(
+                  CupertinoIcons.chart_bar_fill,
+                  'Laporan',
+                  3,
+                ),
+              ),
+              Expanded(
+                child: _buildNavItem(CupertinoIcons.person_fill, 'Profil', 4),
+              ),
+            ],
           ),
         ),
       ),
@@ -108,25 +116,23 @@ class _MainShellState extends State<MainShell> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 38,
-            height: 38,
-            decoration: const BoxDecoration(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
               color: AppTheme.primaryColor,
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryColor.withValues(alpha: 0.24),
+                  blurRadius: 12,
+                  offset: const Offset(0, 5),
+                ),
+              ],
             ),
             child: const Icon(
-              Icons.add_rounded,
-              size: 25,
+              CupertinoIcons.add,
+              size: 22,
               color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            'Scan',
-            style: GoogleFonts.interTight(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF8A94A3),
             ),
           ),
         ],
@@ -148,12 +154,13 @@ class _MainShellState extends State<MainShell> {
             color: isSelected ? AppTheme.primaryColor : const Color(0xFF8A94A3),
             size: 23,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 5),
           Text(
             label,
-            style: GoogleFonts.interTight(
-              fontSize: 11,
-              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+            style: TextStyle(
+              fontFamily: '.SF Pro Text',
+              fontSize: 10,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               color:
                   isSelected ? AppTheme.primaryColor : const Color(0xFF8A94A3),
             ),

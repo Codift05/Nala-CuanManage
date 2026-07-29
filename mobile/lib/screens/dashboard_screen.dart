@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
@@ -39,7 +40,6 @@ class DashboardScreenState extends State<DashboardScreen> {
   List<Wallet> _wallets = [];
   List<TransactionItem> _recentTransactions = [];
   int _healthScore = 0;
-  String _healthStatus = 'Memuat...';
   String _nudgeMessage = '';
   String _userName = 'Pengguna';
   List<Budget> _budgets = [];
@@ -197,11 +197,9 @@ class DashboardScreenState extends State<DashboardScreen> {
             : 'Pengguna';
         if (healthData != null) {
           _healthScore = (healthData['score'] as num?)?.toInt() ?? 0;
-          _healthStatus = healthData['status'] as String? ?? 'Belum tersedia';
           _nudgeMessage = healthData['nudgeMessage'] ?? '';
         } else {
           _healthScore = 72; // Fallback
-          _healthStatus = 'Cukup Sehat';
         }
         _isLoading = false;
         _isRefreshing = false;
@@ -233,29 +231,27 @@ class DashboardScreenState extends State<DashboardScreen> {
                     child: SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 22,
-                        vertical: 18,
+                        horizontal: 20,
+                        vertical: 16,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildHeader(),
-                          const SizedBox(height: 22),
-                          _buildSearchBar(),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
                           _buildBalanceCard(),
-                          const SizedBox(height: 26),
+                          const SizedBox(height: 20),
+                          _buildQuickActions(),
+                          const SizedBox(height: 24),
                           if (_nudgeMessage.isNotEmpty) ...[
                             _buildNudgeBanner(),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 24),
                           ],
-                          _buildHealthCard(context),
-                          const SizedBox(height: 26),
-                          _buildSectionTitle('Pengeluaran Bulan Ini', null),
+                          _buildSectionTitle('Ringkasan bulan ini', null),
                           const SizedBox(height: 12),
                           _buildExpenseChart(),
-                          const SizedBox(height: 26),
-                          _buildSectionTitle('Budget Bulan Ini', () {
+                          const SizedBox(height: 24),
+                          _buildSectionTitle('Budget', () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -265,15 +261,11 @@ class DashboardScreenState extends State<DashboardScreen> {
                           }),
                           const SizedBox(height: 12),
                           _buildBudgetCard(),
-                          const SizedBox(height: 26),
-                          _buildSectionTitle('Transactions', () {}),
+                          const SizedBox(height: 24),
+                          _buildSectionTitle('Transaksi terbaru', null),
                           const SizedBox(height: 12),
                           _buildRecentTransactions(),
-                          const SizedBox(height: 26),
-                          _buildSectionTitle('Weekly insights', null),
-                          const SizedBox(height: 12),
-                          _buildWeeklyInsights(context),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 28),
                         ],
                       ),
                     ),
@@ -296,138 +288,88 @@ class DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          children: [
-            Text(
-              'NALA',
-              style: GoogleFonts.interTight(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.primaryColor,
-              ),
-            ),
-            const Spacer(),
-            InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const HealthScreen()),
-                );
-              },
-              borderRadius: BorderRadius.circular(22),
-              child: Container(
-                height: 36,
-                padding: const EdgeInsets.symmetric(horizontal: 13),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: AppTheme.primaryColor),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.health_and_safety_outlined,
-                      size: 17,
-                      color: AppTheme.primaryColor,
-                    ),
-                    const SizedBox(width: 7),
-                    Text(
-                      'Skor $_healthScore',
-                      style: GoogleFonts.interTight(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+        Container(
+          width: 42,
+          height: 42,
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(13),
+            border: Border.all(color: AppTheme.borderColor),
+          ),
+          child: Image.asset(
+            'img/Logo Nala 4.png',
+            fit: BoxFit.contain,
+          ),
         ),
-        const SizedBox(height: 20),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppTheme.textPrimary,
-                  width: 1.5,
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Selamat datang,',
+                style: const TextStyle(
+                  fontFamily: '.SF Pro Text',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: AppTheme.textSecondary,
                 ),
               ),
-              alignment: Alignment.center,
-              child: const Icon(
-                Icons.person_outline_rounded,
-                size: 24,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-            const SizedBox(width: 11),
-            Expanded(
-              child: Text(
-                'Hai, $_userName!',
+              const SizedBox(height: 2),
+              Text(
+                _userName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.interTight(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                style: const TextStyle(
+                  fontFamily: '.SF Pro Display',
+                  fontSize: 19,
+                  fontWeight: FontWeight.w700,
                   color: AppTheme.textPrimary,
                 ),
               ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 10),
+        InkWell(
+          onTap: _showNotificationToast,
+          borderRadius: BorderRadius.circular(13),
+          child: Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(13),
+              border: Border.all(color: AppTheme.borderColor),
             ),
-            InkWell(
-              onTap: _showNotificationToast,
-              borderRadius: BorderRadius.circular(12),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        const Icon(
-                          Icons.notifications_none_rounded,
-                          size: 25,
-                          color: AppTheme.textPrimary,
-                        ),
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: AppTheme.primaryColor,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Notifikasi',
-                      style: GoogleFonts.interTight(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                  ],
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                const Icon(
+                  CupertinoIcons.bell,
+                  size: 20,
+                  color: AppTheme.textPrimary,
                 ),
-              ),
+                Positioned(
+                  right: 9,
+                  top: 8,
+                  child: Container(
+                    width: 7,
+                    height: 7,
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryColor,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1.5),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ],
     );
@@ -502,33 +444,6 @@ class DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  Widget _buildSearchBar() {
-    return Container(
-      height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFECEFF4),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.search_rounded, size: 22, color: Color(0xFF7A8492)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'Search',
-              style: GoogleFonts.interTight(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF8A94A3),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildNudgeBanner() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -580,15 +495,19 @@ class DashboardScreenState extends State<DashboardScreen> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFFFA321), Color(0xFFF4820A)],
+        ),
+        borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 22,
-            offset: const Offset(0, 12),
+            color: AppTheme.primaryColor.withValues(alpha: 0.22),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -602,6 +521,16 @@ class DashboardScreenState extends State<DashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const Text(
+                      'Total saldo',
+                      style: TextStyle(
+                        fontFamily: '.SF Pro Text',
+                        color: Color(0xE6FFFFFF),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     GestureDetector(
                       onTap: () {
                         setState(() {
@@ -619,12 +548,12 @@ class DashboardScreenState extends State<DashboardScreen> {
                                 _isBalanceVisible
                                     ? _currencyFormat.format(_totalBalance)
                                     : 'Rp •••••••',
-                                style: GoogleFonts.interTight(
-                                  color: const Color(0xFF101217),
-                                  fontSize: 31,
+                                style: const TextStyle(
+                                  fontFamily: '.SF Pro Display',
+                                  color: Colors.white,
+                                  fontSize: 29,
                                   height: 1,
-                                  letterSpacing: 0,
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),
@@ -634,8 +563,8 @@ class DashboardScreenState extends State<DashboardScreen> {
                             _isBalanceVisible
                                 ? Icons.keyboard_arrow_down_rounded
                                 : Icons.visibility_off_rounded,
-                            color: const Color(0xFF101217),
-                            size: 23,
+                            color: Colors.white,
+                            size: 20,
                           ),
                         ],
                       ),
@@ -647,9 +576,10 @@ class DashboardScreenState extends State<DashboardScreen> {
                           : '${primaryWallet.name} · Active',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.interTight(
-                        color: const Color(0xFF101217),
-                        fontSize: 14,
+                      style: const TextStyle(
+                        fontFamily: '.SF Pro Text',
+                        color: Color(0xE6FFFFFF),
+                        fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -659,10 +589,40 @@ class DashboardScreenState extends State<DashboardScreen> {
               _buildWalletBadge(primaryWallet?.type ?? 'CASH'),
             ],
           ),
-          const SizedBox(height: 18),
-          _buildQuickAction(
-            Icons.add_rounded,
-            'Tambah transaksi',
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWalletBadge(String type) {
+    return Container(
+      width: 42,
+      height: 42,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white.withValues(alpha: 0.20),
+      ),
+      child: Center(
+        child: Icon(
+          type == 'EWALLET'
+              ? Icons.account_balance_wallet_rounded
+              : type == 'BANK'
+                  ? Icons.account_balance_rounded
+                  : Icons.payments_rounded,
+          color: Colors.white,
+          size: 20,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickActions() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildActionTile(
+            CupertinoIcons.add,
+            'Catat',
             () {
               Navigator.push(
                 context,
@@ -674,74 +634,64 @@ class DashboardScreenState extends State<DashboardScreen> {
               });
             },
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _buildActionTile(
+            CupertinoIcons.chart_pie,
+            'Budget',
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const BudgetScreen()),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _buildActionTile(
+            CupertinoIcons.heart,
+            'Skor $_healthScore',
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const HealthScreen()),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildWalletBadge(String type) {
-    final colors = switch (type) {
-      'EWALLET' => [AppTheme.primaryColor, AppTheme.secondaryColor],
-      'BANK' => [AppTheme.secondaryColor, AppTheme.primaryColor],
-      _ => [AppTheme.secondaryColor, AppTheme.primaryColor],
-    };
-
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: colors,
-        ),
-      ),
-      child: Center(
-        child: Icon(
-          type == 'EWALLET'
-              ? Icons.account_balance_wallet_rounded
-              : type == 'BANK'
-                  ? Icons.account_balance_rounded
-                  : Icons.payments_rounded,
-          color: Colors.white,
-          size: 23,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickAction(IconData icon, String label, VoidCallback onTap) {
-    return GestureDetector(
+  Widget _buildActionTile(
+    IconData icon,
+    String label,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        height: 42,
-        padding: EdgeInsets.symmetric(horizontal: label.isEmpty ? 14 : 16),
-        alignment: Alignment.center,
+        height: 78,
         decoration: BoxDecoration(
-          color: const Color(0xFFF1F5FB),
-          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.borderColor),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 18, color: AppTheme.primaryColor),
-            if (label.isNotEmpty) ...[
-              const SizedBox(width: 5),
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.interTight(
-                    color: AppTheme.primaryColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+            Icon(icon, size: 21, color: AppTheme.primaryColor),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontFamily: '.SF Pro Text',
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
               ),
-            ],
+            ),
           ],
         ),
       ),
@@ -756,10 +706,11 @@ class DashboardScreenState extends State<DashboardScreen> {
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.interTight(
-              fontSize: 15,
+            style: const TextStyle(
+              fontFamily: '.SF Pro Display',
+              fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF7D8794),
+              color: AppTheme.textPrimary,
             ),
           ),
         ),
@@ -768,83 +719,16 @@ class DashboardScreenState extends State<DashboardScreen> {
           GestureDetector(
             onTap: onSeeAll,
             child: Text(
-              'See all',
-              style: GoogleFonts.interTight(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
+              'Lihat semua',
+              style: const TextStyle(
+                fontFamily: '.SF Pro Text',
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
                 color: AppTheme.primaryColor,
               ),
             ),
           ),
       ],
-    );
-  }
-
-  Widget _buildHealthCard(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const HealthScreen()),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 18,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: const BoxDecoration(
-                color: Color(0xFFEEF3FF),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.health_and_safety_rounded,
-                color: AppTheme.primaryColor,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Kesehatan Keuangan',
-                    style: GoogleFonts.interTight(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF101217),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Skor $_healthScore • $_healthStatus',
-                    style: GoogleFonts.interTight(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.primaryColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right_rounded, color: Color(0xFF8A94A3)),
-          ],
-        ),
-      ),
     );
   }
 
@@ -1177,155 +1061,5 @@ class DashboardScreenState extends State<DashboardScreen> {
     }
     if (normalized.contains('grocer')) return Icons.local_grocery_store_rounded;
     return Icons.shopping_bag_rounded;
-  }
-
-  Widget _buildWeeklyInsights(BuildContext context) {
-    final budgetUsage = _monthlyBudget > 0
-        ? ((_monthlyExpense / _monthlyBudget) * 100).clamp(0, 999).round()
-        : 0;
-    final topCategory = _expenseByCategory.entries.isEmpty
-        ? 'budget'
-        : (_expenseByCategory.entries.toList()
-              ..sort((a, b) => b.value.compareTo(a.value)))
-            .first
-            .key;
-
-    return SizedBox(
-      height: 184,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        children: [
-          _buildInsightCard(
-            icon: Icons.health_and_safety_rounded,
-            title: 'Financial score',
-            body: 'Skor kamu $_healthScore, $_healthStatus',
-            color: const Color(0xFF111827),
-            imageColor: const Color(0xFFEEF3FF),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HealthScreen()),
-              );
-            },
-          ),
-          const SizedBox(width: 12),
-          _buildInsightCard(
-            icon: Icons.local_grocery_store_rounded,
-            title: 'Most spending',
-            body: 'Pengeluaran terbesar ada di $topCategory',
-            color: AppTheme.secondaryColor,
-            imageColor: const Color(0xFFFFEEF2),
-          ),
-          const SizedBox(width: 12),
-          _buildInsightCard(
-            icon: Icons.track_changes_rounded,
-            title: 'Budget progress',
-            body: _monthlyBudget > 0
-                ? '$budgetUsage% budget bulan ini sudah dipakai'
-                : 'Budget bulan ini belum dibuat',
-            color: AppTheme.primaryColor,
-            imageColor: const Color(0xFFEEF3FF),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const BudgetScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInsightCard({
-    required IconData icon,
-    required String title,
-    required String body,
-    required Color color,
-    required Color imageColor,
-    VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 172,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 18,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              right: -18,
-              bottom: -22,
-              child: Container(
-                width: 116,
-                height: 116,
-                decoration: BoxDecoration(
-                  color: imageColor,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(icon, color: Colors.white, size: 22),
-                    ),
-                    const Icon(
-                      Icons.close_rounded,
-                      color: Color(0xFF9AA3AF),
-                      size: 18,
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.interTight(
-                    color: const Color(0xFF7D8794),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  body,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.interTight(
-                    color: const Color(0xFF101217),
-                    fontSize: 16,
-                    height: 1.22,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
