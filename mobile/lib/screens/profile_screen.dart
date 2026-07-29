@@ -18,6 +18,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? _user;
   bool _isLoading = true;
+  String? _loadError;
 
   @override
   void initState() {
@@ -26,13 +27,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUser() async {
-    final user = await AuthService().getCurrentUser();
-    if (mounted) {
-      setState(() {
-        _user = user;
-        _isLoading = false;
-      });
+    setState(() {
+      _isLoading = true;
+      _loadError = null;
+    });
+    final result = await AuthService().getCurrentUserResult();
+    if (!mounted) return;
+
+    if (result.sessionExpired) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (_) => false,
+      );
+      return;
     }
+
+    setState(() {
+      _user = result.user;
+      _loadError = result.success ? null : result.message;
+      _isLoading = false;
+    });
   }
 
   void _navigateToEditProfile() async {
@@ -54,6 +68,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return const Scaffold(
         backgroundColor: AppTheme.backgroundColor,
         body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_loadError != null || _user == null) {
+      return Scaffold(
+        backgroundColor: AppTheme.backgroundColor,
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.cloud_off_rounded,
+                    size: 48,
+                    color: AppTheme.textSecondary,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Profil belum dapat dimuat',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.interTight(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _loadError ?? 'Silakan coba beberapa saat lagi.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.interTight(
+                      color: AppTheme.textSecondary,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  ElevatedButton.icon(
+                    onPressed: _loadUser,
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: const Text('Coba lagi'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       );
     }
 
@@ -142,6 +204,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileHeader() {
+    final avatarImage = _decodeAvatar(_user?['avatar']);
     return Column(
       children: [
         GestureDetector(
@@ -156,20 +219,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   color: Colors.white,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: _user?['avatar'] == null
+                    color: avatarImage == null
                         ? AppTheme.textPrimary
                         : Colors.white,
-                    width: _user?['avatar'] == null ? 1.5 : 4,
+                    width: avatarImage == null ? 1.5 : 4,
                   ),
-                  image: _user?['avatar'] != null
+                  image: avatarImage != null
                       ? DecorationImage(
-                          image: MemoryImage(base64Decode(_user!['avatar'])),
+                          image: avatarImage,
                           fit: BoxFit.cover,
                         )
                       : null,
                 ),
               ),
-              if (_user?['avatar'] == null)
+              if (avatarImage == null)
                 const Positioned.fill(
                   child: Center(
                     child: Icon(
@@ -209,6 +272,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ],
     );
+  }
+
+  MemoryImage? _decodeAvatar(dynamic value) {
+    if (value is! String || value.isEmpty) return null;
+    try {
+      final bytes = base64Decode(value);
+      return bytes.isEmpty ? null : MemoryImage(bytes);
+    } on FormatException {
+      return null;
+    }
   }
 
   Widget _buildMenuGroup({required List<Widget> children}) {
@@ -312,81 +385,151 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  void _showChangePasswordDialog(BuildContext context) {
+  Future<void> _showChangePasswordDialog(BuildContext context) async {
+    final formKey = GlobalKey<FormState>();
     final oldPasswordController = TextEditingController();
     final newPasswordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
     bool isLoading = false;
+    bool obscureOld = true;
+    bool obscureNew = true;
+    bool obscureConfirm = true;
 
-    showDialog(
+    await showDialog<void>(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text('Ubah Password',
-              style: GoogleFonts.interTight(fontWeight: FontWeight.bold)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: oldPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Password Lama',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          title: const Text('Ubah password'),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildPasswordField(
+                    controller: oldPasswordController,
+                    label: 'Password lama',
+                    obscureText: obscureOld,
+                    onToggle: () =>
+                        setDialogState(() => obscureOld = !obscureOld),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Password lama wajib diisi';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  _buildPasswordField(
+                    controller: newPasswordController,
+                    label: 'Password baru',
+                    obscureText: obscureNew,
+                    onToggle: () =>
+                        setDialogState(() => obscureNew = !obscureNew),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Password baru wajib diisi';
+                      }
+                      if (value.length < 8) {
+                        return 'Minimal 8 karakter';
+                      }
+                      if (value == oldPasswordController.text) {
+                        return 'Harus berbeda dari password lama';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  _buildPasswordField(
+                    controller: confirmPasswordController,
+                    label: 'Konfirmasi password baru',
+                    obscureText: obscureConfirm,
+                    onToggle: () => setDialogState(
+                      () => obscureConfirm = !obscureConfirm,
+                    ),
+                    validator: (value) {
+                      if (value != newPasswordController.text) {
+                        return 'Konfirmasi password tidak sama';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: newPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Password Baru',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-            ],
+            ),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Batal',
-                  style: GoogleFonts.interTight(color: Colors.grey)),
+              onPressed: isLoading ? null : () => Navigator.pop(dialogContext),
+              child: const Text('Batal'),
             ),
             ElevatedButton(
               onPressed: isLoading
                   ? null
                   : () async {
-                      setState(() => isLoading = true);
-                      final success = await AuthService().changePassword(
-                          oldPasswordController.text,
-                          newPasswordController.text);
-                      setState(() => isLoading = false);
-                      if (success && context.mounted) {
-                        Navigator.pop(context);
+                      if (!(formKey.currentState?.validate() ?? false)) return;
+                      setDialogState(() => isLoading = true);
+                      final result = await AuthService().changePassword(
+                        oldPasswordController.text,
+                        newPasswordController.text,
+                      );
+                      if (!dialogContext.mounted) return;
+                      setDialogState(() => isLoading = false);
+                      if (result.success) {
+                        Navigator.pop(dialogContext);
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Password berhasil diubah')));
-                      } else if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text(
-                                'Gagal mengubah password (password lama salah)')));
+                          SnackBar(content: Text(result.message)),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(result.message)),
+                        );
                       }
                     },
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryColor),
               child: isLoading
                   ? const SizedBox(
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2))
-                  : Text('Simpan',
-                      style: GoogleFonts.interTight(color: Colors.white)),
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text('Simpan'),
             ),
           ],
+        ),
+      ),
+    );
+
+    oldPasswordController.dispose();
+    newPasswordController.dispose();
+    confirmPasswordController.dispose();
+  }
+
+  Widget _buildPasswordField({
+    required TextEditingController controller,
+    required String label,
+    required bool obscureText,
+    required VoidCallback onToggle,
+    required String? Function(String?) validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      validator: validator,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: const Icon(Icons.lock_outline_rounded),
+        suffixIcon: IconButton(
+          tooltip: obscureText ? 'Tampilkan password' : 'Sembunyikan password',
+          onPressed: onToggle,
+          icon: Icon(
+            obscureText
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
+          ),
         ),
       ),
     );
