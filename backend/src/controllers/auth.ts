@@ -16,6 +16,12 @@ const normalizeName = (name: unknown): string =>
 const readPassword = (password: unknown): string =>
   typeof password === 'string' ? password : '';
 
+const MAX_NAME_LENGTH = 80;
+const MAX_AVATAR_BASE64_LENGTH = 1_500_000;
+
+const isValidBase64 = (value: string): boolean =>
+  value.length % 4 === 0 && /^[A-Za-z0-9+/]*={0,2}$/.test(value);
+
 export const register = async (req: Request, res: Response) => {
   try {
     const name = normalizeName(req.body.name);
@@ -159,45 +165,109 @@ export const me = async (req: AuthRequest, res: Response) => {
 export const updateProfile = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
-    const { name, email, avatar } = req.body;
 
     if (!userId) {
-      res.status(401).json({ message: 'Unauthorized' });
-      return;
+      return res.status(401).json({ message: 'Sesi tidak valid' });
+    }
+
+    const name = normalizeName(req.body.name);
+    const email = normalizeEmail(req.body.email);
+    const avatar = req.body.avatar;
+
+    if (!name || !email) {
+      return res.status(400).json({ message: 'Nama dan email wajib diisi' });
+    }
+
+    if (name.length < 2 || name.length > MAX_NAME_LENGTH) {
+      return res.status(400).json({
+        message: `Nama harus terdiri dari 2-${MAX_NAME_LENGTH} karakter`
+      });
+    }
+
+    if (!EMAIL_PATTERN.test(email)) {
+      return res.status(400).json({ message: 'Format email tidak valid' });
+    }
+
+    if (avatar !== undefined && avatar !== null) {
+      if (typeof avatar !== 'string') {
+        return res.status(400).json({ message: 'Format foto profil tidak valid' });
+      }
+      if (avatar.length > MAX_AVATAR_BASE64_LENGTH) {
+        return res.status(413).json({ message: 'Ukuran foto profil terlalu besar' });
+      }
+      if (avatar.length > 0 && !isValidBase64(avatar)) {
+        return res.status(400).json({ message: 'Data foto profil tidak valid' });
+      }
+    }
+
+    const emailOwner = await prisma.user.findUnique({ where: { email } });
+    if (emailOwner && emailOwner.id !== userId) {
+      return res.status(409).json({ message: 'Email sudah digunakan akun lain' });
     }
 
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { name, email, avatar }
+      data: {
+        name,
+        email,
+        ...(avatar !== undefined ? { avatar } : {})
+      }
     });
 
-    res.json({ message: 'Profile updated', user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar } });
+    return res.json({
+      message: 'Profil berhasil diperbarui',
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar
+      }
+    });
   } catch (error) {
     console.error('Update profile error:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({ message: 'Gagal memperbarui profil' });
   }
 };
 
 export const changePassword = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
-    const { oldPassword, newPassword } = req.body;
 
     if (!userId) {
-      res.status(401).json({ message: 'Unauthorized' });
-      return;
+      return res.status(401).json({ message: 'Sesi tidak valid' });
+    }
+
+    const oldPassword = readPassword(req.body.oldPassword);
+    const newPassword = readPassword(req.body.newPassword);
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({
+        message: 'Password lama dan password baru wajib diisi'
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: 'Password baru minimal 8 karakter' });
+    }
+
+    if (newPassword.length > 72) {
+      return res.status(400).json({ message: 'Password baru maksimal 72 karakter' });
+    }
+
+    if (oldPassword === newPassword) {
+      return res.status(400).json({
+        message: 'Password baru harus berbeda dari password lama'
+      });
     }
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
+      return res.status(404).json({ message: 'Pengguna tidak ditemukan' });
     }
 
     const isPasswordValid = await bcrypt.compare(oldPassword, user.passwordHash);
     if (!isPasswordValid) {
-      res.status(400).json({ message: 'Password lama salah' });
-      return;
+      return res.status(400).json({ message: 'Password lama tidak sesuai' });
     }
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
@@ -206,10 +276,10 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
       data: { passwordHash }
     });
 
-    res.json({ message: 'Password changed successfully' });
+    return res.json({ message: 'Password berhasil diubah' });
   } catch (error) {
     console.error('Change password error:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({ message: 'Gagal mengubah password' });
   }
 };
 
