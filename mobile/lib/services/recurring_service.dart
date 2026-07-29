@@ -1,15 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/recurring_bill.dart';
 import '../config/api_config.dart';
+import 'token_storage.dart';
 
 class RecurringService {
   static String get baseUrl => ApiConfig.baseUrl;
 
   Future<String?> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('auth_token');
+    return TokenStorage.read();
   }
 
   Future<List<RecurringBill>> getRecurringBills() async {

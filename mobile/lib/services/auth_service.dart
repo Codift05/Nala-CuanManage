@@ -1,15 +1,29 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/foundation.dart' show debugPrint;
 import '../config/api_config.dart';
+import 'token_storage.dart';
 
 class AuthResult {
   const AuthResult({required this.success, required this.message});
 
   final bool success;
   final String message;
+}
+
+class CurrentUserResult {
+  const CurrentUserResult({
+    required this.success,
+    required this.message,
+    this.user,
+    this.sessionExpired = false,
+  });
+
+  final bool success;
+  final String message;
+  final Map<String, dynamic>? user;
+  final bool sessionExpired;
 }
 
 class AuthService {
@@ -37,8 +51,7 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('auth_token', data['token']);
+        await TokenStorage.write(data['token']);
         return const AuthResult(success: true, message: 'Login berhasil');
       }
 
@@ -69,8 +82,7 @@ class AuthService {
 
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('auth_token', data['token']);
+        await TokenStorage.write(data['token']);
         return const AuthResult(success: true, message: 'Akun berhasil dibuat');
       }
 
@@ -91,27 +103,27 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('auth_token');
+    await TokenStorage.clear();
   }
 
   Future<bool> isLoggedIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
-    if (token == null || token.isEmpty) return false;
-
     try {
+      final token = await TokenStorage.read().timeout(
+        const Duration(seconds: 3),
+      );
+      if (token == null || token.isEmpty) return false;
+
       final response = await http.get(
         Uri.parse('$baseUrl/auth/me'),
         headers: {'Authorization': 'Bearer $token'},
-      );
+      ).timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) return true;
 
       if (response.statusCode == 401 ||
           response.statusCode == 403 ||
           response.statusCode == 404) {
-        await prefs.remove('auth_token');
+        await TokenStorage.clear();
       }
       return false;
     } catch (e) {
@@ -121,34 +133,90 @@ class AuthService {
   }
 
   Future<String?> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('auth_token');
+    return TokenStorage.read();
   }
 
   Future<Map<String, dynamic>?> getCurrentUser() async {
+    final result = await getCurrentUserResult();
+    return result.user;
+  }
+
+  Future<CurrentUserResult> getCurrentUserResult() async {
     try {
       final token = await _getToken();
-      if (token == null) return null;
+      if (token == null) {
+        return const CurrentUserResult(
+          success: false,
+          message: 'Sesi login tidak ditemukan.',
+          sessionExpired: true,
+        );
+      }
 
       final response = await http.get(
         Uri.parse('$baseUrl/auth/me'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
-      if (response.statusCode != 200) return null;
+      if (response.statusCode == 401 ||
+          response.statusCode == 403 ||
+          response.statusCode == 404) {
+        await logout();
+        return CurrentUserResult(
+          success: false,
+          message: _responseMessage(
+            response,
+            'Sesi telah berakhir. Silakan masuk kembali.',
+          ),
+          sessionExpired: true,
+        );
+      }
+
+      if (response.statusCode != 200) {
+        return CurrentUserResult(
+          success: false,
+          message: _responseMessage(
+            response,
+            'Profil belum dapat dimuat. Silakan coba lagi.',
+          ),
+        );
+      }
+
       final data = jsonDecode(response.body) as Map<String, dynamic>;
-      return data['user'] as Map<String, dynamic>?;
+      final user = data['user'];
+      if (user is! Map<String, dynamic>) {
+        return const CurrentUserResult(
+          success: false,
+          message: 'Data profil dari server tidak valid.',
+        );
+      }
+
+      return CurrentUserResult(
+        success: true,
+        message: 'Profil berhasil dimuat',
+        user: user,
+      );
     } catch (e) {
       debugPrint('Get current user error: $e');
-      return null;
+      return const CurrentUserResult(
+        success: false,
+        message: 'Tidak dapat terhubung ke server NALA.',
+      );
     }
   }
 
-  Future<bool> updateProfile(String name, String email,
-      {String? avatarBase64}) async {
+  Future<AuthResult> updateProfile(
+    String name,
+    String email, {
+    String? avatarBase64,
+  }) async {
     try {
       final token = await _getToken();
-      if (token == null) return false;
+      if (token == null) {
+        return const AuthResult(
+          success: false,
+          message: 'Sesi login tidak ditemukan.',
+        );
+      }
 
       final bodyData = <String, dynamic>{'name': name, 'email': email};
       if (avatarBase64 != null) {
@@ -164,17 +232,36 @@ class AuthService {
         body: jsonEncode(bodyData),
       );
 
-      return response.statusCode == 200;
+      return AuthResult(
+        success: response.statusCode == 200,
+        message: _responseMessage(
+          response,
+          response.statusCode == 200
+              ? 'Profil berhasil diperbarui'
+              : 'Gagal memperbarui profil',
+        ),
+      );
     } catch (e) {
       debugPrint('Update profile error: $e');
-      return false;
+      return const AuthResult(
+        success: false,
+        message: 'Tidak dapat terhubung ke server NALA.',
+      );
     }
   }
 
-  Future<bool> changePassword(String oldPassword, String newPassword) async {
+  Future<AuthResult> changePassword(
+    String oldPassword,
+    String newPassword,
+  ) async {
     try {
       final token = await _getToken();
-      if (token == null) return false;
+      if (token == null) {
+        return const AuthResult(
+          success: false,
+          message: 'Sesi login tidak ditemukan.',
+        );
+      }
 
       final response = await http.put(
         Uri.parse('$baseUrl/auth/password'),
@@ -188,10 +275,21 @@ class AuthService {
         }),
       );
 
-      return response.statusCode == 200;
+      return AuthResult(
+        success: response.statusCode == 200,
+        message: _responseMessage(
+          response,
+          response.statusCode == 200
+              ? 'Password berhasil diubah'
+              : 'Gagal mengubah password',
+        ),
+      );
     } catch (e) {
       debugPrint('Change password error: $e');
-      return false;
+      return const AuthResult(
+        success: false,
+        message: 'Tidak dapat terhubung ke server NALA.',
+      );
     }
   }
 

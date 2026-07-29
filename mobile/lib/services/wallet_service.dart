@@ -1,16 +1,15 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/wallet.dart';
 import '../config/api_config.dart';
+import 'token_storage.dart';
 
 class WalletService {
   // Android development uses `adb reverse tcp:3001 tcp:3001`.
   static String get baseUrl => ApiConfig.baseUrl;
 
   Future<String?> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('auth_token');
+    return TokenStorage.read();
   }
 
   Future<List<Wallet>> getWallets() async {

@@ -1,13 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_service.dart';
+import 'token_storage.dart';
 
 class ChatService {
   Future<String?> sendMessage(String message) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await TokenStorage.read();
       if (token == null) return null;
 
       final response = await http.post(
