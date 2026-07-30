@@ -167,7 +167,7 @@ Acceptance criteria:
 
 ### M1 — Integritas transaksi dan AI
 
-Status: **In progress**
+Status: **Complete**
 
 - [x] Migrasikan seluruh nominal dari `Float` ke integer rupiah
 - [x] Tambahkan batas nominal dan validasi enum/tanggal
@@ -182,9 +182,9 @@ Status: **In progress**
 Acceptance criteria:
 
 - Retry request tidak menghasilkan transaksi ganda. ✅
-- AI tidak dapat langsung menulis transaksi.
-- Nilai uang tersimpan dan dihitung tanpa floating-point.
-- Semua jalur perubahan saldo memiliki integration test.
+- AI tidak dapat langsung menulis transaksi. ✅
+- Nilai uang tersimpan dan dihitung tanpa floating-point. ✅
+- Semua jalur perubahan saldo memiliki integration test. ✅
 
 ### M2 — Authentication untuk pengguna nyata
 
@@ -528,6 +528,8 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Gemini dan klien chat diberi batas waktu serta fallback aman | Unit test timeout; kegagalan AI menghasilkan respons tanpa transaction draft |
 | 30 Juli 2026 | Workflow CI diselaraskan dengan codebase aktual | Job backend menjalankan PostgreSQL, typecheck, unit dan integration test; job mobile menjalankan analyze dan test |
 | 30 Juli 2026 | Rantai migration dapat membangun PostgreSQL kosong | Baseline schema diikuti migrasi integer, idempotency, dan recurring execution |
+| 30 Juli 2026 | Ownership wallet tagihan berulang dipaksa di backend | Integration test lintas akun menolak wallet milik user lain dengan 404 |
+| 30 Juli 2026 | Seluruh jalur saldo runtime diaudit | HTTP test saldo awal wallet, transaksi create/update/delete, recurring, dan penolakan edit langsung |
 
 ### Log keputusan
 
@@ -547,5 +549,4 @@ Pada akhir setiap sesi pengembangan:
 Pekerjaan coding berikutnya tetap berada di **M1 — Integritas transaksi dan AI**:
 
 1. Push workflow lalu verifikasi hasil GitHub Actions.
-2. Audit seluruh jalur perubahan saldo agar memenuhi acceptance criteria M1.
-3. Mulai hardening authentication pada M2.
+2. Mulai hardening authentication pada M2.

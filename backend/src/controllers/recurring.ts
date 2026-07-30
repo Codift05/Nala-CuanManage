@@ -31,6 +31,15 @@ export const createRecurringBill = async (req: AuthRequest, res: Response): Prom
       return;
     }
 
+    const wallet = await prisma.wallet.findFirst({
+      where: { id: walletId, userId },
+      select: { id: true },
+    });
+    if (!wallet) {
+      res.status(404).json({ error: 'Wallet not found' });
+      return;
+    }
+
     const bill = await prisma.recurringBill.create({
       data: {
         userId,

@@ -43,6 +43,7 @@ const run = async () => {
   const wallet = wallets[0];
   const initialBalance = wallet.balance;
   let transactionId: string | undefined;
+  let temporaryUserId: string | undefined;
 
   try {
     for (const [payload, expectedMessage] of [
@@ -61,6 +62,43 @@ const run = async () => {
 
     const invalidLimit = await request('/transactions?limit=101', login.token);
     assert.equal(invalidLimit.response.status, 400);
+
+    const temporaryEmail = `ownership-${Date.now()}@nala.test`;
+    const registrationResponse = await fetch(`${apiUrl}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Ownership Test',
+        email: temporaryEmail,
+        password: 'password123',
+      }),
+    });
+    const registration = await registrationResponse.json();
+    assert.equal(registrationResponse.status, 201);
+    temporaryUserId = registration.user.id;
+
+    const walletCreation = await request('/wallets', registration.token, {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'Integration Wallet',
+        type: 'CASH',
+        balance: 1000,
+      }),
+    });
+    assert.equal(walletCreation.response.status, 201);
+    assert.equal(walletCreation.body.wallet.balance, 1000);
+
+    const foreignWalletBill = await request('/recurring', registration.token, {
+      method: 'POST',
+      body: JSON.stringify({
+        title: 'Foreign wallet test',
+        amount: 1000,
+        categoryId: 'Bills',
+        walletId: wallet.id,
+        dueDate: 1,
+      }),
+    });
+    assert.equal(foreignWalletBill.response.status, 404);
 
     const payload = {
       walletId: wallet.id,
@@ -98,6 +136,31 @@ const run = async () => {
     const afterCreate = await request(`/wallets/${wallet.id}`, login.token);
     assert.equal(afterCreate.body.balance, initialBalance - payload.amount);
 
+    const directBalanceEdit = await request(`/wallets/${wallet.id}`, login.token, {
+      method: 'PUT',
+      body: JSON.stringify({ balance: initialBalance + 999999 }),
+    });
+    assert.equal(directBalanceEdit.response.status, 400);
+
+    const update = await request(
+      `/transactions/${transactionId}`,
+      login.token,
+      {
+        method: 'PUT',
+        body: JSON.stringify({
+          ...payload,
+          type: 'INCOME',
+          amount: 500,
+        }),
+      },
+    );
+    assert.equal(update.response.status, 200);
+    assert.equal(update.body.transaction.type, 'INCOME');
+    assert.equal(update.body.transaction.amount, 500);
+
+    const afterUpdate = await request(`/wallets/${wallet.id}`, login.token);
+    assert.equal(afterUpdate.body.balance, initialBalance + 500);
+
     const deletion = await request(
       `/transactions/${transactionId}`,
       login.token,
@@ -127,6 +190,15 @@ const run = async () => {
           },
         }),
       ]);
+    }
+    if (temporaryUserId) {
+      await prisma.$transaction(async (tx) => {
+        await tx.recurringBill.deleteMany({ where: { userId: temporaryUserId } });
+        await tx.transaction.deleteMany({ where: { userId: temporaryUserId } });
+        await tx.budget.deleteMany({ where: { userId: temporaryUserId } });
+        await tx.wallet.deleteMany({ where: { userId: temporaryUserId } });
+        await tx.user.deleteMany({ where: { id: temporaryUserId } });
+      });
     }
     await prisma.$disconnect();
   }

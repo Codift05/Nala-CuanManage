@@ -90,6 +90,12 @@ export const updateWallet = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
+    if (balance !== undefined) {
+      return res.status(400).json({
+        message: 'Saldo tidak dapat diubah langsung; gunakan transaksi'
+      });
+    }
+
     const wallet = await prisma.wallet.findFirst({
       where: { id, userId }
     });
@@ -98,19 +104,11 @@ export const updateWallet = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Wallet not found' });
     }
 
-    const updatedBalance = balance === undefined
-      ? wallet.balance
-      : parseRupiah(balance, { allowZero: true });
-    if (updatedBalance === null) {
-      return res.status(400).json({ message: 'Saldo harus berupa rupiah bulat yang valid' });
-    }
-
     const updatedWallet = await prisma.wallet.update({
       where: { id },
       data: {
         name: name !== undefined ? name : wallet.name,
-        type: type !== undefined ? type : wallet.type,
-        balance: updatedBalance
+        type: type !== undefined ? type : wallet.type
       }
     });
 
