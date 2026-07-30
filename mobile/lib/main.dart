@@ -4,6 +4,7 @@ import 'theme/app_theme.dart';
 import 'package:home_widget/home_widget.dart';
 import 'screens/splash_screen.dart';
 import 'screens/reset_password_screen.dart';
+import 'screens/verify_email_screen.dart';
 
 String? passwordResetTokenFromRoute(String? routeName) {
   if (routeName == null) return null;
@@ -12,6 +13,17 @@ String? passwordResetTokenFromRoute(String? routeName) {
   final isResetRoute = uri.path == '/reset-password' ||
       (uri.scheme == 'nala' && uri.host == 'reset-password');
   if (!isResetRoute) return null;
+  final token = uri.queryParameters['token'];
+  return token == null || token.isEmpty ? null : token;
+}
+
+String? emailVerificationTokenFromRoute(String? routeName) {
+  if (routeName == null) return null;
+  final uri = Uri.tryParse(routeName);
+  if (uri == null) return null;
+  final isVerificationRoute = uri.path == '/verify-email' ||
+      (uri.scheme == 'nala' && uri.host == 'verify-email');
+  if (!isVerificationRoute) return null;
   final token = uri.queryParameters['token'];
   return token == null || token.isEmpty ? null : token;
 }
@@ -43,11 +55,19 @@ class NalaApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       home: const SplashScreen(),
       onGenerateRoute: (settings) {
-        final token = passwordResetTokenFromRoute(settings.name);
-        return token == null
+        final resetToken = passwordResetTokenFromRoute(settings.name);
+        if (resetToken != null) {
+          return MaterialPageRoute(
+            builder: (_) => ResetPasswordScreen(token: resetToken),
+            settings: settings,
+          );
+        }
+        final verificationToken =
+            emailVerificationTokenFromRoute(settings.name);
+        return verificationToken == null
             ? null
             : MaterialPageRoute(
-                builder: (_) => ResetPasswordScreen(token: token),
+                builder: (_) => VerifyEmailScreen(token: verificationToken),
                 settings: settings,
               );
       },

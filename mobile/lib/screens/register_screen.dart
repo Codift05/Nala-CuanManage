@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
-import '../widgets/main_shell.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -33,12 +32,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _isLoading = false);
 
     if (result.success) {
-      // Clear navigation stack and go to Dashboard
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const MainShell()),
-        (route) => false,
-      );
+      var message = result.message;
+      if (result.developmentVerificationToken != null) {
+        final verification = await _authService.verifyEmail(
+          result.developmentVerificationToken!,
+        );
+        message = verification.message;
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+      Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(
         context,

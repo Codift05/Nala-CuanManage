@@ -117,6 +117,18 @@ void main() {
     expect(passwordResetTokenFromRoute('/reset-password'), isNull);
   });
 
+  test('Email verification routes accept web and NALA deep links', () {
+    expect(
+      emailVerificationTokenFromRoute('/verify-email?token=web-token'),
+      'web-token',
+    );
+    expect(
+      emailVerificationTokenFromRoute('nala://verify-email?token=app-token'),
+      'app-token',
+    );
+    expect(emailVerificationTokenFromRoute('/verify-email'), isNull);
+  });
+
   testWidgets('App loads smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(const NalaApp());
 

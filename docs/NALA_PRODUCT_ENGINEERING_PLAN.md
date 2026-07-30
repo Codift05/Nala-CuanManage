@@ -195,7 +195,7 @@ Status: **In progress**
 - [x] Logout/revoke session
 - [x] Rate limit login dan registrasi
 - [x] Password reset dengan token sekali pakai
-- [ ] Verifikasi email
+- [x] Verifikasi email
 - [x] Reauthentication sebelum penghapusan akun
 - [ ] Biometric app unlock pada perangkat yang mendukung
 - [x] CORS production allowlist dan secret tanpa fallback
@@ -537,6 +537,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Inti password reset sekali pakai tersedia | Token acak disimpan sebagai hash, berlaku 15 menit, sekali pakai, anti-enumerasi, dan revoke session; delivery email masih pending |
 | 30 Juli 2026 | Delivery email reset password tersedia | Resend HTTP API, timeout 8 detik, idempotency key, fail-fast config production, dan token dihapus jika delivery gagal |
 | 30 Juli 2026 | Reset password tersambung ke mobile | Tombol lupa password, form password baru, route web, dan Android deep link `nala://reset-password` |
+| 30 Juli 2026 | Verifikasi email diwajibkan sebelum login | Token hash sekali pakai 24 jam, resend anti-enumerasi, delivery email, dan migration akun lama |
 
 ### Log keputusan
 

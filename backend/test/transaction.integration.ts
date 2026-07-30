@@ -77,21 +77,57 @@ const run = async () => {
     const registration = await registrationResponse.json();
     assert.equal(registrationResponse.status, 201);
     temporaryUserId = registration.user.id;
-    assert.equal(typeof registration.refreshToken, 'string');
+    assert.equal(registration.accessToken, undefined);
+    assert.equal(typeof registration.verificationToken, 'string');
+
+    const loginBeforeVerification = await fetch(`${apiUrl}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: temporaryEmail,
+        password: 'password123',
+      }),
+    });
+    assert.equal(loginBeforeVerification.status, 403);
+
+    const verificationResponse = await fetch(`${apiUrl}/auth/verify-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: registration.verificationToken }),
+    });
+    assert.equal(verificationResponse.status, 200);
+    const reusedVerification = await fetch(`${apiUrl}/auth/verify-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: registration.verificationToken }),
+    });
+    assert.equal(reusedVerification.status, 400);
+
+    const initialLoginResponse = await fetch(`${apiUrl}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: temporaryEmail,
+        password: 'password123',
+        deviceName: 'Integration verified device',
+      }),
+    });
+    const initialLogin = await initialLoginResponse.json();
+    assert.equal(initialLoginResponse.status, 200);
 
     const refreshResponse = await fetch(`${apiUrl}/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken: registration.refreshToken }),
+      body: JSON.stringify({ refreshToken: initialLogin.refreshToken }),
     });
     const refreshed = await refreshResponse.json();
     assert.equal(refreshResponse.status, 200);
-    assert.notEqual(refreshed.refreshToken, registration.refreshToken);
+    assert.notEqual(refreshed.refreshToken, initialLogin.refreshToken);
 
     const reusedRefreshResponse = await fetch(`${apiUrl}/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken: registration.refreshToken }),
+      body: JSON.stringify({ refreshToken: initialLogin.refreshToken }),
     });
     assert.equal(reusedRefreshResponse.status, 401);
     const temporaryToken = refreshed.accessToken;

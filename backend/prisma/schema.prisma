@@ -18,6 +18,7 @@ model User {
   name           String
   avatar         String?
   passwordHash   String
+  emailVerifiedAt DateTime?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   wallets        Wallet[]
@@ -26,6 +27,17 @@ model User {
   recurringBills RecurringBill[]
   sessions       Session[]
   passwordResetTokens PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique @db.VarChar(64)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model PasswordResetToken {

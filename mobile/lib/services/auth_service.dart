@@ -22,6 +22,16 @@ class PasswordResetRequestResult extends AuthResult {
   final String? developmentToken;
 }
 
+class RegistrationResult extends AuthResult {
+  const RegistrationResult({
+    required super.success,
+    required super.message,
+    this.developmentVerificationToken,
+  });
+
+  final String? developmentVerificationToken;
+}
+
 class CurrentUserResult {
   const CurrentUserResult({
     required this.success,
@@ -82,7 +92,7 @@ class AuthService {
     }
   }
 
-  Future<AuthResult> register(
+  Future<RegistrationResult> register(
     String name,
     String email,
     String password,
@@ -100,12 +110,15 @@ class AuthService {
       );
 
       if (response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        await TokenStorage.writePair(data['accessToken'], data['refreshToken']);
-        return const AuthResult(success: true, message: 'Akun berhasil dibuat');
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        return RegistrationResult(
+          success: true,
+          message: data['message'] as String? ?? 'Akun berhasil dibuat',
+          developmentVerificationToken: data['verificationToken'] as String?,
+        );
       }
 
-      return AuthResult(
+      return RegistrationResult(
         success: false,
         message: _responseMessage(
           response,
@@ -114,6 +127,26 @@ class AuthService {
       );
     } catch (e) {
       debugPrint('Register error: $e');
+      return const RegistrationResult(
+        success: false,
+        message: 'Tidak dapat terhubung ke server NALA.',
+      );
+    }
+  }
+
+  Future<AuthResult> verifyEmail(String token) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/verify-email'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'token': token}),
+      );
+      return AuthResult(
+        success: response.statusCode == 200,
+        message: _responseMessage(response, 'Gagal memverifikasi email.'),
+      );
+    } catch (e) {
+      debugPrint('Verify email error: $e');
       return const AuthResult(
         success: false,
         message: 'Tidak dapat terhubung ke server NALA.',

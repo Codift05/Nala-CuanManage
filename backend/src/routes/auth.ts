@@ -3,6 +3,7 @@ import {
   register, login, me, updateProfile, changePassword, deleteAccount,
   refreshSession, logout, getSessions, revokeSession,
   requestPasswordReset, resetPassword,
+  verifyEmail, resendVerification,
 } from '../controllers/auth';
 import { authenticate } from '../middleware/auth';
 import { rateLimit } from '../middleware/rateLimit';
@@ -36,6 +37,17 @@ router.post('/reset-password', rateLimit({
   limit: 10,
   windowSeconds: 60,
 }), resetPassword);
+router.post('/verify-email', rateLimit({
+  prefix: 'verify-email',
+  limit: 10,
+  windowSeconds: 60,
+}), verifyEmail);
+router.post('/resend-verification', rateLimit({
+  prefix: 'resend-verification',
+  limit: 5,
+  windowSeconds: 60 * 60,
+  includeEmail: true,
+}), resendVerification);
 router.get('/me', authenticate, me);
 router.post('/logout', authenticate, logout);
 router.get('/sessions', authenticate, getSessions);

@@ -7,7 +7,11 @@ import {
   createPasswordResetToken,
   hashPasswordResetToken,
 } from '../utils/passwordReset';
-import { sendPasswordResetEmail } from '../utils/email';
+import { sendEmailVerification, sendPasswordResetEmail } from '../utils/email';
+import {
+  createEmailVerificationToken,
+  hashEmailVerificationToken,
+} from '../utils/emailVerification';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -58,6 +62,7 @@ export const register = async (req: Request, res: Response) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
+    const verification = createEmailVerificationToken();
     const user = await prisma.$transaction(async (tx) => {
       const createdUser = await tx.user.create({
         data: {
@@ -75,16 +80,34 @@ export const register = async (req: Request, res: Response) => {
           balance: 0
         }
       });
+      await tx.emailVerificationToken.create({
+        data: {
+          userId: createdUser.id,
+          tokenHash: verification.tokenHash,
+          expiresAt: verification.expiresAt,
+        },
+      });
 
       return createdUser;
     });
 
-    const tokens = await createSession(user.id, req.body.deviceName);
+    if (process.env.NODE_ENV === 'production') {
+      try {
+        await sendEmailVerification({
+          to: user.email,
+          token: verification.token,
+          idempotencyKey: `verify-${user.id}`,
+        });
+      } catch (error) {
+        console.error('Verification email failed:', error);
+      }
+    }
 
     res.status(201).json({
-      message: 'User registered successfully',
-      token: tokens.accessToken,
-      ...tokens,
+      message: 'Akun dibuat. Periksa email untuk melakukan verifikasi.',
+      ...(process.env.NODE_ENV !== 'production'
+        ? { verificationToken: verification.token }
+        : {}),
       user: {
         id: user.id,
         name: user.name,
@@ -123,6 +146,9 @@ export const login = async (req: Request, res: Response) => {
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Email atau password salah' });
     }
+    if (!user.emailVerifiedAt) {
+      return res.status(403).json({ message: 'Email belum diverifikasi' });
+    }
 
     const tokens = await createSession(user.id, req.body.deviceName);
 
@@ -140,6 +166,80 @@ export const login = async (req: Request, res: Response) => {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
+};
+
+export const verifyEmail = async (req: Request, res: Response) => {
+  const token = typeof req.body.token === 'string' ? req.body.token : '';
+  const verification = token
+    ? await prisma.emailVerificationToken.findUnique({
+        where: { tokenHash: hashEmailVerificationToken(token) },
+      })
+    : null;
+  if (!verification || verification.usedAt || verification.expiresAt <= new Date()) {
+    return res.status(400).json({ message: 'Token verifikasi tidak valid atau kedaluwarsa' });
+  }
+
+  const verified = await prisma.$transaction(async (tx) => {
+    const consumed = await tx.emailVerificationToken.updateMany({
+      where: {
+        id: verification.id,
+        usedAt: null,
+        expiresAt: { gt: new Date() },
+      },
+      data: { usedAt: new Date() },
+    });
+    if (consumed.count !== 1) return false;
+    await tx.user.update({
+      where: { id: verification.userId },
+      data: { emailVerifiedAt: new Date() },
+    });
+    return true;
+  });
+  return verified
+    ? res.json({ message: 'Email berhasil diverifikasi. Silakan masuk.' })
+    : res.status(400).json({ message: 'Token verifikasi tidak valid atau kedaluwarsa' });
+};
+
+export const resendVerification = async (req: Request, res: Response) => {
+  const email = normalizeEmail(req.body.email);
+  const user = EMAIL_PATTERN.test(email)
+    ? await prisma.user.findUnique({ where: { email } })
+    : null;
+  let verificationToken: string | undefined;
+
+  if (user && !user.emailVerifiedAt) {
+    const generated = createEmailVerificationToken();
+    const verification = await prisma.$transaction(async (tx) => {
+      await tx.emailVerificationToken.deleteMany({
+        where: { userId: user.id, usedAt: null },
+      });
+      return tx.emailVerificationToken.create({
+        data: {
+          userId: user.id,
+          tokenHash: generated.tokenHash,
+          expiresAt: generated.expiresAt,
+        },
+      });
+    });
+    if (process.env.NODE_ENV !== 'production') {
+      verificationToken = generated.token;
+    } else {
+      try {
+        await sendEmailVerification({
+          to: user.email,
+          token: generated.token,
+          idempotencyKey: verification.id,
+        });
+      } catch (error) {
+        console.error('Verification email failed:', error);
+      }
+    }
+  }
+
+  return res.json({
+    message: 'Jika akun belum terverifikasi, email baru akan dikirim.',
+    ...(verificationToken ? { verificationToken } : {}),
+  });
 };
 
 export const me = async (req: AuthRequest, res: Response) => {

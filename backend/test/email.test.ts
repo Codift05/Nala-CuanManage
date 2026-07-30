@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { sendPasswordResetEmail } from '../src/utils/email';
+import {
+  sendEmailVerification,
+  sendPasswordResetEmail,
+} from '../src/utils/email';
 
 test('password reset email uses the provider safely and no-ops in development', async () => {
   assert.equal(
@@ -32,4 +35,21 @@ test('password reset email uses the provider safely and no-ops in development', 
     'reset-2',
   );
   assert.match(String(request?.body), /a%2Bb%2Fc%3F/);
+});
+
+test('verification email contains a NALA verification deep link', async () => {
+  let body = '';
+  await sendEmailVerification(
+    { to: 'user@example.com', token: 'verify-secret', idempotencyKey: 'verify-1' },
+    {
+      apiKey: 're_test',
+      from: 'NALA <noreply@nala.example>',
+      appUrl: 'nala://app',
+    },
+    async (_input, init) => {
+      body = String(init?.body);
+      return new Response(JSON.stringify({ id: 'email-2' }), { status: 200 });
+    },
+  );
+  assert.match(body, /nala:\/\/verify-email\?token=verify-secret/);
 });
