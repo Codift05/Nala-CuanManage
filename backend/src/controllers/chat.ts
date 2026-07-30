@@ -3,6 +3,10 @@ import { AuthRequest } from '../middleware/auth';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import prisma from '../utils/prisma';
 import { parseTransactionDraft } from '../utils/transactionDraft';
+import { getGeminiTimeoutMs, withTimeout } from '../utils/ai';
+
+const fallbackReply =
+  'Maaf, layanan AI Nala sedang tidak tersedia. Kamu tetap bisa mencatat transaksi secara manual, lalu coba chat lagi nanti ya.';
 
 export const chatWithNala = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -20,7 +24,11 @@ export const chatWithNala = async (req: AuthRequest, res: Response): Promise<voi
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      res.status(500).json({ error: 'Gemini API key is not configured di backend/.env' });
+      res.json({
+        reply: fallbackReply,
+        transactionDraft: null,
+        fallback: true,
+      });
       return;
     }
 
@@ -68,10 +76,21 @@ Pastikan nominal berupa bilangan bulat rupiah dan walletId sesuai dengan ID domp
 
 Gunakan bahasa Indonesia yang ramah, singkat, dan jelas (maksimal 3 paragraf pendek) sebelum block JSON. Jangan pernah mengatakan transaksi sudah tersimpan. Jelaskan bahwa kamu menyiapkan draft yang harus diperiksa dan dikonfirmasi pengguna.`;
 
-    const result = await model.generateContent([
-      systemPrompt,
-      `User: ${message}`
-    ]);
+    let result;
+    try {
+      result = await withTimeout(
+        model.generateContent([systemPrompt, `User: ${message}`]),
+        getGeminiTimeoutMs(),
+      );
+    } catch (error) {
+      console.error('Gemini request failed:', error);
+      res.json({
+        reply: fallbackReply,
+        transactionDraft: null,
+        fallback: true,
+      });
+      return;
+    }
 
     let nalaResponse = result.response.text();
     let transactionDraft = null;

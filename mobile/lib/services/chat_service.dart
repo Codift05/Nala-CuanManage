@@ -31,14 +31,16 @@ class ChatService {
       final token = await TokenStorage.read();
       if (token == null) return null;
 
-      final response = await http.post(
-        Uri.parse('${AuthService.baseUrl}/chat'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({'message': message}),
-      );
+      final response = await http
+          .post(
+            Uri.parse('${AuthService.baseUrl}/chat'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({'message': message}),
+          )
+          .timeout(const Duration(seconds: 12));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;

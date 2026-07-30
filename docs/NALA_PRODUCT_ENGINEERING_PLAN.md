@@ -175,7 +175,7 @@ Status: **In progress**
 - [x] Validasi output transaksi AI dengan schema yang ketat
 - [x] Tampilkan form review sebelum transaksi AI disimpan
 - [x] Pastikan AI tidak mengatakan “berhasil” sebelum konfirmasi
-- [ ] Tambahkan timeout dan fallback ketika Gemini gagal
+- [x] Tambahkan timeout dan fallback ketika Gemini gagal
 - [x] Tambahkan test untuk perhitungan saldo dan transaksi duplikat
 
 Acceptance criteria:
@@ -524,6 +524,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Tagihan tanggal 29–31 diproses pada hari terakhir bulan pendek | Unit test bulan biasa, kabisat, dan bulan 30 hari |
 | 30 Juli 2026 | Input transaksi dibatasi dan divalidasi konsisten | Typecheck dan unit test nominal, tipe, tanggal kalender, serta limit list |
 | 30 Juli 2026 | Jalur HTTP transaksi diuji end-to-end | Login, validasi input, create, replay, conflict, perubahan saldo sekali, delete, dan pemulihan saldo |
+| 30 Juli 2026 | Gemini dan klien chat diberi batas waktu serta fallback aman | Unit test timeout; kegagalan AI menghasilkan respons tanpa transaction draft |
 
 ### Log keputusan
 
@@ -542,6 +543,6 @@ Pada akhir setiap sesi pengembangan:
 
 Pekerjaan coding berikutnya tetap berada di **M1 — Integritas transaksi dan AI**:
 
-1. Tambahkan timeout dan fallback Gemini.
-2. Perbaiki workflow CI dan jalankan backend integration test.
-3. Audit seluruh jalur perubahan saldo agar memenuhi acceptance criteria M1.
+1. Perbaiki workflow CI dan jalankan backend integration test.
+2. Audit seluruh jalur perubahan saldo agar memenuhi acceptance criteria M1.
+3. Mulai hardening authentication pada M2.
