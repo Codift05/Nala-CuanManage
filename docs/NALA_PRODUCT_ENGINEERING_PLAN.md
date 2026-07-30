@@ -153,8 +153,9 @@ Status: **In progress**
 - [x] Redesign welcome, login, dashboard, dan profil
 - [x] Pindahkan token ke secure storage
 - [x] Tambahkan widget test dasar mobile
-- [ ] Perbaiki workflow CI yang menunjuk ke folder `frontend`
-- [ ] Tambahkan backend typecheck dan test command ke CI
+- [x] Perbaiki workflow CI yang menunjuk ke folder `frontend`
+- [x] Tambahkan backend typecheck dan test command ke CI
+- [ ] Tambahkan migration baseline untuk deployment database kosong
 - [ ] Tetapkan istilah produk serta arsitektur yang konsisten
 - [ ] Sinkronkan status fitur proposal dengan codebase
 
@@ -525,6 +526,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Input transaksi dibatasi dan divalidasi konsisten | Typecheck dan unit test nominal, tipe, tanggal kalender, serta limit list |
 | 30 Juli 2026 | Jalur HTTP transaksi diuji end-to-end | Login, validasi input, create, replay, conflict, perubahan saldo sekali, delete, dan pemulihan saldo |
 | 30 Juli 2026 | Gemini dan klien chat diberi batas waktu serta fallback aman | Unit test timeout; kegagalan AI menghasilkan respons tanpa transaction draft |
+| 30 Juli 2026 | Workflow CI diselaraskan dengan codebase aktual | Job backend menjalankan PostgreSQL, typecheck, unit dan integration test; job mobile menjalankan analyze dan test |
 
 ### Log keputusan
 
@@ -543,6 +545,7 @@ Pada akhir setiap sesi pengembangan:
 
 Pekerjaan coding berikutnya tetap berada di **M1 — Integritas transaksi dan AI**:
 
-1. Perbaiki workflow CI dan jalankan backend integration test.
-2. Audit seluruh jalur perubahan saldo agar memenuhi acceptance criteria M1.
-3. Mulai hardening authentication pada M2.
+1. Push workflow lalu verifikasi hasil GitHub Actions.
+2. Tambahkan migration baseline untuk deployment database kosong.
+3. Audit seluruh jalur perubahan saldo agar memenuhi acceptance criteria M1.
+4. Mulai hardening authentication pada M2.
