@@ -41,6 +41,6 @@ test('production requires strong secrets and an explicit CORS allowlist', () => 
       EMAIL_FROM: 'NALA <noreply@nala.example>',
       APP_URL: 'https://app.nala.example/reset',
     })?.appUrl,
-    'https://app.nala.example',
+    'https://app.nala.example/reset',
   );
 });

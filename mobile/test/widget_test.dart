@@ -5,6 +5,7 @@ import 'package:nala/main.dart';
 import 'package:nala/screens/add_transaction_screen.dart';
 import 'package:nala/screens/edit_profile_screen.dart';
 import 'package:nala/screens/login_screen.dart';
+import 'package:nala/screens/reset_password_screen.dart';
 import 'package:nala/screens/onboarding_screen.dart';
 import 'package:nala/services/token_storage.dart';
 import 'package:nala/services/chat_service.dart';
@@ -104,6 +105,18 @@ void main() {
     expect(RegExp(r'^[A-Za-z0-9._:-]+$').hasMatch(first), isTrue);
   });
 
+  test('Password reset routes accept web and NALA deep links', () {
+    expect(
+      passwordResetTokenFromRoute('/reset-password?token=web-token'),
+      'web-token',
+    );
+    expect(
+      passwordResetTokenFromRoute('nala://reset-password?token=app-token'),
+      'app-token',
+    );
+    expect(passwordResetTokenFromRoute('/reset-password'), isNull);
+  });
+
   testWidgets('App loads smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(const NalaApp());
 
@@ -133,6 +146,19 @@ void main() {
 
     expect(find.text('Selamat datang kembali.'), findsOneWidget);
     expect(find.text('Gunakan biometrik'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Reset password screen fits a narrow phone', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(360, 640));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      const MaterialApp(home: ResetPasswordScreen(token: 'test-token')),
+    );
+
+    expect(find.text('Buat password baru'), findsOneWidget);
+    expect(find.text('Simpan password baru'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

@@ -7,6 +7,7 @@ import '../theme/app_theme.dart';
 import '../widgets/auth_visuals.dart';
 import '../widgets/main_shell.dart';
 import 'register_screen.dart';
+import 'reset_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -53,6 +54,49 @@ class _LoginScreenState extends State<LoginScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('$feature segera hadir di NALA.')),
     );
+  }
+
+  Future<void> _forgotPassword() async {
+    final email = TextEditingController(text: _emailController.text.trim());
+    final submitted = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Lupa password?'),
+        content: TextField(
+          controller: email,
+          keyboardType: TextInputType.emailAddress,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: 'Email akun'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, email.text.trim()),
+            child: const Text('Kirim link'),
+          ),
+        ],
+      ),
+    );
+    email.dispose();
+    if (submitted == null || submitted.isEmpty || !mounted) return;
+
+    final result = await _authService.requestPasswordReset(submitted);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(result.message)));
+    if (result.developmentToken != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ResetPasswordScreen(
+            token: result.developmentToken!,
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -205,7 +249,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Expanded(child: Text('Password', style: _fieldLabelStyle)),
               Flexible(
                 child: GestureDetector(
-                  onTap: () => _comingSoon('Lupa password'),
+                  onTap: _forgotPassword,
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(

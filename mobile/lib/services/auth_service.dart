@@ -12,6 +12,16 @@ class AuthResult {
   final String message;
 }
 
+class PasswordResetRequestResult extends AuthResult {
+  const PasswordResetRequestResult({
+    required super.success,
+    required super.message,
+    this.developmentToken,
+  });
+
+  final String? developmentToken;
+}
+
 class CurrentUserResult {
   const CurrentUserResult({
     required this.success,
@@ -104,6 +114,48 @@ class AuthService {
       );
     } catch (e) {
       debugPrint('Register error: $e');
+      return const AuthResult(
+        success: false,
+        message: 'Tidak dapat terhubung ke server NALA.',
+      );
+    }
+  }
+
+  Future<PasswordResetRequestResult> requestPasswordReset(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/forgot-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      return PasswordResetRequestResult(
+        success: response.statusCode == 200,
+        message: data['message'] as String? ?? 'Permintaan reset diproses.',
+        developmentToken: data['resetToken'] as String?,
+      );
+    } catch (e) {
+      debugPrint('Request password reset error: $e');
+      return const PasswordResetRequestResult(
+        success: false,
+        message: 'Tidak dapat terhubung ke server NALA.',
+      );
+    }
+  }
+
+  Future<AuthResult> resetPassword(String token, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/reset-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'token': token, 'password': password}),
+      );
+      return AuthResult(
+        success: response.statusCode == 200,
+        message: _responseMessage(response, 'Gagal mereset password.'),
+      );
+    } catch (e) {
+      debugPrint('Reset password error: $e');
       return const AuthResult(
         success: false,
         message: 'Tidak dapat terhubung ke server NALA.',

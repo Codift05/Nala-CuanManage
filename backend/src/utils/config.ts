@@ -50,5 +50,5 @@ export const getEmailConfig = (
     );
   }
   if (!apiKey || !from || !appUrl) return null;
-  return { apiKey, from, appUrl: new URL(appUrl).origin };
+  return { apiKey, from, appUrl: new URL(appUrl).toString() };
 };

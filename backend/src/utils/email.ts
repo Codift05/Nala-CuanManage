@@ -11,7 +11,7 @@ export const sendPasswordResetEmail = async (
 ): Promise<boolean> => {
   if (!config) return false;
 
-  const resetUrl = new URL('/reset-password', config.appUrl);
+  const resetUrl = new URL(config.appUrl);
   resetUrl.searchParams.set('token', token);
   const response = await fetcher('https://api.resend.com/emails', {
     method: 'POST',

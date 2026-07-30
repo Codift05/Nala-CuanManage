@@ -194,7 +194,7 @@ Status: **In progress**
 - [x] Refresh token rotation dan session per perangkat
 - [x] Logout/revoke session
 - [x] Rate limit login dan registrasi
-- [ ] Password reset dengan token sekali pakai
+- [x] Password reset dengan token sekali pakai
 - [ ] Verifikasi email
 - [x] Reauthentication sebelum penghapusan akun
 - [ ] Biometric app unlock pada perangkat yang mendukung
@@ -536,6 +536,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Konfigurasi production dibuat fail-fast | JWT secret minimal 32 karakter dan CORS allowlist wajib; native request tanpa Origin tetap didukung |
 | 30 Juli 2026 | Inti password reset sekali pakai tersedia | Token acak disimpan sebagai hash, berlaku 15 menit, sekali pakai, anti-enumerasi, dan revoke session; delivery email masih pending |
 | 30 Juli 2026 | Delivery email reset password tersedia | Resend HTTP API, timeout 8 detik, idempotency key, fail-fast config production, dan token dihapus jika delivery gagal |
+| 30 Juli 2026 | Reset password tersambung ke mobile | Tombol lupa password, form password baru, route web, dan Android deep link `nala://reset-password` |
 
 ### Log keputusan
 
@@ -555,6 +556,5 @@ Pada akhir setiap sesi pengembangan:
 Pekerjaan coding berikutnya berada di **M2 — Authentication untuk pengguna nyata**:
 
 1. Push workflow lalu verifikasi hasil GitHub Actions.
-2. Hubungkan provider email dan deep link untuk menyelesaikan password reset.
-3. Tambahkan verifikasi email.
-4. Tambahkan biometric app unlock pada perangkat yang mendukung.
+2. Tambahkan verifikasi email.
+3. Tambahkan biometric app unlock pada perangkat yang mendukung.
