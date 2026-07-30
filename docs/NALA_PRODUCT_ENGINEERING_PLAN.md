@@ -193,7 +193,7 @@ Status: **In progress**
 - [ ] Access token berumur singkat
 - [ ] Refresh token rotation dan session per perangkat
 - [ ] Logout/revoke session
-- [ ] Rate limit login dan registrasi
+- [x] Rate limit login dan registrasi
 - [ ] Password reset dengan token sekali pakai
 - [ ] Verifikasi email
 - [x] Reauthentication sebelum penghapusan akun
@@ -531,6 +531,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Ownership wallet tagihan berulang dipaksa di backend | Integration test lintas akun menolak wallet milik user lain dengan 404 |
 | 30 Juli 2026 | Seluruh jalur saldo runtime diaudit | HTTP test saldo awal wallet, transaksi create/update/delete, recurring, dan penolakan edit langsung |
 | 30 Juli 2026 | Penghapusan akun memerlukan password aktif | HTTP test menolak password kosong/salah dan menerima password benar; UI meminta password |
+| 30 Juli 2026 | Login dan registrasi dilindungi rate limit | Redis multi-instance limiter dengan fallback memory; integration test login menghasilkan 429 |
 
 ### Log keputusan
 

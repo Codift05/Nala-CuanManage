@@ -199,6 +199,21 @@ const run = async () => {
 
     const afterDelete = await request(`/wallets/${wallet.id}`, login.token);
     assert.equal(afterDelete.body.balance, initialBalance);
+
+    const limitedEmail = `rate-${Date.now()}@nala.test`;
+    let rateLimitStatus = 0;
+    for (let attempt = 0; attempt < 11; attempt++) {
+      const response = await fetch(`${apiUrl}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: limitedEmail,
+          password: 'wrong-password',
+        }),
+      });
+      rateLimitStatus = response.status;
+    }
+    assert.equal(rateLimitStatus, 429);
     console.log('Transaction HTTP integration test passed');
   } finally {
     const transaction = await prisma.transaction.findFirst({
