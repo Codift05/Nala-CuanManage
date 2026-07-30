@@ -1,7 +1,7 @@
 class Budget {
   final String id;
   final String categoryId;
-  final double amount;
+  final int amount;
   final int month;
   final int year;
 
@@ -17,7 +17,7 @@ class Budget {
     return Budget(
       id: json['id'],
       categoryId: json['categoryId'],
-      amount: (json['amount'] as num).toDouble(),
+      amount: (json['amount'] as num).toInt(),
       month: json['month'],
       year: json['year'],
     );

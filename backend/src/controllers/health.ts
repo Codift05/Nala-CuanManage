@@ -6,14 +6,14 @@ const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep
 
 type TransactionLike = {
   type: string;
-  amount: number;
+  amount: bigint;
   categoryId: string | null;
   date: Date;
 };
 
 type WalletLike = {
   type: string;
-  balance: number;
+  balance: bigint;
 };
 
 type ScoreBreakdown = {

@@ -24,8 +24,8 @@ class _ReportScreenState extends State<ReportScreen> {
   );
 
   bool _isLoading = true;
-  double _totalIncome = 0;
-  double _totalExpense = 0;
+  int _totalIncome = 0;
+  int _totalExpense = 0;
   List<Map<String, dynamic>> _expenseCategories = [];
   DateTime _selectedDate = DateTime.now();
   List<Map<String, dynamic>> _trendData = [];
@@ -82,9 +82,9 @@ class _ReportScreenState extends State<ReportScreen> {
             tx.date.year == _selectedDate.year,
       );
 
-      double income = 0;
-      double expense = 0;
-      Map<String, double> categoryExpense = {};
+      int income = 0;
+      int expense = 0;
+      Map<String, int> categoryExpense = {};
 
       for (var tx in monthlyTransactions) {
         if (tx.type == 'INCOME') {
@@ -137,8 +137,8 @@ class _ReportScreenState extends State<ReportScreen> {
             DateTime(_selectedDate.year, _selectedDate.month - i);
         final monthTxs = transactions.where((tx) =>
             tx.date.month == monthDate.month && tx.date.year == monthDate.year);
-        double inc = 0;
-        double exp = 0;
+        int inc = 0;
+        int exp = 0;
         for (var tx in monthTxs) {
           if (tx.type == 'INCOME')
             inc += tx.amount;
@@ -451,8 +451,8 @@ class _ReportScreenState extends State<ReportScreen> {
                           alignment: BarChartAlignment.center,
                           groupsSpace: 50,
                           maxY: _trendData.fold<double>(0, (max, e) {
-                                final inc = e['income'] as double;
-                                final exp = e['expense'] as double;
+                                final inc = (e['income'] as int).toDouble();
+                                final exp = (e['expense'] as int).toDouble();
                                 final val = inc > exp ? inc : exp;
                                 return val > max ? val : max;
                               }) *
@@ -509,14 +509,14 @@ class _ReportScreenState extends State<ReportScreen> {
                               x: index,
                               barRods: [
                                 BarChartRodData(
-                                  toY: data['income'],
+                                  toY: (data['income'] as int).toDouble(),
                                   color: AppTheme.primaryColor,
                                   width: 12,
                                   borderRadius: const BorderRadius.vertical(
                                       top: Radius.circular(4)),
                                 ),
                                 BarChartRodData(
-                                  toY: data['expense'],
+                                  toY: (data['expense'] as int).toDouble(),
                                   color: AppTheme.errorColor,
                                   width: 12,
                                   borderRadius: const BorderRadius.vertical(

@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/transaction.dart';
 import '../config/api_config.dart';
@@ -36,7 +38,7 @@ class TransactionService {
         throw Exception('Failed to load transactions');
       }
     } catch (e) {
-      print('Get transactions error: $e');
+      debugPrint('Get transactions error: $e');
       return [];
     }
   }
@@ -44,10 +46,11 @@ class TransactionService {
   Future<Map<String, dynamic>?> createTransaction({
     required String walletId,
     required String type,
-    required double amount,
+    required int amount,
     String? categoryId,
     String? merchant,
     String? notes,
+    String? idempotencyKey,
   }) async {
     try {
       final token = await _getToken();
@@ -58,6 +61,7 @@ class TransactionService {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
+          'Idempotency-Key': idempotencyKey ?? createIdempotencyKey(),
         },
         body: jsonEncode({
           'walletId': walletId,
@@ -69,16 +73,17 @@ class TransactionService {
         }),
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         return {
           'transaction': TransactionItem.fromJson(data['transaction']),
           'warning': data['warning'],
+          'replayed': data['replayed'] == true,
         };
       }
       return null;
     } catch (e) {
-      print('Create transaction error: $e');
+      debugPrint('Create transaction error: $e');
       return null;
     }
   }
@@ -102,11 +107,11 @@ class TransactionService {
       if (response.statusCode == 200) {
         return jsonDecode(response.body) as Map<String, dynamic>;
       } else {
-        print('Scan receipt error: ${response.body}');
+        debugPrint('Scan receipt error: ${response.body}');
         return null;
       }
     } catch (e) {
-      print('Scan receipt exception: $e');
+      debugPrint('Scan receipt exception: $e');
       return null;
     }
   }
@@ -115,7 +120,7 @@ class TransactionService {
     required String id,
     required String walletId,
     required String type,
-    required double amount,
+    required int amount,
     String? categoryId,
     String? merchant,
     String? notes,
@@ -149,8 +154,14 @@ class TransactionService {
       }
       return null;
     } catch (e) {
-      print('Update transaction error: $e');
+      debugPrint('Update transaction error: $e');
       return null;
     }
   }
+}
+
+String createIdempotencyKey() {
+  final random = Random.secure();
+  return 'nala-${DateTime.now().microsecondsSinceEpoch}-'
+      '${random.nextInt(0x7fffffff).toRadixString(16)}';
 }

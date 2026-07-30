@@ -1,0 +1,547 @@
+# NALA Product & Engineering Plan
+
+Dokumen ini adalah sumber acuan utama untuk menyelaraskan proposal GEMASTIK,
+pengembangan produk, pengujian, dan validasi pengguna NALA.
+
+Terakhir diperbarui: 30 Juli 2026  
+Status produk: Beta internal / belum siap untuk pengguna publik
+
+## 1. Arah Produk
+
+### Identitas
+
+- Nama produk: **NALA**
+- Deskripsi: **AI Financial Wellness Companion untuk mahasiswa**
+- Tagline: **Atur uang nggak perlu ribet. Bareng Nala aja.**
+- Platform prototipe utama: **Android**
+- Arsitektur aplikasi: Flutter cross-platform dengan backend modular monolith
+
+### Target pengguna utama
+
+Mahasiswa aktif berusia 18–24 tahun yang menggunakan lebih dari satu media
+keuangan—uang tunai, rekening bank, atau dompet digital—dan kesulitan mencatat,
+memahami, serta mengendalikan pengeluaran bulanan.
+
+### Masalah utama
+
+1. Pencatatan transaksi terasa merepotkan dan mudah ditinggalkan.
+2. Saldo dan transaksi tersebar di beberapa media keuangan.
+3. Grafik keuangan tidak selalu menghasilkan tindakan yang mudah dipahami.
+4. Saran keuangan umum tidak mempertimbangkan kondisi aktual pengguna.
+
+### Tiga inovasi inti
+
+1. **Frictionless Financial Capture**  
+   Pencatatan melalui input cepat, scan struk, impor bukti transaksi, dan
+   percakapan dengan Nala.
+
+2. **Explainable Financial Habit Score**  
+   Indikator kebiasaan finansial dengan komponen, alasan perubahan, dan tindakan
+   perbaikan yang dapat dijelaskan.
+
+3. **Context-Aware AI Coach**  
+   Pendamping yang memakai ringkasan kondisi aktual pengguna, meminimalkan data
+   sensitif, dan selalu meminta konfirmasi sebelum mengubah data keuangan.
+
+Fitur lain seperti multi-wallet, budget, tagihan berulang, laporan, dan widget
+merupakan fitur pendukung, bukan inovasi utama.
+
+## 2. Prinsip Pengembangan
+
+1. Bukti lebih penting daripada jumlah fitur.
+2. Integritas nilai uang dan data pengguna tidak boleh dikompromikan.
+3. AI hanya menghasilkan saran atau draft; pengguna memegang keputusan akhir.
+4. Klaim proposal harus sesuai dengan implementasi dan hasil pengujian.
+5. Modular monolith dipertahankan sampai skala nyata membuktikan kebutuhan lain.
+6. Teknologi baru ditambahkan hanya jika menyelesaikan kebutuhan terukur.
+7. Setiap fitur dianggap selesai setelah memiliki acceptance criteria dan bukti.
+
+## 3. Kondisi Aktual
+
+Legenda:
+
+- ✅ Selesai dan sudah diverifikasi
+- 🟡 Berfungsi sebagian atau perlu diperkuat
+- ⬜ Belum tersedia
+- ⛔ Tidak menjadi prioritas versi kompetisi
+
+### Mobile
+
+| Area | Status | Kondisi aktual | Bukti selesai berikutnya |
+|---|---:|---|---|
+| Welcome dan login | ✅ | UI diperbarui dan memiliki widget test | Pertahankan tanpa overflow |
+| Secure token storage | ✅ | Token memakai `flutter_secure_storage` dan migrasi token lama | Tetap diuji di CI |
+| Dashboard | ✅ | Saldo, aksi cepat, budget, dan transaksi terbaru tersedia | Uji loading/error/empty state |
+| Multi-wallet | 🟡 | CRUD tersedia | Validasi, empty state, dan integration test |
+| Transaksi manual | 🟡 | CRUD, integer rupiah, dan idempotency tersedia | Integration test seluruh perubahan saldo |
+| Budget planner | 🟡 | CRUD dan progress tersedia | Edge case dan integration test |
+| Financial score | 🟡 | Skor serta tren tiga bulan tersedia | Formula baru, penjelasan, dan test |
+| AI Coach | 🟡 | Chat kontekstual dan pembuatan transaksi tersedia | Wajib diubah menjadi draft + konfirmasi |
+| Scan struk | 🟡 | Gemini mengekstrak gambar Base64 | Validasi file, schema output, review, evaluasi |
+| Deteksi SMS | 🟡 | Hanya mendeteksi kata GoPay/BCA dan “berhasil” | Turunkan menjadi eksperimen Android |
+| Home widget | 🟡 | Implementasi Android tersedia | Verifikasi pembaruan data dan pengujian perangkat |
+| Tagihan berulang | 🟡 | CRUD tersedia | Edit/nonaktif, status eksekusi, idempotency |
+| Profil | ✅ | Edit profil, password, loading, dan error state diperkuat | Test integrasi dengan backend |
+| Biometrik | ⬜ | Tombol masih placeholder | Local biometric app unlock |
+| Verifikasi email | ⬜ | Belum tersedia | Alur kirim dan verifikasi token |
+| Password reset | ⬜ | Belum tersedia | Token sekali pakai dan expiry |
+| Mode offline | ⬜ | Belum ada local queue/database | Pending/synced/failed + retry aman |
+| Laporan PDF | ⬜ | Belum tersedia | Laporan dapat dibuat dan dibagikan |
+| Push notification | ⬜ | FCM belum terpasang | Device registration dan notifikasi relevan |
+
+### Backend dan data
+
+| Area | Status | Kondisi aktual | Bukti selesai berikutnya |
+|---|---:|---|---|
+| REST API | 🟡 | Express router/controller dan Prisma tersedia | Versioning, schema validation, error format |
+| PostgreSQL | ✅ | Database utama dan constraint dasar tersedia | Migration terkontrol dan backup |
+| Nilai uang | ✅ | PostgreSQL `BIGINT`, Prisma `BigInt`, dan Flutter `int` | Pertahankan contract test |
+| Authentication | 🟡 | JWT 7 hari dan bcrypt | Access/refresh token, revoke, rate limit |
+| Authorization | 🟡 | Ownership check tersedia pada banyak endpoint | Test IDOR seluruh resource |
+| Redis | 🟡 | Container dan dependency tersedia tetapi belum digunakan | Gunakan hanya untuk kebutuhan nyata |
+| Recurring scheduler | 🟡 | Execution record, duplicate protection, dan bulan pendek tersedia | Perlu monitoring dan timezone production |
+| AI safety | 🟡 | Output AI diparsing langsung | Schema validation, privacy, confirmation |
+| Audit trail | ⬜ | Belum tersedia | Event keamanan dan perubahan data penting |
+| Backend test | 🟡 | Unit test dan recurring integration test tersedia | Perluas ke auth dan seluruh perubahan saldo |
+| Observability | ⬜ | Masih memakai `console.log` | Request ID, structured log, error tracking |
+| Production deployment | ⬜ | Docker Compose development tersedia | Image production, TLS, secrets, migration |
+
+### Proposal dan validasi
+
+| Area | Status | Tindakan |
+|---|---:|---|
+| Identitas produk | 🟡 | Gunakan “NALA” secara konsisten |
+| Target pengguna | 🟡 | Persempit ke mahasiswa 18–24 tahun |
+| Riset primer | ⬜ | Survei, wawancara, dan kutipan pengguna asli |
+| Usability testing | ⬜ | SUS, task success, time on task, error rate |
+| Evaluasi receipt extraction | ⬜ | Dataset struk dan metrik per field |
+| Performance testing | ⬜ | p50/p95, error rate, startup/load time |
+| Security testing | ⬜ | Checklist OWASP API dan test authorization |
+| Klaim dampak | 🟡 | Pisahkan target dari hasil aktual |
+| Screenshot aktual | 🟡 | Perbarui setelah UI setiap alur stabil |
+| Diagram arsitektur | 🟡 | Gambarkan implementasi modular monolith aktual |
+
+## 4. Gap Proposal yang Harus Diselesaikan
+
+| Klaim lama | Fakta saat ini | Keputusan |
+|---|---|---|
+| NALA Coach / NALA Dana Kelola | Identitas bercampur | Gunakan nama produk “NALA” |
+| Android dan iOS setara | Fitur SMS/widget berorientasi Android | Android-first, iOS sebagai roadmap |
+| SharedPreferences untuk token | Sudah memakai secure storage | Perbarui proposal |
+| Provider + Flutter Hooks | Hooks tidak digunakan; Provider placeholder | Sebut layered architecture atau hapus dependency |
+| Hive dan offline mode | Belum diimplementasikan | Jangan klaim implemented |
+| Clean Architecture | Struktur belum mengikuti dependency rule | Sebut feature-oriented layered architecture |
+| API Gateway | Tidak ada gateway terpisah | Sebut HTTPS REST API |
+| Multer untuk struk | Gambar dikirim dalam Base64 JSON | Dokumentasikan fakta atau ubah implementasi |
+| Email verification | Belum tersedia | Implementasikan sebelum menulis panduan final |
+| Setup wallet wizard | Backend membuat dompet utama otomatis | Sesuaikan panduan atau implementasikan wizard |
+| SMS mengisi transaksi otomatis | Baru deteksi kata sederhana | Jadikan eksperimen, bukan fitur inti |
+| Laporan PDF | Belum tersedia | Pertahankan status “planned” |
+| Push notification | Belum tersedia | Pertahankan status “planned” |
+| AI mencatat transaksi aman | AI langsung menulis transaksi | Ubah menjadi draft + konfirmasi |
+| Mode offline partial | Belum ada antrean lokal | Ubah status menjadi “planned” |
+
+## 5. Roadmap Implementasi
+
+Roadmap menggunakan milestone berbasis hasil, bukan tanggal buatan. Satu milestone
+ditutup hanya setelah acceptance criteria dan verifikasinya lengkap.
+
+### M0 — Baseline dan konsistensi
+
+Status: **In progress**
+
+- [x] Redesign welcome, login, dashboard, dan profil
+- [x] Pindahkan token ke secure storage
+- [x] Tambahkan widget test dasar mobile
+- [ ] Perbaiki workflow CI yang menunjuk ke folder `frontend`
+- [ ] Tambahkan backend typecheck dan test command ke CI
+- [ ] Tetapkan istilah produk serta arsitektur yang konsisten
+- [ ] Sinkronkan status fitur proposal dengan codebase
+
+Acceptance criteria:
+
+- Working tree bersih dan perubahan terkelompok.
+- CI berjalan otomatis pada push dan pull request.
+- Tidak ada klaim `implemented` tanpa alur yang dapat didemonstrasikan.
+
+### M1 — Integritas transaksi dan AI
+
+Status: **In progress**
+
+- [x] Migrasikan seluruh nominal dari `Float` ke integer rupiah
+- [x] Tambahkan batas nominal dan validasi enum/tanggal
+- [x] Tambahkan `idempotencyKey` unik pada pembuatan transaksi
+- [x] Ubah AI transaction menjadi draft
+- [x] Validasi output transaksi AI dengan schema yang ketat
+- [x] Tampilkan form review sebelum transaksi AI disimpan
+- [x] Pastikan AI tidak mengatakan “berhasil” sebelum konfirmasi
+- [ ] Tambahkan timeout dan fallback ketika Gemini gagal
+- [x] Tambahkan test untuk perhitungan saldo dan transaksi duplikat
+
+Acceptance criteria:
+
+- Retry request tidak menghasilkan transaksi ganda. ✅
+- AI tidak dapat langsung menulis transaksi.
+- Nilai uang tersimpan dan dihitung tanpa floating-point.
+- Semua jalur perubahan saldo memiliki integration test.
+
+### M2 — Authentication untuk pengguna nyata
+
+Status: **In progress**
+
+- [ ] Access token berumur singkat
+- [ ] Refresh token rotation dan session per perangkat
+- [ ] Logout/revoke session
+- [ ] Rate limit login dan registrasi
+- [ ] Password reset dengan token sekali pakai
+- [ ] Verifikasi email
+- [ ] Reauthentication sebelum penghapusan akun
+- [ ] Biometric app unlock pada perangkat yang mendukung
+- [ ] CORS production allowlist dan secret tanpa fallback
+
+Acceptance criteria:
+
+- Session dapat dilihat dan dicabut.
+- Password berubah menyebabkan session lama tidak lagi dipercaya.
+- Endpoint auth memiliki test sukses, gagal, expiry, dan rate limit.
+- Secret production wajib berasal dari environment/secret manager.
+
+### M3 — Keandalan fitur inti
+
+Status: **Planned**
+
+- [x] Recurring execution record per tagihan dan periode
+- [x] Duplicate protection untuk scheduler
+- [x] Perilaku tanggal 29–31 didefinisikan
+- [ ] Schema validation seluruh endpoint
+- [ ] Global error response yang konsisten
+- [ ] Pagination transaksi
+- [ ] Audit log untuk auth, profil, dan perubahan transaksi
+- [ ] Loading, empty, error, retry, dan session-expired state
+
+Acceptance criteria:
+
+- Restart atau lebih dari satu instance tidak menggandakan tagihan. ✅
+- Semua resource terlindungi ownership check yang diuji.
+- Error aman untuk pengguna dan memiliki request ID untuk diagnosis.
+
+### M4 — Tiga inovasi inti
+
+Status: **Planned**
+
+#### Frictionless Financial Capture
+
+- [ ] Input manual selesai dalam alur singkat
+- [ ] Receipt extraction menandai field yang tidak yakin
+- [ ] Pengguna dapat mengoreksi hasil sebelum menyimpan
+- [ ] Impor screenshot/share sebagai alternatif SMS
+- [ ] Deteksi SMS diposisikan sebagai eksperimen Android
+
+#### Explainable Financial Habit Score
+
+- [ ] Hapus diversifikasi pengeluaran sebagai indikator kesehatan
+- [ ] Tetapkan komponen dan bobot yang dapat dijelaskan
+- [ ] Tangani pemasukan nol, tanpa budget, dan pengguna baru
+- [ ] Jelaskan penyebab perubahan skor
+- [ ] Beri satu hingga tiga tindakan yang relevan
+- [ ] Simpan histori skor untuk evaluasi perubahan
+
+#### Context-Aware AI Coach
+
+- [ ] Kirim ringkasan minimum, bukan seluruh data mentah
+- [ ] Redaksi data personal yang tidak diperlukan
+- [ ] Batasi panjang input dan frekuensi request
+- [ ] Validasi output terstruktur
+- [ ] Sediakan fallback tanpa AI
+- [ ] Konfirmasi eksplisit untuk semua mutasi data
+
+Acceptance criteria:
+
+- Ketiga alur dapat didemonstrasikan end-to-end.
+- Pengguna selalu dapat memeriksa dan membatalkan perubahan.
+- Kegagalan AI tidak menghalangi pencatatan manual.
+
+### M5 — Pengujian dan validasi nasional
+
+Status: **Planned**
+
+- [ ] Survei kuantitatif dengan responden asli
+- [ ] Wawancara mendalam dan kutipan anonim
+- [ ] Usability test dengan tugas yang konsisten
+- [ ] Pilot penggunaan 14–30 hari
+- [ ] Evaluasi receipt extraction pada dataset representatif
+- [ ] Functional test report
+- [ ] Performance test report
+- [ ] Security checklist dan hasil test
+- [ ] Screenshot serta video aplikasi aktual
+
+Acceptance criteria:
+
+- Semua angka proposal dapat ditelusuri ke data mentah atau laporan.
+- Target dan hasil aktual ditampilkan terpisah.
+- Tidak ada persentase atau test result yang direkayasa.
+
+### M6 — Release beta
+
+Status: **Planned**
+
+- [ ] Production Docker image
+- [ ] Database migration terkontrol
+- [ ] Staging dan production environment
+- [ ] HTTPS/TLS
+- [ ] Secret management
+- [ ] Structured logging dan error tracking
+- [ ] Backup serta restore test PostgreSQL
+- [ ] Privacy notice, consent, export, dan delete data
+- [ ] Signed Android build dan internal testing
+
+Acceptance criteria:
+
+- Deployment dapat diulang dan di-rollback.
+- Backup pernah diuji untuk restore.
+- Crash/error production dapat dilacak tanpa membocorkan data sensitif.
+- Build beta dapat dipasang oleh peserta pilot.
+
+## 6. Metrik Keberhasilan
+
+Angka berikut adalah **target**, bukan hasil aktual.
+
+### Produk dan usability
+
+| Metrik | Target awal | Metode |
+|---|---:|---|
+| Task success pencatatan manual | ≥90% | Usability test |
+| Task success scan dan koreksi struk | ≥85% | Usability test |
+| SUS score | ≥75 | Kuesioner SUS |
+| Waktu median input manual | ≤35 detik | Event timestamp |
+| Waktu median scan sampai review | ≤15 detik | Event timestamp |
+| Retensi pilot hari ke-14 | ≥50% | Cohort pilot |
+
+### Receipt extraction
+
+| Metrik | Target awal |
+|---|---:|
+| Akurasi nominal | ≥90% |
+| Akurasi merchant | ≥85% |
+| Akurasi tanggal | ≥80% |
+| Akurasi kategori | ≥75% |
+| Full-record exact match | Diukur, tanpa target palsu |
+| Latensi p95 | ≤10 detik |
+
+### Engineering
+
+| Metrik | Target awal |
+|---|---:|
+| Test jalur transaksi kritis | 100% memiliki test |
+| API error rate saat uji beban | <1% |
+| Dashboard load p95 pada skenario uji | ≤2 detik |
+| Duplicate transaction pada retry test | 0 |
+| Critical security finding terbuka | 0 |
+| CI pada branch utama | Selalu lulus sebelum demo |
+
+### Dampak pilot
+
+Hasil hanya ditulis setelah pilot. Kandidat metrik:
+
+- Persentase pengguna yang lebih memahami pengeluaran terbesar.
+- Perubahan konsistensi pencatatan.
+- Perubahan kepatuhan terhadap budget.
+- Perubahan indikator kebiasaan finansial.
+- Persentase rekomendasi Nala yang dianggap dapat dilakukan.
+
+## 7. Rencana Pengujian
+
+### Functional
+
+- Auth: register, login, expiry, refresh, logout, reset password.
+- Wallet: ownership, saldo awal, edit, dan penghapusan.
+- Transaction: create, update, reversal, duplicate, dan concurrency.
+- Budget: batas, bulan/tahun, dan kategori.
+- Recurring: eksekusi sekali per periode dan edge case tanggal.
+- AI/OCR: valid, invalid, timeout, malformed JSON, dan fallback.
+
+### Usability
+
+Tugas minimum:
+
+1. Membuat akun dan dompet pertama.
+2. Mencatat pengeluaran manual.
+3. Scan struk, mengoreksi hasil, lalu menyimpan.
+4. Membuat budget makan.
+5. Memahami alasan perubahan Financial Habit Score.
+6. Meminta saran Nala dan mengonfirmasi draft transaksi.
+
+### Performance
+
+- Startup dan dashboard load.
+- `GET /transactions`.
+- `POST /transactions`.
+- Financial score calculation.
+- Receipt extraction latency.
+- Request bersamaan pada wallet yang sama.
+
+### Security
+
+- Invalid/expired JWT.
+- IDOR seluruh resource.
+- Brute-force login.
+- Payload dan upload berukuran ekstrem.
+- Output AI berbahaya atau tidak sesuai schema.
+- Prompt injection dari teks struk.
+- Sensitive data pada log.
+- Dependency audit.
+
+## 8. Privasi dan Data
+
+| Data | Penyimpanan/pemroses | Tujuan | Retensi target | Perlindungan |
+|---|---|---|---|---|
+| Email | PostgreSQL | Identitas dan autentikasi | Selama akun aktif | Access control |
+| Password | PostgreSQL | Autentikasi | Selama akun aktif | Hash bcrypt/Argon2id |
+| Token | Keystore/Keychain | Session | Sampai expiry/revoke | Secure storage |
+| Transaksi | PostgreSQL | Fitur inti | Selama akun aktif | Ownership authorization |
+| Foto struk | Backend/Gemini sementara | Ekstraksi | Hapus setelah proses/≤24 jam | HTTPS dan minimalisasi |
+| Ringkasan keuangan | Backend/Gemini | Insight kontekstual | Minimum yang diperlukan | Redaksi PII |
+| SMS/notifikasi | Perangkat | Eksperimen impor | Tidak dikirim mentah | Consent dan izin |
+| Event usability | Analytics/pilot dataset | Evaluasi produk | Selama studi | Pseudonimisasi |
+
+Sebelum pilot, pengguna harus mengetahui data apa yang diproses, tujuannya,
+cara mencabut izin, dan cara menghapus akun.
+
+## 9. Risiko dan Mitigasi
+
+| Risiko | Dampak | Mitigasi | Prioritas |
+|---|---|---|---:|
+| AI membuat transaksi salah | Saldo dan kepercayaan rusak | Draft, schema validation, konfirmasi | P0 |
+| Float menghasilkan nominal tidak presisi | Data finansial salah | Integer rupiah dan migration test | P0 |
+| Request ganda | Transaksi duplikat | Idempotency key dan unique constraint | P0 |
+| Cron berjalan pada beberapa instance | Tagihan ganda | Execution record dan unique period | P0 |
+| Token dicuri/tidak dapat dicabut | Account takeover | Refresh rotation dan revoke session | P0 |
+| Izin SMS ditolak Play Store | Distribusi gagal | Screenshot/share; SMS eksperimen | P1 |
+| Gemini timeout/hallucination | Alur gagal atau data salah | Timeout, fallback, review | P1 |
+| Klaim proposal tidak terbukti | Kredibilitas turun | Traceability dan laporan aktual | P0 |
+| Tidak ada riset primer | Relevansi produk diragukan | Survei, wawancara, pilot | P0 |
+| Scope terlalu besar | Fitur inti tidak stabil | Bekukan fitur di luar tiga inovasi | P0 |
+
+## 10. Definition of Done
+
+Sebuah fitur hanya boleh ditandai **Implemented** apabila:
+
+- [ ] Alur utama bekerja end-to-end.
+- [ ] Input dan error pada trust boundary ditangani.
+- [ ] Loading, empty, error, dan retry state tersedia jika relevan.
+- [ ] Data pengguna lain tidak dapat diakses.
+- [ ] Jalur kritis memiliki minimal satu automated test.
+- [ ] Tidak ada analyzer/typecheck error.
+- [ ] Acceptance criteria diverifikasi.
+- [ ] Screenshot/video aktual tersedia untuk fitur proposal.
+- [ ] Dokumentasi dan status proposal diperbarui.
+
+Selain itu:
+
+- **Partial** berarti sebagian alur bekerja tetapi belum memenuhi Definition of Done.
+- **Planned** berarti belum dapat didemonstrasikan.
+- **Validated** hanya digunakan setelah ada hasil pengguna atau pengujian aktual.
+
+## 11. Prioritas Backlog
+
+### P0 — kerjakan sebelum fitur baru
+
+1. AI draft + konfirmasi.
+2. Integer rupiah.
+3. Idempotency transaksi.
+4. Recurring execution safety.
+5. CI yang benar-benar berjalan.
+6. Backend integration test.
+7. Sinkronisasi klaim proposal.
+8. Rencana dan pelaksanaan riset pengguna.
+
+### P1 — sebelum pilot
+
+1. Schema validation dan global error handler.
+2. Session/refresh token.
+3. Password reset dan email verification.
+4. Formula Financial Habit Score baru.
+5. Receipt review dan evaluasi.
+6. Audit log dasar.
+7. Structured logging dan error tracking.
+8. Privacy notice dan consent.
+
+### P2 — setelah alur inti stabil
+
+1. Offline queue.
+2. Laporan PDF.
+3. Push notification.
+4. Biometric app unlock.
+5. Screenshot/share import.
+6. Production deployment.
+
+### Tidak dikerjakan untuk versi kompetisi
+
+- Microservices
+- Kafka
+- Kubernetes
+- gRPC
+- Shared budget
+- Investasi
+- Pembayaran/QRIS
+- Core banking adapter
+- Gamifikasi besar
+- Native Android dan iOS terpisah
+
+## 12. Traceability Proposal
+
+Setiap klaim penting pada proposal final harus memiliki bukti:
+
+| Klaim | Bukti yang diterima | Lokasi bukti |
+|---|---|---|
+| Fitur implemented | Test + screenshot/video aktual | Repo dan deliverable |
+| Akurasi receipt extraction | Dataset + hasil evaluasi per field | Laporan evaluasi |
+| Usability | Raw response + kalkulasi SUS | Laporan usability |
+| Performance | Script + hasil p50/p95 | Laporan performance |
+| Security | Checklist + test output | Laporan security |
+| Dampak | Baseline dan hasil pilot | Laporan pilot |
+| Arsitektur | Diagram sesuai deployment aktual | Proposal |
+| Privasi | Data flow dan consent | Proposal/aplikasi |
+
+## 13. Cara Memperbarui Dokumen
+
+Pada akhir setiap sesi pengembangan:
+
+1. Perbarui checkbox milestone yang benar-benar selesai.
+2. Tambahkan atau ubah bukti pada tabel kondisi aktual.
+3. Jangan mengubah target menjadi hasil tanpa data.
+4. Catat keputusan yang mengubah scope pada bagian berikut.
+5. Sinkronkan status proposal setelah fitur memenuhi Definition of Done.
+
+### Log verifikasi
+
+| Tanggal | Perubahan | Bukti |
+|---|---|---|
+| 30 Juli 2026 | AI Coach diubah menjadi draft + konfirmasi | Backend typecheck, 1 backend test, Flutter analyzer, 7 Flutter test |
+| 30 Juli 2026 | Nominal dimigrasikan dari floating-point ke integer rupiah | 4 kolom PostgreSQL bertipe `bigint`, 2 backend test, 8 Flutter test |
+| 30 Juli 2026 | Pembuatan transaksi dilindungi idempotency key | Unique constraint database, backend test, Flutter key test, dan API replay smoke test |
+| 30 Juli 2026 | Scheduler tagihan dilindungi marker eksekusi per periode | Unique constraint, backend test, dan pemanggilan scheduler dua kali |
+| 30 Juli 2026 | Tagihan tanggal 29–31 diproses pada hari terakhir bulan pendek | Unit test bulan biasa, kabisat, dan bulan 30 hari |
+| 30 Juli 2026 | Input transaksi dibatasi dan divalidasi konsisten | Typecheck dan unit test nominal, tipe, tanggal kalender, serta limit list |
+| 30 Juli 2026 | Jalur HTTP transaksi diuji end-to-end | Login, validasi input, create, replay, conflict, perubahan saldo sekali, delete, dan pemulihan saldo |
+
+### Log keputusan
+
+| Tanggal | Keputusan | Alasan |
+|---|---|---|
+| 30 Juli 2026 | Android menjadi platform prototipe utama | Fitur SMS dan widget bersifat platform-specific |
+| 30 Juli 2026 | Modular monolith dipertahankan | Lebih sederhana dan cukup untuk beta/pilot |
+| 30 Juli 2026 | Fokus dibatasi pada tiga inovasi inti | Menghindari feature dump dan memperkuat bukti |
+| 30 Juli 2026 | Financial Health Score diarahkan menjadi Financial Habit Score | Tidak diklaim sebagai diagnosis atau skor tervalidasi ilmiah |
+| 30 Juli 2026 | AI wajib memakai draft dan konfirmasi | Melindungi integritas data finansial |
+| 30 Juli 2026 | Nominal disimpan sebagai BIGINT dan dikirim sebagai integer JSON | Rupiah tidak membutuhkan pecahan dan batasnya melampaui PostgreSQL INT |
+| 30 Juli 2026 | Idempotency transaksi dijamin unique constraint PostgreSQL | Perlindungan tetap berlaku pada restart dan banyak instance backend |
+| 30 Juli 2026 | RecurringExecution dipisahkan dari Transaction | Marker periode tetap ada walaupun transaksi hasil scheduler dihapus |
+
+## 14. Langkah Berikutnya
+
+Pekerjaan coding berikutnya tetap berada di **M1 — Integritas transaksi dan AI**:
+
+1. Tambahkan timeout dan fallback Gemini.
+2. Perbaiki workflow CI dan jalankan backend integration test.
+3. Audit seluruh jalur perubahan saldo agar memenuhi acceptance criteria M1.

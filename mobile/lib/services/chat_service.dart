@@ -1,10 +1,32 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'auth_service.dart';
 import 'token_storage.dart';
 
+class ChatReply {
+  final String message;
+  final Map<String, dynamic>? transactionDraft;
+
+  const ChatReply({required this.message, this.transactionDraft});
+}
+
+Map<String, dynamic>? parseTransactionDraft(Object? value) {
+  if (value is! Map<String, dynamic>) return null;
+  final type = value['type'];
+  final amount = value['amount'];
+  if ((type != 'INCOME' && type != 'EXPENSE') ||
+      amount is! int ||
+      amount <= 0 ||
+      value['walletId'] is! String ||
+      value['categoryId'] is! String) {
+    return null;
+  }
+  return value;
+}
+
 class ChatService {
-  Future<String?> sendMessage(String message) async {
+  Future<ChatReply?> sendMessage(String message) async {
     try {
       final token = await TokenStorage.read();
       if (token == null) return null;
@@ -19,15 +41,26 @@ class ChatService {
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['reply'];
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final draft = data['transactionDraft'];
+        return ChatReply(
+          message: data['reply'] as String? ?? 'Aku belum punya jawaban.',
+          transactionDraft: parseTransactionDraft(draft),
+        );
       } else {
-        print('Failed to send chat: ${response.statusCode} - ${response.body}');
-        return 'Maaf, Nala sedang mengalami gangguan teknis 😔 (Status: ${response.statusCode})';
+        debugPrint(
+          'Failed to send chat: ${response.statusCode} - ${response.body}',
+        );
+        return ChatReply(
+          message:
+              'Maaf, Nala sedang mengalami gangguan teknis 😔 (Status: ${response.statusCode})',
+        );
       }
     } catch (e) {
-      print('Chat API Error: $e');
-      return 'Maaf, koneksi Nala terputus. Coba lagi nanti ya!';
+      debugPrint('Chat API Error: $e');
+      return const ChatReply(
+        message: 'Maaf, koneksi Nala terputus. Coba lagi nanti ya!',
+      );
     }
   }
 }

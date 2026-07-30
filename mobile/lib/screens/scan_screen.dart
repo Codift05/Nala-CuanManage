@@ -123,7 +123,7 @@ class _ScanScreenState extends State<ScanScreen> {
       final result = await _transactionService.createTransaction(
         walletId: _selectedWallet!.id,
         type: 'EXPENSE', // Usually receipts are expenses
-        amount: double.tryParse(_amountController.text) ?? 0,
+        amount: int.tryParse(_amountController.text) ?? 0,
         categoryId: _selectedCategory,
         merchant: _merchantController.text,
         notes: _notesController.text,

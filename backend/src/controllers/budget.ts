@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
+import { parseRupiah } from '../utils/money';
 
 export const createBudget = async (req: Request, res: Response) => {
   try {
@@ -14,9 +15,9 @@ export const createBudget = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'categoryId, amount, month, and year are required' });
     }
 
-    const numericAmount = Number(amount);
-    if (isNaN(numericAmount) || numericAmount < 0) {
-      return res.status(400).json({ message: 'amount must be a positive number' });
+    const numericAmount = parseRupiah(amount, { allowZero: true });
+    if (numericAmount === null) {
+      return res.status(400).json({ message: 'amount must be a whole rupiah value' });
     }
 
     // Check if budget for this category, month, and year already exists
@@ -99,9 +100,9 @@ export const updateBudget = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Budget not found' });
     }
 
-    const numericAmount = Number(amount);
-    if (isNaN(numericAmount) || numericAmount < 0) {
-      return res.status(400).json({ message: 'amount must be a positive number' });
+    const numericAmount = parseRupiah(amount, { allowZero: true });
+    if (numericAmount === null) {
+      return res.status(400).json({ message: 'amount must be a whole rupiah value' });
     }
 
     const updatedBudget = await prisma.budget.update({

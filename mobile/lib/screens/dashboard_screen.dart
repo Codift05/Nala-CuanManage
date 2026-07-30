@@ -36,16 +36,16 @@ class DashboardScreenState extends State<DashboardScreen> {
   bool _isLoading = true;
   bool _isRefreshing = false;
   bool _isBalanceVisible = true;
-  double _totalBalance = 0;
+  int _totalBalance = 0;
   List<Wallet> _wallets = [];
   List<TransactionItem> _recentTransactions = [];
   int _healthScore = 0;
   String _nudgeMessage = '';
   String _userName = 'Pengguna';
   List<Budget> _budgets = [];
-  Map<String, double> _expenseByCategory = {};
-  double _monthlyExpense = 0;
-  double _monthlyBudget = 0;
+  Map<String, int> _expenseByCategory = {};
+  int _monthlyExpense = 0;
+  int _monthlyBudget = 0;
 
   final NumberFormat _currencyFormat = NumberFormat.currency(
     locale: 'id_ID',
@@ -164,7 +164,7 @@ class DashboardScreenState extends State<DashboardScreen> {
       final budgets = results[3] as List<Budget>;
       final user = results[4] as Map<String, dynamic>?;
 
-      double total = 0;
+      int total = 0;
       for (var w in wallets) {
         total += w.balance;
       }
@@ -172,8 +172,8 @@ class DashboardScreenState extends State<DashboardScreen> {
       final monthlyTransactions = transactions.where(
         (tx) => tx.date.month == now.month && tx.date.year == now.year,
       );
-      final expenseByCategory = <String, double>{};
-      double monthlyExpense = 0;
+      final expenseByCategory = <String, int>{};
+      int monthlyExpense = 0;
       for (final tx in monthlyTransactions) {
         if (tx.type != 'EXPENSE') continue;
         monthlyExpense += tx.amount;
@@ -189,7 +189,7 @@ class DashboardScreenState extends State<DashboardScreen> {
         _totalBalance = total;
         _recentTransactions = transactions.take(3).toList();
         _budgets = budgets;
-        _monthlyBudget = budgets.fold(0.0, (sum, item) => sum + item.amount);
+        _monthlyBudget = budgets.fold(0, (sum, item) => sum + item.amount);
         _monthlyExpense = monthlyExpense;
         _expenseByCategory = expenseByCategory;
         _userName = (user?['name'] as String?)?.trim().isNotEmpty == true
@@ -773,7 +773,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                     strokeWidth: 15,
                     data: entries.asMap().entries.map((entry) {
                       return DonutChartData(
-                        entry.value.value,
+                        entry.value.value.toDouble(),
                         colors[entry.key % colors.length],
                       );
                     }).toList(),

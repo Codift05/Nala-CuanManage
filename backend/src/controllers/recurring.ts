@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/auth';
+import { parseRupiah } from '../utils/money';
 
 export const createRecurringBill = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -17,14 +18,27 @@ export const createRecurringBill = async (req: AuthRequest, res: Response): Prom
       return;
     }
 
+    const numericAmount = parseRupiah(amount);
+    if (numericAmount === null) {
+      res.status(400).json({ error: 'Nominal harus berupa rupiah bulat yang valid' });
+      return;
+    }
+    const numericDueDate = Number(dueDate);
+    if (!Number.isInteger(numericDueDate) ||
+        numericDueDate < 1 ||
+        numericDueDate > 31) {
+      res.status(400).json({ error: 'Tanggal jatuh tempo harus antara 1-31' });
+      return;
+    }
+
     const bill = await prisma.recurringBill.create({
       data: {
         userId,
         title,
-        amount: Number(amount),
+        amount: numericAmount,
         categoryId,
         walletId,
-        dueDate: Number(dueDate)
+        dueDate: numericDueDate
       }
     });
 

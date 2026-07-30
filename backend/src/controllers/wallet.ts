@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
+import { parseRupiah } from '../utils/money';
 
 export const createWallet = async (req: Request, res: Response) => {
   try {
@@ -14,12 +15,17 @@ export const createWallet = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Name and type are required' });
     }
 
+    const initialBalance = parseRupiah(balance ?? 0, { allowZero: true });
+    if (initialBalance === null) {
+      return res.status(400).json({ message: 'Saldo harus berupa rupiah bulat yang valid' });
+    }
+
     const wallet = await prisma.wallet.create({
       data: {
         userId,
         name,
         type,
-        balance: balance || 0
+        balance: initialBalance
       }
     });
 
@@ -92,12 +98,19 @@ export const updateWallet = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Wallet not found' });
     }
 
+    const updatedBalance = balance === undefined
+      ? wallet.balance
+      : parseRupiah(balance, { allowZero: true });
+    if (updatedBalance === null) {
+      return res.status(400).json({ message: 'Saldo harus berupa rupiah bulat yang valid' });
+    }
+
     const updatedWallet = await prisma.wallet.update({
       where: { id },
       data: {
         name: name !== undefined ? name : wallet.name,
         type: type !== undefined ? type : wallet.type,
-        balance: balance !== undefined ? balance : wallet.balance
+        balance: updatedBalance
       }
     });
 

@@ -7,6 +7,10 @@ import 'package:nala/screens/edit_profile_screen.dart';
 import 'package:nala/screens/login_screen.dart';
 import 'package:nala/screens/onboarding_screen.dart';
 import 'package:nala/services/token_storage.dart';
+import 'package:nala/services/chat_service.dart';
+import 'package:nala/services/transaction_service.dart';
+import 'package:nala/models/transaction.dart';
+import 'package:nala/models/wallet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -34,6 +38,56 @@ void main() {
       isFalse,
     );
     expect(await TokenStorage.read(), 'legacy-token');
+  });
+
+  test('AI transaction draft rejects unsafe payloads', () {
+    expect(
+      parseTransactionDraft({
+        'type': 'EXPENSE',
+        'amount': 25000,
+        'walletId': 'wallet-1',
+        'categoryId': 'Food',
+      }),
+      isNotNull,
+    );
+    expect(
+      parseTransactionDraft({
+        'type': 'EXPENSE',
+        'amount': -1,
+        'walletId': 'wallet-1',
+        'categoryId': 'Food',
+      }),
+      isNull,
+    );
+  });
+
+  test('Money models preserve whole rupiah values', () {
+    final wallet = Wallet.fromJson({
+      'id': 'wallet-1',
+      'name': 'Dompet Utama',
+      'type': 'CASH',
+      'balance': 1000000000000,
+    });
+    final transaction = TransactionItem.fromJson({
+      'id': 'tx-1',
+      'walletId': 'wallet-1',
+      'type': 'EXPENSE',
+      'amount': 25000,
+      'date': '2026-07-30T00:00:00.000Z',
+    });
+
+    expect(wallet.balance, isA<int>());
+    expect(wallet.balance, 1000000000000);
+    expect(transaction.amount, 25000);
+  });
+
+  test('Transaction idempotency keys are unique and API-safe', () {
+    final first = createIdempotencyKey();
+    final second = createIdempotencyKey();
+
+    expect(first, isNot(second));
+    expect(first.length, inInclusiveRange(16, 128));
+    expect(RegExp(r'^[A-Za-z0-9._:-]+$').hasMatch(first), isTrue);
   });
 
   testWidgets('App loads smoke test', (WidgetTester tester) async {

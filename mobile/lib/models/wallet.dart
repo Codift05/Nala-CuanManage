@@ -2,7 +2,7 @@ class Wallet {
   final String id;
   final String name;
   final String type;
-  final double balance;
+  final int balance;
 
   Wallet({
     required this.id,
@@ -16,7 +16,7 @@ class Wallet {
       id: json['id'],
       name: json['name'],
       type: json['type'],
-      balance: (json['balance'] as num).toDouble(),
+      balance: (json['balance'] as num).toInt(),
     );
   }
 

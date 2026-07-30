@@ -264,7 +264,7 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
 
     setState(() => _isSaving = true);
 
-    final amount = double.tryParse(
+    final amount = int.tryParse(
             _amountController.text.replaceAll(RegExp(r'[^0-9]'), '')) ??
         0;
     final dueDate = int.tryParse(_dueDateController.text) ?? 1;

@@ -24,9 +24,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
   );
 
   bool _isLoading = true;
-  double _totalIncome = 0;
-  double _totalExpense = 0;
-  double _totalBalance = 0;
+  int _totalIncome = 0;
+  int _totalExpense = 0;
+  int _totalBalance = 0;
   List<Map<String, dynamic>> _transactionGroups = [];
   String _selectedFilter = 'Semua';
   List<TransactionItem> _allTransactions = [];
@@ -95,7 +95,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
       setState(() {
         _totalBalance = wallets.fold(
-          0.0,
+          0,
           (total, wallet) => total + wallet.balance,
         );
         _isLoading = false;
@@ -133,8 +133,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
       return true;
     }).toList();
 
-    double income = 0;
-    double expense = 0;
+    int income = 0;
+    int expense = 0;
 
     for (var tx in _filteredMonthlyTransactions) {
       if (tx.type == 'INCOME') {
@@ -214,7 +214,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
     });
   }
 
-  String _formatCurrency(double amount) {
+  String _formatCurrency(int amount) {
     final isNegative = amount < 0;
     final absAmount = amount.abs();
     return '${isNegative ? '- ' : '+ '}${_currencyFormat.format(absAmount)}';
@@ -505,7 +505,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
   Widget _buildSummaryItem(
     String label,
-    double amount,
+    int amount,
     IconData icon,
     Color color,
   ) {
@@ -632,7 +632,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
   }
 
   Widget _buildTransactionItem(Map<String, dynamic> tx, bool showDivider) {
-    final amount = (tx['amount'] as num).toDouble();
+    final amount = (tx['amount'] as num).toInt();
     final isIncome = amount > 0;
     final iconColor = tx['iconColor'] as Color;
     final rawTx = tx['rawTransaction'] as TransactionItem;

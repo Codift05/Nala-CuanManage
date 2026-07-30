@@ -37,7 +37,7 @@ class WalletService {
     }
   }
 
-  Future<Wallet?> createWallet(String name, String type, double balance) async {
+  Future<Wallet?> createWallet(String name, String type, int balance) async {
     try {
       final token = await _getToken();
       if (token == null) throw Exception('No token found');

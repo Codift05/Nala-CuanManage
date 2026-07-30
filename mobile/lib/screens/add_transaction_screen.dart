@@ -37,8 +37,13 @@ class RupiahInputFormatter extends TextInputFormatter {
 
 class AddTransactionScreen extends StatefulWidget {
   final TransactionItem? transactionToEdit;
+  final Map<String, dynamic>? transactionDraft;
 
-  const AddTransactionScreen({super.key, this.transactionToEdit});
+  const AddTransactionScreen({
+    super.key,
+    this.transactionToEdit,
+    this.transactionDraft,
+  });
 
   @override
   State<AddTransactionScreen> createState() => _AddTransactionScreenState();
@@ -60,7 +65,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   List<Wallet> _wallets = [];
   bool _isLoading = false;
 
-  List<String> _categories = [
+  final List<String> _categories = [
     'Food',
     'Transport',
     'Entertainment',
@@ -87,6 +92,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       _selectedWalletId = widget.transactionToEdit!.walletId;
       _merchantController.text = widget.transactionToEdit!.merchant ?? '';
       _notesController.text = widget.transactionToEdit!.notes ?? '';
+    } else if (widget.transactionDraft case final draft?) {
+      _type = draft['type'] as String;
+      _amountController.text = _rupiahFormatter.formatNumber(
+        draft['amount'] as num,
+      );
+      _selectedWalletId = draft['walletId'] as String;
+      _selectedCategory = draft['categoryId'] as String;
+      _merchantController.text = draft['merchant'] as String? ?? '';
+      _notesController.text = draft['notes'] as String? ?? '';
     }
     _loadWallets();
   }
@@ -113,7 +127,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
     setState(() => _isLoading = true);
 
-    final amount = double.tryParse(
+    final amount = int.tryParse(
           _amountController.text.replaceAll(RegExp(r'[^0-9]'), ''),
         ) ??
         0;
@@ -186,7 +200,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         title: Text(
           widget.transactionToEdit != null
               ? 'Edit Transaksi'
-              : 'Tambah Transaksi',
+              : widget.transactionDraft != null
+                  ? 'Tinjau Draft Nala'
+                  : 'Tambah Transaksi',
         ),
       ),
       body: _wallets.isEmpty && _isLoading
@@ -228,7 +244,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                 color: Colors.white,
                               )
                             : Text(
-                                'Simpan Transaksi',
+                                widget.transactionDraft != null
+                                    ? 'Konfirmasi & Simpan'
+                                    : 'Simpan Transaksi',
                                 style: GoogleFonts.interTight(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -374,6 +392,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
+          // Controlled value changes after the wallets API finishes loading.
+          // ignore: deprecated_member_use
           value: _selectedWalletId,
           decoration: const InputDecoration(),
           items: _wallets.map((w) {
@@ -406,6 +426,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
+          // Controlled value changes with the income/expense selector.
+          // ignore: deprecated_member_use
           value: _selectedCategory,
           decoration: const InputDecoration(),
           items: _categories.map((c) {

@@ -13,52 +13,56 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(uuid())
-  email        String        @unique
-  name         String
-  avatar       String?
-  passwordHash String
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  wallets      Wallet[]
-  transactions Transaction[]
-  budgets      Budget[]
+  id             String          @id @default(uuid())
+  email          String          @unique
+  name           String
+  avatar         String?
+  passwordHash   String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  wallets        Wallet[]
+  transactions   Transaction[]
+  budgets        Budget[]
   recurringBills RecurringBill[]
 }
 
 model Wallet {
-  id           String        @id @default(uuid())
-  userId       String
-  name         String
-  type         String        // CASH, BANK, EWALLET
-  balance      Float         @default(0)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  user         User          @relation(fields: [userId], references: [id])
-  transactions Transaction[]
+  id             String          @id @default(uuid())
+  userId         String
+  name           String
+  type           String // CASH, BANK, EWALLET
+  balance        BigInt          @default(0)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  user           User            @relation(fields: [userId], references: [id])
+  transactions   Transaction[]
   recurringBills RecurringBill[]
 }
 
 model Transaction {
-  id          String   @id @default(uuid())
-  userId      String
-  walletId    String
-  type        String   // INCOME, EXPENSE
-  amount      Float
-  categoryId  String?  // e.g., Food, Transport
-  merchant    String?
-  notes       String?
-  date        DateTime @default(now())
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id])
-  wallet      Wallet   @relation(fields: [walletId], references: [id])
+  id                 String              @id @default(uuid())
+  userId             String
+  walletId           String
+  type               String // INCOME, EXPENSE
+  amount             BigInt
+  categoryId         String? // e.g., Food, Transport
+  merchant           String?
+  notes              String?
+  idempotencyKey     String?             @db.VarChar(128)
+  date               DateTime            @default(now())
+  createdAt          DateTime            @default(now())
+  user               User                @relation(fields: [userId], references: [id])
+  wallet             Wallet              @relation(fields: [walletId], references: [id])
+  recurringExecution RecurringExecution?
+
+  @@unique([userId, idempotencyKey])
 }
 
 model Budget {
   id         String   @id @default(uuid())
   userId     String
   categoryId String
-  amount     Float
+  amount     BigInt
   month      Int
   year       Int
   createdAt  DateTime @default(now())
@@ -69,15 +73,28 @@ model Budget {
 }
 
 model RecurringBill {
-  id          String   @id @default(uuid())
-  userId      String
-  title       String
-  amount      Float
-  categoryId  String
-  walletId    String
-  dueDate     Int      // Day of month 1-31
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id])
-  wallet      Wallet   @relation(fields: [walletId], references: [id])
+  id         String               @id @default(uuid())
+  userId     String
+  title      String
+  amount     BigInt
+  categoryId String
+  walletId   String
+  dueDate    Int // Day of month 1-31
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+  user       User                 @relation(fields: [userId], references: [id])
+  wallet     Wallet               @relation(fields: [walletId], references: [id])
+  executions RecurringExecution[]
+}
+
+model RecurringExecution {
+  id              String        @id @default(uuid())
+  recurringBillId String
+  period          String        @db.VarChar(7)
+  transactionId   String?       @unique
+  createdAt       DateTime      @default(now())
+  recurringBill   RecurringBill @relation(fields: [recurringBillId], references: [id], onDelete: Cascade)
+  transaction     Transaction?  @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+
+  @@unique([recurringBillId, period])
 }

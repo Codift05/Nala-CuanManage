@@ -1,7 +1,7 @@
 class RecurringBill {
   final String id;
   final String title;
-  final double amount;
+  final int amount;
   final String categoryId;
   final String walletId;
   final int dueDate;
@@ -21,7 +21,7 @@ class RecurringBill {
     return RecurringBill(
       id: json['id'],
       title: json['title'],
-      amount: (json['amount'] as num).toDouble(),
+      amount: (json['amount'] as num).toInt(),
       categoryId: json['categoryId'],
       walletId: json['walletId'],
       dueDate: json['dueDate'],

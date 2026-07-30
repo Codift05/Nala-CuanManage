@@ -213,7 +213,7 @@ class _AddBudgetSheetState extends State<_AddBudgetSheet> {
 
     setState(() => _isSaving = true);
 
-    final amount = double.tryParse(
+    final amount = int.tryParse(
             _amountController.text.replaceAll(RegExp(r'[^0-9]'), '')) ??
         0;
 

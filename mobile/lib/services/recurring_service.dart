@@ -38,7 +38,7 @@ class RecurringService {
 
   Future<RecurringBill?> createRecurringBill({
     required String title,
-    required double amount,
+    required int amount,
     required String categoryId,
     required String walletId,
     required int dueDate,

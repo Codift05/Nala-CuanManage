@@ -2,7 +2,7 @@ class TransactionItem {
   final String id;
   final String walletId;
   final String type; // INCOME, EXPENSE
-  final double amount;
+  final int amount;
   final String? categoryId;
   final String? merchant;
   final String? notes;
@@ -26,12 +26,13 @@ class TransactionItem {
       id: json['id'],
       walletId: json['walletId'],
       type: json['type'],
-      amount: (json['amount'] as num).toDouble(),
+      amount: (json['amount'] as num).toInt(),
       categoryId: json['categoryId'],
       merchant: json['merchant'],
       notes: json['notes'],
       date: DateTime.parse(json['date']),
-      wallet: json['wallet'] != null ? WalletInfo.fromJson(json['wallet']) : null,
+      wallet:
+          json['wallet'] != null ? WalletInfo.fromJson(json['wallet']) : null,
     );
   }
 }

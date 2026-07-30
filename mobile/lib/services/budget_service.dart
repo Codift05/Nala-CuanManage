@@ -47,7 +47,7 @@ class BudgetService {
 
   Future<Budget?> createBudget({
     required String categoryId,
-    required double amount,
+    required int amount,
     required int month,
     required int year,
   }) async {

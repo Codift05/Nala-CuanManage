@@ -8,7 +8,8 @@
     "start": "node --require ts-node/register src/index.ts",
     "seed": "node --require ts-node/register seed.ts",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --require ts-node/register --test test/*.test.ts",
+    "test:integration": "node --require ts-node/register test/recurring.integration.ts && node --require ts-node/register test/transaction.integration.ts"
   },
   "keywords": [],
   "author": "",

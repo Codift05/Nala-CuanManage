@@ -209,7 +209,7 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
 
     setState(() => _isSaving = true);
 
-    final balance = double.tryParse(
+    final balance = int.tryParse(
             _balanceController.text.replaceAll(RegExp(r'[^0-9]'), '')) ??
         0;
 

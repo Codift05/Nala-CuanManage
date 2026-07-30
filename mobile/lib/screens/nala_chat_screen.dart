@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/chat_service.dart';
 import '../theme/app_theme.dart';
+import 'add_transaction_screen.dart';
 
 class ChatMessage {
   final String text;
@@ -22,7 +23,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
   final ChatService _chatService = ChatService();
   final ScrollController _scrollController = ScrollController();
 
-  List<ChatMessage> _messages = [
+  final List<ChatMessage> _messages = [
     ChatMessage(
         text:
             'Hei! Aku Nala, asisten keuangan pribadimu. Ada yang bisa aku bantu seputar keuanganmu bulan ini?',
@@ -53,13 +54,13 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
     _textController.clear();
     _scrollToBottom();
 
-    final reply = await _chatService.sendMessage(text);
+    final response = await _chatService.sendMessage(text);
 
     if (mounted) {
       setState(() {
         _isLoading = false;
-        if (reply != null) {
-          _messages.add(ChatMessage(text: reply, isUser: false));
+        if (response != null) {
+          _messages.add(ChatMessage(text: response.message, isUser: false));
         } else {
           _messages.add(ChatMessage(
               text: 'Maaf, koneksi Nala terputus. Coba lagi nanti ya!',
@@ -67,6 +68,28 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
         }
       });
       _scrollToBottom();
+
+      final draft = response?.transactionDraft;
+      if (draft != null) {
+        final saved = await Navigator.push<bool>(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AddTransactionScreen(transactionDraft: draft),
+          ),
+        );
+        if (!mounted) return;
+        setState(() {
+          _messages.add(
+            ChatMessage(
+              text: saved == true
+                  ? 'Transaksinya sudah tersimpan setelah kamu konfirmasi.'
+                  : 'Draft belum disimpan. Kamu tetap memegang kendali.',
+              isUser: false,
+            ),
+          );
+        });
+        _scrollToBottom();
+      }
     }
   }
 

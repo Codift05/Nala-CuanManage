@@ -1,5 +1,12 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
+import { parseRupiah } from '../utils/money';
+import { parseIdempotencyKey } from '../utils/idempotency';
+import {
+  parseTransactionDate,
+  parseTransactionLimit,
+  parseTransactionType,
+} from '../utils/transactionInput';
 
 export const createTransaction = async (req: Request, res: Response) => {
   try {
@@ -14,29 +21,63 @@ export const createTransaction = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'walletId, type, and amount are required' });
     }
 
-    if (type !== 'INCOME' && type !== 'EXPENSE') {
+    const transactionType = parseTransactionType(type);
+    if (!transactionType) {
       return res.status(400).json({ message: 'type must be INCOME or EXPENSE' });
     }
 
-    // Verify wallet belongs to user
+    const transactionDate = parseTransactionDate(date);
+    if (transactionDate === null) {
+      return res.status(400).json({ message: 'date must be a valid ISO date' });
+    }
+
+    const idempotencyKey = parseIdempotencyKey(req.get('Idempotency-Key'));
+    if (!idempotencyKey) {
+      return res.status(400).json({ message: 'Valid Idempotency-Key header is required' });
+    }
+
+    const numericAmount = parseRupiah(amount);
+    if (numericAmount === null) {
+      return res.status(400).json({ message: 'amount must be a whole rupiah value' });
+    }
+
+    const existingTransaction = await prisma.transaction.findUnique({
+      where: { userId_idempotencyKey: { userId, idempotencyKey } },
+      include: { wallet: { select: { name: true, type: true } } }
+    });
+    if (existingTransaction) {
+      const sameRequest =
+        existingTransaction.walletId === walletId &&
+        existingTransaction.type === transactionType &&
+        existingTransaction.amount === numericAmount &&
+        existingTransaction.categoryId === (categoryId ?? null) &&
+        existingTransaction.merchant === (merchant ?? null) &&
+        existingTransaction.notes === (notes ?? null) &&
+        (transactionDate === undefined ||
+          existingTransaction.date.getTime() === transactionDate.getTime());
+      if (!sameRequest) {
+        return res.status(409).json({
+          message: 'Idempotency-Key sudah digunakan untuk transaksi berbeda'
+        });
+      }
+      return res.status(200).json({
+        message: 'Transaction already processed',
+        transaction: existingTransaction,
+        replayed: true
+      });
+    }
+
     const wallet = await prisma.wallet.findFirst({
       where: { id: walletId, userId }
     });
-
     if (!wallet) {
       return res.status(404).json({ message: 'Wallet not found' });
     }
 
-    // Determine the balance change
-    const numericAmount = Number(amount);
-    if (isNaN(numericAmount) || numericAmount <= 0) {
-      return res.status(400).json({ message: 'amount must be a positive number' });
-    }
-
-    const balanceChange = type === 'INCOME' ? numericAmount : -numericAmount;
+    const balanceChange = transactionType === 'INCOME' ? numericAmount : -numericAmount;
 
     let warning: string | undefined;
-    if (type === 'EXPENSE' && wallet.balance < numericAmount) {
+    if (transactionType === 'EXPENSE' && wallet.balance < numericAmount) {
       warning = 'Saldo dompet menjadi minus setelah transaksi ini.';
     }
 
@@ -46,12 +87,13 @@ export const createTransaction = async (req: Request, res: Response) => {
         data: {
           userId,
           walletId,
-          type,
+          type: transactionType,
           amount: numericAmount,
           categoryId,
           merchant,
           notes,
-          date: date ? new Date(date) : undefined
+          idempotencyKey,
+          date: transactionDate
         }
       }),
       prisma.wallet.update({
@@ -64,7 +106,13 @@ export const createTransaction = async (req: Request, res: Response) => {
       })
     ]);
 
-    res.status(201).json({ message: 'Transaction created successfully', transaction, wallet: updatedWallet, warning });
+    res.status(201).json({
+      message: 'Transaction created successfully',
+      transaction,
+      wallet: updatedWallet,
+      warning,
+      replayed: false
+    });
   } catch (error) {
     console.error('Create transaction error:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -80,16 +128,28 @@ export const getTransactions = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
+    const transactionType = type === undefined
+      ? undefined
+      : parseTransactionType(type);
+    if (transactionType === null) {
+      return res.status(400).json({ message: 'type must be INCOME or EXPENSE' });
+    }
+
+    const transactionLimit = parseTransactionLimit(limit);
+    if (transactionLimit === null) {
+      return res.status(400).json({ message: 'limit must be an integer from 1 to 100' });
+    }
+
     const whereClause: any = { userId };
 
     if (walletId) whereClause.walletId = String(walletId);
-    if (type) whereClause.type = String(type);
+    if (transactionType) whereClause.type = transactionType;
     if (categoryId) whereClause.categoryId = String(categoryId);
 
     const transactions = await prisma.transaction.findMany({
       where: whereClause,
       orderBy: { date: 'desc' },
-      take: limit ? Number(limit) : undefined,
+      take: transactionLimit,
       include: {
         wallet: {
           select: { name: true, type: true }
@@ -188,9 +248,19 @@ export const updateTransaction = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'walletId, type, and amount are required' });
     }
 
-    const numericAmount = Number(amount);
-    if (isNaN(numericAmount) || numericAmount <= 0) {
-      return res.status(400).json({ message: 'amount must be a positive number' });
+    const transactionType = parseTransactionType(type);
+    if (!transactionType) {
+      return res.status(400).json({ message: 'type must be INCOME or EXPENSE' });
+    }
+
+    const transactionDate = parseTransactionDate(date);
+    if (transactionDate === null) {
+      return res.status(400).json({ message: 'date must be a valid ISO date' });
+    }
+
+    const numericAmount = parseRupiah(amount);
+    if (numericAmount === null) {
+      return res.status(400).json({ message: 'amount must be a whole rupiah value' });
     }
 
     const oldTransaction = await prisma.transaction.findFirst({
@@ -215,10 +285,10 @@ export const updateTransaction = async (req: Request, res: Response) => {
       });
 
       // 2. Apply new transaction
-      const applyAmount = type === 'INCOME' ? numericAmount : -numericAmount;
+      const applyAmount = transactionType === 'INCOME' ? numericAmount : -numericAmount;
 
       const currentNewWallet = await tx.wallet.findUnique({ where: { id: walletId } });
-      if (type === 'EXPENSE' && currentNewWallet && (currentNewWallet.balance - numericAmount < 0)) {
+      if (transactionType === 'EXPENSE' && currentNewWallet && (currentNewWallet.balance - numericAmount < 0)) {
         warning = 'Saldo dompet menjadi minus setelah transaksi ini.';
       }
 
@@ -232,12 +302,12 @@ export const updateTransaction = async (req: Request, res: Response) => {
         where: { id },
         data: {
           walletId,
-          type,
+          type: transactionType,
           amount: numericAmount,
           categoryId,
           merchant,
           notes,
-          date: date ? new Date(date) : undefined
+          date: transactionDate
         }
       });
     });

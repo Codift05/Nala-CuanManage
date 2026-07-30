@@ -1,12 +1,16 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { rupiahToJson } from './utils/money';
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.set('json replacer', (_key: string, value: unknown) =>
+  typeof value === 'bigint' ? rupiahToJson(value) : value
+);
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 

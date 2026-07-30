@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { parseRupiah } from '../utils/money';
 
 export const scanReceipt = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -47,8 +48,13 @@ Format JSON yang diharapkan:
     responseText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
 
     const parsedData = JSON.parse(responseText);
+    const amount = parseRupiah(parsedData.amount);
+    if (amount === null) {
+      res.status(422).json({ error: 'Nominal struk tidak valid' });
+      return;
+    }
 
-    res.json(parsedData);
+    res.json({ ...parsedData, amount });
   } catch (error) {
     console.error('Scan receipt error:', error);
     res.status(500).json({ error: 'Gagal memproses struk' });
