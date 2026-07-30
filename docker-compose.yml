@@ -58,6 +58,9 @@ services:
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET:-nala_dev_only_change_me}
       CORS_ORIGINS: ${CORS_ORIGINS:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-}
+      APP_URL: ${APP_URL:-}
     command: ["sh", "-c", "npx prisma generate && npx prisma db push && npm run seed && npm run dev"]
     ports:
       - "127.0.0.1:${BACKEND_PORT:-3001}:3000"

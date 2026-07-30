@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   getCorsOrigins,
+  getEmailConfig,
   getJwtSecret,
   isOriginAllowed,
 } from '../src/utils/config';
@@ -28,4 +29,18 @@ test('production requires strong secrets and an explicit CORS allowlist', () => 
   assert.equal(isOriginAllowed(undefined, origins), true);
   assert.equal(isOriginAllowed('https://nala.example', origins), true);
   assert.equal(isOriginAllowed('https://evil.example', origins), false);
+
+  assert.throws(
+    () => getEmailConfig({ NODE_ENV: 'production' }),
+    /RESEND_API_KEY/,
+  );
+  assert.equal(
+    getEmailConfig({
+      NODE_ENV: 'production',
+      RESEND_API_KEY: 're_test',
+      EMAIL_FROM: 'NALA <noreply@nala.example>',
+      APP_URL: 'https://app.nala.example/reset',
+    })?.appUrl,
+    'https://app.nala.example',
+  );
 });

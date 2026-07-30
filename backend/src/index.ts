@@ -2,11 +2,12 @@ import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { rupiahToJson } from './utils/money';
-import { getCorsOrigins, isOriginAllowed } from './utils/config';
+import { getCorsOrigins, getEmailConfig, isOriginAllowed } from './utils/config';
 
 const app = express();
 const port = process.env.PORT || 3000;
 const corsOrigins = getCorsOrigins();
+getEmailConfig();
 
 app.set('json replacer', (_key: string, value: unknown) =>
   typeof value === 'bigint' ? rupiahToJson(value) : value

@@ -7,6 +7,7 @@ import {
   createPasswordResetToken,
   hashPasswordResetToken,
 } from '../utils/passwordReset';
+import { sendPasswordResetEmail } from '../utils/email';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -347,19 +348,32 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
   let resetToken: string | undefined;
   if (user) {
     const generated = createPasswordResetToken();
-    await prisma.$transaction([
-      prisma.passwordResetToken.deleteMany({
+    const reset = await prisma.$transaction(async (tx) => {
+      await tx.passwordResetToken.deleteMany({
         where: { userId: user.id, usedAt: null },
-      }),
-      prisma.passwordResetToken.create({
+      });
+      return tx.passwordResetToken.create({
         data: {
           userId: user.id,
           tokenHash: generated.tokenHash,
           expiresAt: generated.expiresAt,
         },
-      }),
-    ]);
-    if (process.env.NODE_ENV !== 'production') resetToken = generated.token;
+      });
+    });
+    if (process.env.NODE_ENV !== 'production') {
+      resetToken = generated.token;
+    } else {
+      try {
+        await sendPasswordResetEmail({
+          to: email,
+          token: generated.token,
+          idempotencyKey: reset.id,
+        });
+      } catch (error) {
+        await prisma.passwordResetToken.delete({ where: { id: reset.id } });
+        console.error('Password reset email failed:', error);
+      }
+    }
   }
 
   return res.json({

@@ -535,6 +535,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Authentication memakai session dan refresh rotation | Access 15 menit, refresh hash 30 hari, rotasi, daftar perangkat, logout/revoke, dan invalidasi setelah ganti password diuji |
 | 30 Juli 2026 | Konfigurasi production dibuat fail-fast | JWT secret minimal 32 karakter dan CORS allowlist wajib; native request tanpa Origin tetap didukung |
 | 30 Juli 2026 | Inti password reset sekali pakai tersedia | Token acak disimpan sebagai hash, berlaku 15 menit, sekali pakai, anti-enumerasi, dan revoke session; delivery email masih pending |
+| 30 Juli 2026 | Delivery email reset password tersedia | Resend HTTP API, timeout 8 detik, idempotency key, fail-fast config production, dan token dihapus jika delivery gagal |
 
 ### Log keputusan
 
