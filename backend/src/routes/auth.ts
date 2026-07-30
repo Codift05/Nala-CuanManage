@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   register, login, me, updateProfile, changePassword, deleteAccount,
   refreshSession, logout, getSessions, revokeSession,
+  requestPasswordReset, resetPassword,
 } from '../controllers/auth';
 import { authenticate } from '../middleware/auth';
 import { rateLimit } from '../middleware/rateLimit';
@@ -24,6 +25,17 @@ router.post('/refresh', rateLimit({
   limit: 30,
   windowSeconds: 60,
 }), refreshSession);
+router.post('/forgot-password', rateLimit({
+  prefix: 'forgot-password',
+  limit: 5,
+  windowSeconds: 60 * 60,
+  includeEmail: true,
+}), requestPasswordReset);
+router.post('/reset-password', rateLimit({
+  prefix: 'reset-password',
+  limit: 10,
+  windowSeconds: 60,
+}), resetPassword);
 router.get('/me', authenticate, me);
 router.post('/logout', authenticate, logout);
 router.get('/sessions', authenticate, getSessions);

@@ -3,6 +3,10 @@ import bcrypt from 'bcrypt';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/auth';
 import { createSession, rotateSession } from '../utils/authTokens';
+import {
+  createPasswordResetToken,
+  hashPasswordResetToken,
+} from '../utils/passwordReset';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -332,6 +336,75 @@ export const revokeSession = async (req: AuthRequest, res: Response) => {
     return res.status(404).json({ message: 'Sesi tidak ditemukan' });
   }
   return res.json({ message: 'Sesi berhasil dicabut' });
+};
+
+export const requestPasswordReset = async (req: Request, res: Response) => {
+  const email = normalizeEmail(req.body.email);
+  const user = EMAIL_PATTERN.test(email)
+    ? await prisma.user.findUnique({ where: { email }, select: { id: true } })
+    : null;
+
+  let resetToken: string | undefined;
+  if (user) {
+    const generated = createPasswordResetToken();
+    await prisma.$transaction([
+      prisma.passwordResetToken.deleteMany({
+        where: { userId: user.id, usedAt: null },
+      }),
+      prisma.passwordResetToken.create({
+        data: {
+          userId: user.id,
+          tokenHash: generated.tokenHash,
+          expiresAt: generated.expiresAt,
+        },
+      }),
+    ]);
+    if (process.env.NODE_ENV !== 'production') resetToken = generated.token;
+  }
+
+  return res.json({
+    message: 'Jika email terdaftar, instruksi reset password akan dikirim.',
+    ...(resetToken ? { resetToken } : {}),
+  });
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  const token = typeof req.body.token === 'string' ? req.body.token : '';
+  const password = readPassword(req.body.password);
+  if (password.length < 8 || password.length > 72) {
+    return res.status(400).json({ message: 'Password harus terdiri dari 8-72 karakter' });
+  }
+
+  const reset = token
+    ? await prisma.passwordResetToken.findUnique({
+        where: { tokenHash: hashPasswordResetToken(token) },
+      })
+    : null;
+  if (!reset || reset.usedAt || reset.expiresAt <= new Date()) {
+    return res.status(400).json({ message: 'Token reset tidak valid atau kedaluwarsa' });
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  const changed = await prisma.$transaction(async (tx) => {
+    const consumed = await tx.passwordResetToken.updateMany({
+      where: { id: reset.id, usedAt: null, expiresAt: { gt: new Date() } },
+      data: { usedAt: new Date() },
+    });
+    if (consumed.count !== 1) return false;
+    await tx.user.update({
+      where: { id: reset.userId },
+      data: { passwordHash },
+    });
+    await tx.session.updateMany({
+      where: { userId: reset.userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+    return true;
+  });
+
+  return changed
+    ? res.json({ message: 'Password berhasil direset. Silakan masuk kembali.' })
+    : res.status(400).json({ message: 'Token reset tidak valid atau kedaluwarsa' });
 };
 
 export const deleteAccount = async (req: AuthRequest, res: Response) => {

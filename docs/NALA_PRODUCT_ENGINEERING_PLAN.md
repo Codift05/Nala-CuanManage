@@ -534,6 +534,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Login dan registrasi dilindungi rate limit | Redis multi-instance limiter dengan fallback memory; integration test login menghasilkan 429 |
 | 30 Juli 2026 | Authentication memakai session dan refresh rotation | Access 15 menit, refresh hash 30 hari, rotasi, daftar perangkat, logout/revoke, dan invalidasi setelah ganti password diuji |
 | 30 Juli 2026 | Konfigurasi production dibuat fail-fast | JWT secret minimal 32 karakter dan CORS allowlist wajib; native request tanpa Origin tetap didukung |
+| 30 Juli 2026 | Inti password reset sekali pakai tersedia | Token acak disimpan sebagai hash, berlaku 15 menit, sekali pakai, anti-enumerasi, dan revoke session; delivery email masih pending |
 
 ### Log keputusan
 
@@ -553,6 +554,6 @@ Pada akhir setiap sesi pengembangan:
 Pekerjaan coding berikutnya berada di **M2 — Authentication untuk pengguna nyata**:
 
 1. Push workflow lalu verifikasi hasil GitHub Actions.
-2. Tambahkan password reset dengan token sekali pakai.
+2. Hubungkan provider email dan deep link untuk menyelesaikan password reset.
 3. Tambahkan verifikasi email.
 4. Tambahkan biometric app unlock pada perangkat yang mendukung.

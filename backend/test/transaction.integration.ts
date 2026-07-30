@@ -182,12 +182,67 @@ const run = async () => {
     const loginAfterPasswordChange = await loginAfterPasswordChangeResponse.json();
     assert.equal(loginAfterPasswordChangeResponse.status, 200);
 
-    const deleteWithPassword = await request(
+    const unknownResetResponse = await fetch(`${apiUrl}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: `unknown-${Date.now()}@nala.test` }),
+    });
+    const unknownReset = await unknownResetResponse.json();
+    assert.equal(unknownResetResponse.status, 200);
+    assert.equal(unknownReset.resetToken, undefined);
+
+    const resetRequestResponse = await fetch(`${apiUrl}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: temporaryEmail }),
+    });
+    const resetRequest = await resetRequestResponse.json();
+    assert.equal(resetRequestResponse.status, 200);
+    assert.equal(typeof resetRequest.resetToken, 'string');
+
+    const resetResponse = await fetch(`${apiUrl}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: resetRequest.resetToken,
+        password: 'password789',
+      }),
+    });
+    assert.equal(resetResponse.status, 200);
+
+    const reusedResetResponse = await fetch(`${apiUrl}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: resetRequest.resetToken,
+        password: 'password999',
+      }),
+    });
+    assert.equal(reusedResetResponse.status, 400);
+    const revokedAfterReset = await request(
       '/auth/me',
       loginAfterPasswordChange.accessToken,
+    );
+    assert.equal(revokedAfterReset.response.status, 403);
+
+    const loginAfterResetResponse = await fetch(`${apiUrl}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: temporaryEmail,
+        password: 'password789',
+        deviceName: 'Integration reset session',
+      }),
+    });
+    const loginAfterReset = await loginAfterResetResponse.json();
+    assert.equal(loginAfterResetResponse.status, 200);
+
+    const deleteWithPassword = await request(
+      '/auth/me',
+      loginAfterReset.accessToken,
       {
         method: 'DELETE',
-        body: JSON.stringify({ password: 'password456' }),
+        body: JSON.stringify({ password: 'password789' }),
       },
     );
     assert.equal(deleteWithPassword.response.status, 200);
