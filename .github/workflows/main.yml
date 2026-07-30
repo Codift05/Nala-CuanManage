@@ -41,7 +41,7 @@ jobs:
       - run: npx prisma generate
       - run: npm run typecheck
       - run: npm test
-      - run: npx prisma db push
+      - run: npx prisma migrate deploy
       - run: npm run seed
       - name: Start backend
         run: |

@@ -1,5 +1,5 @@
 CREATE TABLE "RecurringExecution" (
-  "id" UUID NOT NULL,
+  "id" TEXT NOT NULL,
   "recurringBillId" TEXT NOT NULL,
   "period" VARCHAR(7) NOT NULL,
   "transactionId" TEXT,
