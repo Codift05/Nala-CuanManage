@@ -24,6 +24,19 @@ model User {
   transactions   Transaction[]
   budgets        Budget[]
   recurringBills RecurringBill[]
+  sessions       Session[]
+}
+
+model Session {
+  id               String    @id @default(uuid())
+  userId           String
+  refreshTokenHash String    @unique @db.VarChar(64)
+  deviceName       String    @db.VarChar(100)
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Wallet {

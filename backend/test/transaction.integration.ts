@@ -27,6 +27,7 @@ const run = async () => {
     body: JSON.stringify({
       email: 'admin@nala.com',
       password: 'password123',
+      deviceName: 'Integration primary',
     }),
   });
   const login = await loginResponse.json();
@@ -76,8 +77,26 @@ const run = async () => {
     const registration = await registrationResponse.json();
     assert.equal(registrationResponse.status, 201);
     temporaryUserId = registration.user.id;
+    assert.equal(typeof registration.refreshToken, 'string');
 
-    const walletCreation = await request('/wallets', registration.token, {
+    const refreshResponse = await fetch(`${apiUrl}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: registration.refreshToken }),
+    });
+    const refreshed = await refreshResponse.json();
+    assert.equal(refreshResponse.status, 200);
+    assert.notEqual(refreshed.refreshToken, registration.refreshToken);
+
+    const reusedRefreshResponse = await fetch(`${apiUrl}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: registration.refreshToken }),
+    });
+    assert.equal(reusedRefreshResponse.status, 401);
+    const temporaryToken = refreshed.accessToken;
+
+    const walletCreation = await request('/wallets', temporaryToken, {
       method: 'POST',
       body: JSON.stringify({
         name: 'Integration Wallet',
@@ -88,7 +107,7 @@ const run = async () => {
     assert.equal(walletCreation.response.status, 201);
     assert.equal(walletCreation.body.wallet.balance, 1000);
 
-    const foreignWalletBill = await request('/recurring', registration.token, {
+    const foreignWalletBill = await request('/recurring', temporaryToken, {
       method: 'POST',
       body: JSON.stringify({
         title: 'Foreign wallet test',
@@ -102,14 +121,14 @@ const run = async () => {
 
     const deleteWithoutPassword = await request(
       '/auth/me',
-      registration.token,
+      temporaryToken,
       { method: 'DELETE', body: JSON.stringify({}) },
     );
     assert.equal(deleteWithoutPassword.response.status, 400);
 
     const deleteWithWrongPassword = await request(
       '/auth/me',
-      registration.token,
+      temporaryToken,
       {
         method: 'DELETE',
         body: JSON.stringify({ password: 'definitely-wrong' }),
@@ -117,12 +136,58 @@ const run = async () => {
     );
     assert.equal(deleteWithWrongPassword.response.status, 401);
 
+    const secondLoginResponse = await fetch(`${apiUrl}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: temporaryEmail,
+        password: 'password123',
+        deviceName: 'Integration second device',
+      }),
+    });
+    const secondLogin = await secondLoginResponse.json();
+    assert.equal(secondLoginResponse.status, 200);
+
+    const sessions = await request('/auth/sessions', temporaryToken);
+    assert.equal(sessions.response.status, 200);
+    assert.equal(sessions.body.length, 2);
+
+    const logout = await request('/auth/logout', secondLogin.accessToken, {
+      method: 'POST',
+    });
+    assert.equal(logout.response.status, 200);
+    const revokedAccess = await request('/auth/me', secondLogin.accessToken);
+    assert.equal(revokedAccess.response.status, 403);
+
+    const passwordChange = await request('/auth/password', temporaryToken, {
+      method: 'PUT',
+      body: JSON.stringify({
+        oldPassword: 'password123',
+        newPassword: 'password456',
+      }),
+    });
+    assert.equal(passwordChange.response.status, 200);
+    const revokedAfterPasswordChange = await request('/auth/me', temporaryToken);
+    assert.equal(revokedAfterPasswordChange.response.status, 403);
+
+    const loginAfterPasswordChangeResponse = await fetch(`${apiUrl}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: temporaryEmail,
+        password: 'password456',
+        deviceName: 'Integration reauthenticated',
+      }),
+    });
+    const loginAfterPasswordChange = await loginAfterPasswordChangeResponse.json();
+    assert.equal(loginAfterPasswordChangeResponse.status, 200);
+
     const deleteWithPassword = await request(
       '/auth/me',
-      registration.token,
+      loginAfterPasswordChange.accessToken,
       {
         method: 'DELETE',
-        body: JSON.stringify({ password: 'password123' }),
+        body: JSON.stringify({ password: 'password456' }),
       },
     );
     assert.equal(deleteWithPassword.response.status, 200);
@@ -243,6 +308,14 @@ const run = async () => {
         await tx.user.deleteMany({ where: { id: temporaryUserId } });
       });
     }
+    await prisma.session.updateMany({
+      where: {
+        userId: login.user.id,
+        deviceName: 'Integration primary',
+        revokedAt: null,
+      },
+      data: { revokedAt: new Date() },
+    });
     await prisma.$disconnect();
   }
 };

@@ -38,6 +38,20 @@ void main() {
       isFalse,
     );
     expect(await TokenStorage.read(), 'legacy-token');
+    await TokenStorage.clear();
+  });
+
+  test('Access and refresh tokens share the secure session lifecycle',
+      () async {
+    FlutterSecureStorage.setMockInitialValues({});
+
+    await TokenStorage.writePair('access-token', 'refresh-token');
+    expect(await TokenStorage.read(), 'access-token');
+    expect(await TokenStorage.readRefresh(), 'refresh-token');
+
+    await TokenStorage.clear();
+    expect(await TokenStorage.read(), isNull);
+    expect(await TokenStorage.readRefresh(), isNull);
   });
 
   test('AI transaction draft rejects unsafe payloads', () {

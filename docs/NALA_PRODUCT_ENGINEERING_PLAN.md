@@ -190,9 +190,9 @@ Acceptance criteria:
 
 Status: **In progress**
 
-- [ ] Access token berumur singkat
-- [ ] Refresh token rotation dan session per perangkat
-- [ ] Logout/revoke session
+- [x] Access token berumur singkat
+- [x] Refresh token rotation dan session per perangkat
+- [x] Logout/revoke session
 - [x] Rate limit login dan registrasi
 - [ ] Password reset dengan token sekali pakai
 - [ ] Verifikasi email
@@ -532,6 +532,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Seluruh jalur saldo runtime diaudit | HTTP test saldo awal wallet, transaksi create/update/delete, recurring, dan penolakan edit langsung |
 | 30 Juli 2026 | Penghapusan akun memerlukan password aktif | HTTP test menolak password kosong/salah dan menerima password benar; UI meminta password |
 | 30 Juli 2026 | Login dan registrasi dilindungi rate limit | Redis multi-instance limiter dengan fallback memory; integration test login menghasilkan 429 |
+| 30 Juli 2026 | Authentication memakai session dan refresh rotation | Access 15 menit, refresh hash 30 hari, rotasi, daftar perangkat, logout/revoke, dan invalidasi setelah ganti password diuji |
 
 ### Log keputusan
 

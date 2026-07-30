@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 abstract final class TokenStorage {
   static const _key = 'auth_token';
+  static const _refreshKey = 'refresh_token';
   static const _secure = FlutterSecureStorage();
 
   static Future<String?> read() async {
@@ -24,8 +25,18 @@ abstract final class TokenStorage {
     await preferences.remove(_key);
   }
 
+  static Future<String?> readRefresh() => _secure.read(key: _refreshKey);
+
+  static Future<void> writePair(String accessToken, String refreshToken) async {
+    await _secure.write(key: _key, value: accessToken);
+    await _secure.write(key: _refreshKey, value: refreshToken);
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.remove(_key);
+  }
+
   static Future<void> clear() async {
     await _secure.delete(key: _key);
+    await _secure.delete(key: _refreshKey);
     final preferences = await SharedPreferences.getInstance();
     await preferences.remove(_key);
   }

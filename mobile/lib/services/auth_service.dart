@@ -46,12 +46,16 @@ class AuthService {
       final response = await http.post(
         Uri.parse('$baseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'password': password}),
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'deviceName': 'NALA Mobile',
+        }),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        await TokenStorage.write(data['token']);
+        await TokenStorage.writePair(data['accessToken'], data['refreshToken']);
         return const AuthResult(success: true, message: 'Login berhasil');
       }
 
@@ -77,12 +81,17 @@ class AuthService {
       final response = await http.post(
         Uri.parse('$baseUrl/auth/register'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'name': name, 'email': email, 'password': password}),
+        body: jsonEncode({
+          'name': name,
+          'email': email,
+          'password': password,
+          'deviceName': 'NALA Mobile',
+        }),
       );
 
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        await TokenStorage.write(data['token']);
+        await TokenStorage.writePair(data['accessToken'], data['refreshToken']);
         return const AuthResult(success: true, message: 'Akun berhasil dibuat');
       }
 
@@ -103,7 +112,39 @@ class AuthService {
   }
 
   Future<void> logout() async {
+    final token = await TokenStorage.read();
+    if (token != null) {
+      try {
+        await http.post(
+          Uri.parse('$baseUrl/auth/logout'),
+          headers: {'Authorization': 'Bearer $token'},
+        ).timeout(const Duration(seconds: 5));
+      } catch (_) {
+        // Local logout must still succeed when the server is unavailable.
+      }
+    }
     await TokenStorage.clear();
+  }
+
+  Future<String?> _refreshAccessToken() async {
+    final refreshToken = await TokenStorage.readRefresh();
+    if (refreshToken == null) return null;
+
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/auth/refresh'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'refreshToken': refreshToken}),
+        )
+        .timeout(const Duration(seconds: 5));
+    if (response.statusCode != 200) return null;
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final accessToken = data['accessToken'];
+    final nextRefreshToken = data['refreshToken'];
+    if (accessToken is! String || nextRefreshToken is! String) return null;
+    await TokenStorage.writePair(accessToken, nextRefreshToken);
+    return accessToken;
   }
 
   Future<bool> isLoggedIn() async {
@@ -113,16 +154,22 @@ class AuthService {
       );
       if (token == null || token.isEmpty) return false;
 
-      final response = await http.get(
+      var response = await http.get(
         Uri.parse('$baseUrl/auth/me'),
         headers: {'Authorization': 'Bearer $token'},
       ).timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) return true;
 
-      if (response.statusCode == 401 ||
-          response.statusCode == 403 ||
-          response.statusCode == 404) {
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        final refreshedToken = await _refreshAccessToken();
+        if (refreshedToken != null) {
+          response = await http.get(
+            Uri.parse('$baseUrl/auth/me'),
+            headers: {'Authorization': 'Bearer $refreshedToken'},
+          ).timeout(const Duration(seconds: 5));
+          if (response.statusCode == 200) return true;
+        }
         await TokenStorage.clear();
       }
       return false;
@@ -152,10 +199,20 @@ class AuthService {
         );
       }
 
-      final response = await http.get(
+      var response = await http.get(
         Uri.parse('$baseUrl/auth/me'),
         headers: {'Authorization': 'Bearer $token'},
       );
+
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        final refreshedToken = await _refreshAccessToken();
+        if (refreshedToken != null) {
+          response = await http.get(
+            Uri.parse('$baseUrl/auth/me'),
+            headers: {'Authorization': 'Bearer $refreshedToken'},
+          );
+        }
+      }
 
       if (response.statusCode == 401 ||
           response.statusCode == 403 ||

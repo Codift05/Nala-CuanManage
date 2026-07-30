@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/auth';
+import { createSession, rotateSession } from '../utils/authTokens';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'nala_super_secret_key_2026';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const normalizeEmail = (email: unknown): string =>
@@ -75,13 +74,12 @@ export const register = async (req: Request, res: Response) => {
       return createdUser;
     });
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
-      expiresIn: '7d'
-    });
+    const tokens = await createSession(user.id, req.body.deviceName);
 
     res.status(201).json({
       message: 'User registered successfully',
-      token,
+      token: tokens.accessToken,
+      ...tokens,
       user: {
         id: user.id,
         name: user.name,
@@ -121,13 +119,12 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Email atau password salah' });
     }
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
-      expiresIn: '7d'
-    });
+    const tokens = await createSession(user.id, req.body.deviceName);
 
     res.json({
       message: 'Login successful',
-      token,
+      token: tokens.accessToken,
+      ...tokens,
       user: {
         id: user.id,
         name: user.name,
@@ -271,16 +268,70 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
     }
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
-    await prisma.user.update({
-      where: { id: userId },
-      data: { passwordHash }
-    });
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: userId },
+        data: { passwordHash }
+      }),
+      prisma.session.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: new Date() }
+      })
+    ]);
 
-    return res.json({ message: 'Password berhasil diubah' });
+    return res.json({ message: 'Password berhasil diubah. Silakan masuk kembali.' });
   } catch (error) {
     console.error('Change password error:', error);
     return res.status(500).json({ message: 'Gagal mengubah password' });
   }
+};
+
+export const refreshSession = async (req: Request, res: Response) => {
+  try {
+    const tokens = await rotateSession(req.body.refreshToken);
+    if (!tokens) {
+      return res.status(401).json({ message: 'Refresh token tidak valid atau kedaluwarsa' });
+    }
+    return res.json(tokens);
+  } catch (error) {
+    console.error('Refresh session error:', error);
+    return res.status(500).json({ message: 'Gagal memperbarui sesi' });
+  }
+};
+
+export const logout = async (req: AuthRequest, res: Response) => {
+  if (!req.user?.sessionId) {
+    return res.status(401).json({ message: 'Sesi tidak valid' });
+  }
+  await prisma.session.updateMany({
+    where: { id: req.user.sessionId, userId: req.user.userId },
+    data: { revokedAt: new Date() },
+  });
+  return res.json({ message: 'Logout berhasil' });
+};
+
+export const getSessions = async (req: AuthRequest, res: Response) => {
+  const sessions = await prisma.session.findMany({
+    where: { userId: req.user!.userId, revokedAt: null, expiresAt: { gt: new Date() } },
+    select: { id: true, deviceName: true, createdAt: true, updatedAt: true },
+    orderBy: { updatedAt: 'desc' },
+  });
+  return res.json(sessions.map((session) => ({
+    ...session,
+    current: session.id === req.user!.sessionId,
+  })));
+};
+
+export const revokeSession = async (req: AuthRequest, res: Response) => {
+  const id = req.params.id as string;
+  const revoked = await prisma.session.updateMany({
+    where: { id, userId: req.user!.userId, revokedAt: null },
+    data: { revokedAt: new Date() },
+  });
+  if (!revoked.count) {
+    return res.status(404).json({ message: 'Sesi tidak ditemukan' });
+  }
+  return res.json({ message: 'Sesi berhasil dicabut' });
 };
 
 export const deleteAccount = async (req: AuthRequest, res: Response) => {
