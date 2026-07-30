@@ -100,6 +100,34 @@ const run = async () => {
     });
     assert.equal(foreignWalletBill.response.status, 404);
 
+    const deleteWithoutPassword = await request(
+      '/auth/me',
+      registration.token,
+      { method: 'DELETE', body: JSON.stringify({}) },
+    );
+    assert.equal(deleteWithoutPassword.response.status, 400);
+
+    const deleteWithWrongPassword = await request(
+      '/auth/me',
+      registration.token,
+      {
+        method: 'DELETE',
+        body: JSON.stringify({ password: 'definitely-wrong' }),
+      },
+    );
+    assert.equal(deleteWithWrongPassword.response.status, 401);
+
+    const deleteWithPassword = await request(
+      '/auth/me',
+      registration.token,
+      {
+        method: 'DELETE',
+        body: JSON.stringify({ password: 'password123' }),
+      },
+    );
+    assert.equal(deleteWithPassword.response.status, 200);
+    temporaryUserId = undefined;
+
     const payload = {
       walletId: wallet.id,
       type: 'EXPENSE',

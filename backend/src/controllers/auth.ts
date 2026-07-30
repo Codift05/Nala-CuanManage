@@ -286,9 +286,21 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
 export const deleteAccount = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
+    const password = readPassword(req.body.password);
 
     if (!userId) {
       res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    if (!password) {
+      res.status(400).json({ message: 'Password wajib diisi' });
+      return;
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !await bcrypt.compare(password, user.passwordHash)) {
+      res.status(401).json({ message: 'Password tidak sesuai' });
       return;
     }
 

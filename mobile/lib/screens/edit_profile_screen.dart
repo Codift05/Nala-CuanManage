@@ -100,7 +100,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _deleteAccount() async {
-    final confirm = await showDialog<bool>(
+    final passwordController = TextEditingController();
+    final password = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -109,18 +110,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           style: GoogleFonts.interTight(
               fontWeight: FontWeight.bold, color: AppTheme.errorColor),
         ),
-        content: Text(
-          'Perhatian: Tindakan ini tidak dapat dibatalkan. Seluruh data transaksi, dompet, dan tagihan Anda akan dihapus secara permanen. Lanjutkan?',
-          style: GoogleFonts.interTight(),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Seluruh data akan dihapus permanen. Masukkan password untuk melanjutkan.',
+              style: GoogleFonts.interTight(),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: passwordController,
+              autofocus: true,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                prefixIcon: Icon(Icons.lock_outline_rounded),
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(context),
             child: Text('Batal',
                 style: GoogleFonts.interTight(color: Colors.grey)),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(context, passwordController.text),
             style:
                 ElevatedButton.styleFrom(backgroundColor: AppTheme.errorColor),
             child: Text('Hapus Permanen',
@@ -130,21 +147,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ],
       ),
     );
+    passwordController.dispose();
 
-    if (confirm == true) {
+    if (password != null && password.isNotEmpty) {
       setState(() => _isLoading = true);
-      final success = await _authService.deleteAccount();
+      final result = await _authService.deleteAccount(password);
+      if (!mounted) return;
       setState(() => _isLoading = false);
 
-      if (success && mounted) {
+      if (result.success) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const LoginScreen()),
           (Route<dynamic> route) => false,
         );
-      } else if (mounted) {
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Gagal menghapus akun. Silakan coba lagi.')),
+          SnackBar(content: Text(result.message)),
         );
       }
     }

@@ -196,7 +196,7 @@ Status: **In progress**
 - [ ] Rate limit login dan registrasi
 - [ ] Password reset dengan token sekali pakai
 - [ ] Verifikasi email
-- [ ] Reauthentication sebelum penghapusan akun
+- [x] Reauthentication sebelum penghapusan akun
 - [ ] Biometric app unlock pada perangkat yang mendukung
 - [ ] CORS production allowlist dan secret tanpa fallback
 
@@ -530,6 +530,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Rantai migration dapat membangun PostgreSQL kosong | Baseline schema diikuti migrasi integer, idempotency, dan recurring execution |
 | 30 Juli 2026 | Ownership wallet tagihan berulang dipaksa di backend | Integration test lintas akun menolak wallet milik user lain dengan 404 |
 | 30 Juli 2026 | Seluruh jalur saldo runtime diaudit | HTTP test saldo awal wallet, transaksi create/update/delete, recurring, dan penolakan edit langsung |
+| 30 Juli 2026 | Penghapusan akun memerlukan password aktif | HTTP test menolak password kosong/salah dan menerima password benar; UI meminta password |
 
 ### Log keputusan
 

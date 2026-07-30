@@ -293,26 +293,43 @@ class AuthService {
     }
   }
 
-  Future<bool> deleteAccount() async {
+  Future<AuthResult> deleteAccount(String password) async {
     try {
       final token = await _getToken();
-      if (token == null) return false;
+      if (token == null) {
+        return const AuthResult(
+          success: false,
+          message: 'Sesi login tidak ditemukan.',
+        );
+      }
 
       final response = await http.delete(
         Uri.parse('$baseUrl/auth/me'),
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
+        body: jsonEncode({'password': password}),
       );
 
       if (response.statusCode == 200) {
         await logout();
-        return true;
       }
-      return false;
+      return AuthResult(
+        success: response.statusCode == 200,
+        message: _responseMessage(
+          response,
+          response.statusCode == 200
+              ? 'Akun berhasil dihapus'
+              : 'Gagal menghapus akun',
+        ),
+      );
     } catch (e) {
       debugPrint('Delete account error: $e');
-      return false;
+      return const AuthResult(
+        success: false,
+        message: 'Tidak dapat terhubung ke server NALA.',
+      );
     }
   }
 }
