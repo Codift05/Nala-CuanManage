@@ -1,8 +1,9 @@
 import { createHash, randomBytes } from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import prisma from './prisma';
+import { getJwtSecret } from './config';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'nala_super_secret_key_2026';
+const JWT_SECRET = getJwtSecret();
 const REFRESH_TOKEN_DAYS = 30;
 
 export const hashRefreshToken = (token: string): string =>

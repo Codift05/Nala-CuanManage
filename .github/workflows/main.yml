@@ -36,6 +36,7 @@ jobs:
       DATABASE_URL: postgresql://nala_user:nala_password@localhost:5432/nala_test
       JWT_SECRET: nala_ci_only_secret
       REDIS_URL: redis://localhost:6379
+      CORS_ORIGINS: ""
     defaults:
       run:
         working-directory: ./backend

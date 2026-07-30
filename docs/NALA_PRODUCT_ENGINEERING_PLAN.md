@@ -198,7 +198,7 @@ Status: **In progress**
 - [ ] Verifikasi email
 - [x] Reauthentication sebelum penghapusan akun
 - [ ] Biometric app unlock pada perangkat yang mendukung
-- [ ] CORS production allowlist dan secret tanpa fallback
+- [x] CORS production allowlist dan secret tanpa fallback
 
 Acceptance criteria:
 
@@ -533,6 +533,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Penghapusan akun memerlukan password aktif | HTTP test menolak password kosong/salah dan menerima password benar; UI meminta password |
 | 30 Juli 2026 | Login dan registrasi dilindungi rate limit | Redis multi-instance limiter dengan fallback memory; integration test login menghasilkan 429 |
 | 30 Juli 2026 | Authentication memakai session dan refresh rotation | Access 15 menit, refresh hash 30 hari, rotasi, daftar perangkat, logout/revoke, dan invalidasi setelah ganti password diuji |
+| 30 Juli 2026 | Konfigurasi production dibuat fail-fast | JWT secret minimal 32 karakter dan CORS allowlist wajib; native request tanpa Origin tetap didukung |
 
 ### Log keputusan
 
@@ -549,7 +550,9 @@ Pada akhir setiap sesi pengembangan:
 
 ## 14. Langkah Berikutnya
 
-Pekerjaan coding berikutnya tetap berada di **M1 — Integritas transaksi dan AI**:
+Pekerjaan coding berikutnya berada di **M2 — Authentication untuk pengguna nyata**:
 
 1. Push workflow lalu verifikasi hasil GitHub Actions.
-2. Mulai hardening authentication pada M2.
+2. Tambahkan password reset dengan token sekali pakai.
+3. Tambahkan verifikasi email.
+4. Tambahkan biometric app unlock pada perangkat yang mendukung.

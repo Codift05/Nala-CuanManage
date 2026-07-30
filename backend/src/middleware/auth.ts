@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import prisma from '../utils/prisma';
+import { getJwtSecret } from '../utils/config';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'nala_super_secret_key_2026';
+const JWT_SECRET = getJwtSecret();
 
 export interface AuthRequest extends Request {
   user?: { userId: string; sessionId: string };
