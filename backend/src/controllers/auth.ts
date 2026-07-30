@@ -40,16 +40,18 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Nama, email, dan password wajib diisi' });
     }
 
-    if (name.length < 2) {
-      return res.status(400).json({ message: 'Nama minimal 2 karakter' });
+    if (name.length < 2 || name.length > MAX_NAME_LENGTH) {
+      return res.status(400).json({
+        message: `Nama harus terdiri dari 2-${MAX_NAME_LENGTH} karakter`
+      });
     }
 
     if (!EMAIL_PATTERN.test(email)) {
       return res.status(400).json({ message: 'Format email tidak valid' });
     }
 
-    if (password.length < 8) {
-      return res.status(400).json({ message: 'Password minimal 8 karakter' });
+    if (password.length < 8 || password.length > 72) {
+      return res.status(400).json({ message: 'Password harus terdiri dari 8-72 karakter' });
     }
 
     const existingUser = await prisma.user.findUnique({

@@ -72,7 +72,7 @@ Legenda:
 | Welcome dan login | ✅ | UI diperbarui dan memiliki widget test | Pertahankan tanpa overflow |
 | Secure token storage | ✅ | Token memakai `flutter_secure_storage` dan migrasi token lama | Tetap diuji di CI |
 | Dashboard | ✅ | Saldo, aksi cepat, budget, dan transaksi terbaru tersedia | Uji loading/error/empty state |
-| Multi-wallet | 🟡 | CRUD tersedia | Validasi, empty state, dan integration test |
+| Multi-wallet | 🟡 | CRUD dan validasi backend tersedia | Empty state dan integration test CRUD lengkap |
 | Transaksi manual | 🟡 | CRUD, integer rupiah, dan idempotency tersedia | Integration test seluruh perubahan saldo |
 | Budget planner | 🟡 | CRUD dan progress tersedia | Edge case dan integration test |
 | Financial score | 🟡 | Skor serta tren tiga bulan tersedia | Formula baru, penjelasan, dan test |
@@ -82,9 +82,9 @@ Legenda:
 | Home widget | 🟡 | Implementasi Android tersedia | Verifikasi pembaruan data dan pengujian perangkat |
 | Tagihan berulang | 🟡 | CRUD tersedia | Edit/nonaktif, status eksekusi, idempotency |
 | Profil | ✅ | Edit profil, password, loading, dan error state diperkuat | Test integrasi dengan backend |
-| Biometrik | ⬜ | Tombol masih placeholder | Local biometric app unlock |
-| Verifikasi email | ⬜ | Belum tersedia | Alur kirim dan verifikasi token |
-| Password reset | ⬜ | Belum tersedia | Token sekali pakai dan expiry |
+| Biometrik | ✅ | App unlock opt-in memakai biometrik lokal perangkat | Uji pada perangkat target pilot |
+| Verifikasi email | ✅ | Token sekali pakai, resend, email delivery, dan deep link | Uji delivery pada staging |
+| Password reset | ✅ | Token sekali pakai, expiry, email delivery, dan deep link | Uji delivery pada staging |
 | Mode offline | ⬜ | Belum ada local queue/database | Pending/synced/failed + retry aman |
 | Laporan PDF | ⬜ | Belum tersedia | Laporan dapat dibuat dan dibagikan |
 | Push notification | ⬜ | FCM belum terpasang | Device registration dan notifikasi relevan |
@@ -93,14 +93,14 @@ Legenda:
 
 | Area | Status | Kondisi aktual | Bukti selesai berikutnya |
 |---|---:|---|---|
-| REST API | 🟡 | Express router/controller dan Prisma tersedia | Versioning, schema validation, error format |
+| REST API | 🟡 | Express API dengan validasi trust boundary tersedia | Versioning dan error format global |
 | PostgreSQL | ✅ | Database utama dan constraint dasar tersedia | Migration terkontrol dan backup |
 | Nilai uang | ✅ | PostgreSQL `BIGINT`, Prisma `BigInt`, dan Flutter `int` | Pertahankan contract test |
-| Authentication | 🟡 | JWT 7 hari dan bcrypt | Access/refresh token, revoke, rate limit |
-| Authorization | 🟡 | Ownership check tersedia pada banyak endpoint | Test IDOR seluruh resource |
-| Redis | 🟡 | Container dan dependency tersedia tetapi belum digunakan | Gunakan hanya untuk kebutuhan nyata |
+| Authentication | ✅ | Access 15 menit, refresh rotation, revoke, rate limit, reset, dan verifikasi email | Pertahankan integration test |
+| Authorization | 🟡 | Ownership wallet/transaksi/tagihan diuji | Lengkapi test IDOR budget dan seluruh resource |
+| Redis | ✅ | Menyimpan auth rate limit lintas instance | Tambahkan health/monitoring production |
 | Recurring scheduler | 🟡 | Execution record, duplicate protection, dan bulan pendek tersedia | Perlu monitoring dan timezone production |
-| AI safety | 🟡 | Output AI diparsing langsung | Schema validation, privacy, confirmation |
+| AI safety | 🟡 | Mutasi AI berupa draft terkonfirmasi dan output transaksi/struk divalidasi | Privacy dan evaluasi prompt injection |
 | Audit trail | ⬜ | Belum tersedia | Event keamanan dan perubahan data penting |
 | Backend test | 🟡 | Unit test dan recurring integration test tersedia | Perluas ke auth dan seluruh perubahan saldo |
 | Observability | ⬜ | Masih memakai `console.log` | Request ID, structured log, error tracking |
@@ -209,12 +209,12 @@ Acceptance criteria:
 
 ### M3 — Keandalan fitur inti
 
-Status: **Planned**
+Status: **In progress**
 
 - [x] Recurring execution record per tagihan dan periode
 - [x] Duplicate protection untuk scheduler
 - [x] Perilaku tanggal 29–31 didefinisikan
-- [ ] Schema validation seluruh endpoint
+- [x] Schema validation seluruh endpoint
 - [ ] Global error response yang konsisten
 - [ ] Pagination transaksi
 - [ ] Audit log untuk auth, profil, dan perubahan transaksi
@@ -539,6 +539,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Reset password tersambung ke mobile | Tombol lupa password, form password baru, route web, dan Android deep link `nala://reset-password` |
 | 30 Juli 2026 | Verifikasi email diwajibkan sebelum login | Token hash sekali pakai 24 jam, resend anti-enumerasi, delivery email, dan migration akun lama |
 | 30 Juli 2026 | Biometric app unlock tersedia | Plugin resmi local_auth, opt-in dari profil, secure session unlock, dan native Android configuration |
+| 30 Juli 2026 | Schema validation endpoint fitur inti diselesaikan | Typecheck, 11 unit test, dan HTTP integration test menolak payload invalid pada wallet, budget, recurring, chat, OCR, serta transaksi |
 
 ### Log keputusan
 
@@ -558,6 +559,6 @@ Pada akhir setiap sesi pengembangan:
 Pekerjaan coding berikutnya berada di **M3 — Keandalan fitur inti**:
 
 1. Push workflow lalu verifikasi hasil GitHub Actions.
-2. Tambahkan schema validation pada endpoint yang tersisa.
-3. Tambahkan global error response dan request ID.
-4. Tambahkan pagination transaksi.
+2. Tambahkan global error response dan request ID.
+3. Tambahkan pagination transaksi.
+4. Tambahkan audit log untuk perubahan keamanan dan data finansial.

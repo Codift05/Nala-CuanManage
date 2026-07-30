@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 import { parseRupiah } from '../utils/money';
+import { parseText, parseWalletType } from '../utils/resourceInput';
 
 export const createWallet = async (req: Request, res: Response) => {
   try {
@@ -11,7 +12,9 @@ export const createWallet = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    if (!name || !type) {
+    const walletName = parseText(name, 80);
+    const walletType = parseWalletType(type);
+    if (!walletName || !walletType) {
       return res.status(400).json({ message: 'Name and type are required' });
     }
 
@@ -23,8 +26,8 @@ export const createWallet = async (req: Request, res: Response) => {
     const wallet = await prisma.wallet.create({
       data: {
         userId,
-        name,
-        type,
+        name: walletName,
+        type: walletType,
         balance: initialBalance
       }
     });
@@ -104,11 +107,17 @@ export const updateWallet = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Wallet not found' });
     }
 
+    const walletName = name === undefined ? wallet.name : parseText(name, 80);
+    const walletType = type === undefined ? wallet.type : parseWalletType(type);
+    if (!walletName || !walletType) {
+      return res.status(400).json({ message: 'Name or type is invalid' });
+    }
+
     const updatedWallet = await prisma.wallet.update({
       where: { id },
       data: {
-        name: name !== undefined ? name : wallet.name,
-        type: type !== undefined ? type : wallet.type
+        name: walletName,
+        type: walletType
       }
     });
 

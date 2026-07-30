@@ -7,6 +7,7 @@ import {
   parseTransactionLimit,
   parseTransactionType,
 } from '../utils/transactionInput';
+import { parseText } from '../utils/resourceInput';
 
 export const createTransaction = async (req: Request, res: Response) => {
   try {
@@ -40,6 +41,18 @@ export const createTransaction = async (req: Request, res: Response) => {
     if (numericAmount === null) {
       return res.status(400).json({ message: 'amount must be a whole rupiah value' });
     }
+    const parsedWalletId = parseText(walletId, 100);
+    const parsedCategory = parseText(categoryId, 50, { optional: true });
+    const parsedMerchant = parseText(merchant, 100, { optional: true });
+    const parsedNotes = parseText(notes, 500, { optional: true });
+    if (
+      !parsedWalletId ||
+      parsedCategory === null ||
+      parsedMerchant === null ||
+      parsedNotes === null
+    ) {
+      return res.status(400).json({ message: 'Transaction text fields are invalid' });
+    }
 
     const existingTransaction = await prisma.transaction.findUnique({
       where: { userId_idempotencyKey: { userId, idempotencyKey } },
@@ -47,12 +60,12 @@ export const createTransaction = async (req: Request, res: Response) => {
     });
     if (existingTransaction) {
       const sameRequest =
-        existingTransaction.walletId === walletId &&
+        existingTransaction.walletId === parsedWalletId &&
         existingTransaction.type === transactionType &&
         existingTransaction.amount === numericAmount &&
-        existingTransaction.categoryId === (categoryId ?? null) &&
-        existingTransaction.merchant === (merchant ?? null) &&
-        existingTransaction.notes === (notes ?? null) &&
+        existingTransaction.categoryId === (parsedCategory ?? null) &&
+        existingTransaction.merchant === (parsedMerchant ?? null) &&
+        existingTransaction.notes === (parsedNotes ?? null) &&
         (transactionDate === undefined ||
           existingTransaction.date.getTime() === transactionDate.getTime());
       if (!sameRequest) {
@@ -68,7 +81,7 @@ export const createTransaction = async (req: Request, res: Response) => {
     }
 
     const wallet = await prisma.wallet.findFirst({
-      where: { id: walletId, userId }
+      where: { id: parsedWalletId, userId }
     });
     if (!wallet) {
       return res.status(404).json({ message: 'Wallet not found' });
@@ -86,18 +99,18 @@ export const createTransaction = async (req: Request, res: Response) => {
       prisma.transaction.create({
         data: {
           userId,
-          walletId,
+          walletId: parsedWalletId,
           type: transactionType,
           amount: numericAmount,
-          categoryId,
-          merchant,
-          notes,
+          categoryId: parsedCategory,
+          merchant: parsedMerchant,
+          notes: parsedNotes,
           idempotencyKey,
           date: transactionDate
         }
       }),
       prisma.wallet.update({
-        where: { id: walletId },
+        where: { id: parsedWalletId },
         data: {
           balance: {
             increment: balanceChange
@@ -139,12 +152,17 @@ export const getTransactions = async (req: Request, res: Response) => {
     if (transactionLimit === null) {
       return res.status(400).json({ message: 'limit must be an integer from 1 to 100' });
     }
+    const parsedWalletId = parseText(walletId, 100, { optional: true });
+    const parsedCategory = parseText(categoryId, 50, { optional: true });
+    if (parsedWalletId === null || parsedCategory === null) {
+      return res.status(400).json({ message: 'walletId or categoryId is invalid' });
+    }
 
     const whereClause: any = { userId };
 
-    if (walletId) whereClause.walletId = String(walletId);
+    if (parsedWalletId) whereClause.walletId = parsedWalletId;
     if (transactionType) whereClause.type = transactionType;
-    if (categoryId) whereClause.categoryId = String(categoryId);
+    if (parsedCategory) whereClause.categoryId = parsedCategory;
 
     const transactions = await prisma.transaction.findMany({
       where: whereClause,
@@ -262,6 +280,18 @@ export const updateTransaction = async (req: Request, res: Response) => {
     if (numericAmount === null) {
       return res.status(400).json({ message: 'amount must be a whole rupiah value' });
     }
+    const parsedWalletId = parseText(walletId, 100);
+    const parsedCategory = parseText(categoryId, 50, { optional: true });
+    const parsedMerchant = parseText(merchant, 100, { optional: true });
+    const parsedNotes = parseText(notes, 500, { optional: true });
+    if (
+      !parsedWalletId ||
+      parsedCategory === null ||
+      parsedMerchant === null ||
+      parsedNotes === null
+    ) {
+      return res.status(400).json({ message: 'Transaction text fields are invalid' });
+    }
 
     const oldTransaction = await prisma.transaction.findFirst({
       where: { id, userId }
@@ -271,7 +301,7 @@ export const updateTransaction = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Transaction not found' });
     }
 
-    const newWallet = await prisma.wallet.findFirst({ where: { id: walletId, userId } });
+    const newWallet = await prisma.wallet.findFirst({ where: { id: parsedWalletId, userId } });
     if (!newWallet) return res.status(404).json({ message: 'New Wallet not found' });
 
     let warning: string | undefined;
@@ -287,13 +317,13 @@ export const updateTransaction = async (req: Request, res: Response) => {
       // 2. Apply new transaction
       const applyAmount = transactionType === 'INCOME' ? numericAmount : -numericAmount;
 
-      const currentNewWallet = await tx.wallet.findUnique({ where: { id: walletId } });
+      const currentNewWallet = await tx.wallet.findUnique({ where: { id: parsedWalletId } });
       if (transactionType === 'EXPENSE' && currentNewWallet && (currentNewWallet.balance - numericAmount < 0)) {
         warning = 'Saldo dompet menjadi minus setelah transaksi ini.';
       }
 
       await tx.wallet.update({
-        where: { id: walletId },
+        where: { id: parsedWalletId },
         data: { balance: { increment: applyAmount } }
       });
 
@@ -301,12 +331,12 @@ export const updateTransaction = async (req: Request, res: Response) => {
       await tx.transaction.update({
         where: { id },
         data: {
-          walletId,
+          walletId: parsedWalletId,
           type: transactionType,
           amount: numericAmount,
-          categoryId,
-          merchant,
-          notes,
+          categoryId: parsedCategory,
+          merchant: parsedMerchant,
+          notes: parsedNotes,
           date: transactionDate
         }
       });

@@ -21,6 +21,15 @@ app.use(cors({
   ),
 }));
 app.use(express.json({ limit: '2mb' }));
+app.use((req, res, next) => {
+  if (
+    req.body !== undefined &&
+    (req.body === null || typeof req.body !== 'object' || Array.isArray(req.body))
+  ) {
+    return res.status(400).json({ message: 'JSON body must be an object' });
+  }
+  next();
+});
 
 import authRoutes from './routes/auth';
 import walletRoutes from './routes/wallet';

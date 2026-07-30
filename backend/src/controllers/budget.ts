@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 import { parseRupiah } from '../utils/money';
+import { parsePeriodPart, parseText } from '../utils/resourceInput';
 
 export const createBudget = async (req: Request, res: Response) => {
   try {
@@ -11,7 +12,10 @@ export const createBudget = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    if (!categoryId || amount === undefined || !month || !year) {
+    const category = parseText(categoryId, 50);
+    const numericMonth = parsePeriodPart(month, 1, 12);
+    const numericYear = parsePeriodPart(year, 2000, 2100);
+    if (!category || amount === undefined || !numericMonth || !numericYear) {
       return res.status(400).json({ message: 'categoryId, amount, month, and year are required' });
     }
 
@@ -25,9 +29,9 @@ export const createBudget = async (req: Request, res: Response) => {
       where: {
         userId_categoryId_month_year: {
           userId,
-          categoryId,
-          month: Number(month),
-          year: Number(year)
+          categoryId: category,
+          month: numericMonth,
+          year: numericYear
         }
       }
     });
@@ -39,10 +43,10 @@ export const createBudget = async (req: Request, res: Response) => {
     const budget = await prisma.budget.create({
       data: {
         userId,
-        categoryId,
+        categoryId: category,
         amount: numericAmount,
-        month: Number(month),
-        year: Number(year)
+        month: numericMonth,
+        year: numericYear
       }
     });
 
@@ -62,10 +66,15 @@ export const getBudgets = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const whereClause: any = { userId };
+    const numericMonth = month === undefined ? undefined : parsePeriodPart(month, 1, 12);
+    const numericYear = year === undefined ? undefined : parsePeriodPart(year, 2000, 2100);
+    if (numericMonth === null || numericYear === null) {
+      return res.status(400).json({ message: 'month or year is invalid' });
+    }
 
-    if (month) whereClause.month = Number(month);
-    if (year) whereClause.year = Number(year);
+    const whereClause: any = { userId };
+    if (numericMonth) whereClause.month = numericMonth;
+    if (numericYear) whereClause.year = numericYear;
 
     const budgets = await prisma.budget.findMany({
       where: whereClause,

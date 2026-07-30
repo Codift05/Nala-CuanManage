@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import prisma from '../utils/prisma';
 import { parseTransactionDraft } from '../utils/transactionDraft';
 import { getGeminiTimeoutMs, withTimeout } from '../utils/ai';
+import { parseText } from '../utils/resourceInput';
 
 const fallbackReply =
   'Maaf, layanan AI Nala sedang tidak tersedia. Kamu tetap bisa mencatat transaksi secara manual, lalu coba chat lagi nanti ya.';
@@ -17,8 +18,9 @@ export const chatWithNala = async (req: AuthRequest, res: Response): Promise<voi
       res.status(401).json({ error: 'Unauthorized' });
       return;
     }
-    if (!message) {
-      res.status(400).json({ error: 'Message is required' });
+    const userMessage = parseText(message, 2_000);
+    if (!userMessage) {
+      res.status(400).json({ error: 'Message must contain 1-2000 characters' });
       return;
     }
 
@@ -79,7 +81,7 @@ Gunakan bahasa Indonesia yang ramah, singkat, dan jelas (maksimal 3 paragraf pen
     let result;
     try {
       result = await withTimeout(
-        model.generateContent([systemPrompt, `User: ${message}`]),
+        model.generateContent([systemPrompt, `User: ${userMessage}`]),
         getGeminiTimeoutMs(),
       );
     } catch (error) {

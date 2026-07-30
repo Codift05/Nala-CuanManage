@@ -47,6 +47,36 @@ const run = async () => {
   let temporaryUserId: string | undefined;
 
   try {
+    const invalidBody = await fetch(`${apiUrl}/wallets`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${login.token}`,
+      },
+      body: JSON.stringify(['invalid']),
+    });
+    assert.equal(invalidBody.status, 400);
+
+    for (const [path, payload] of [
+      ['/wallets', { name: 'Invalid wallet', type: 'CRYPTO' }],
+      ['/budgets', { categoryId: 'Food', amount: 1000, month: 13, year: 2026 }],
+      ['/recurring', {
+        title: ['invalid'],
+        amount: 1000,
+        categoryId: 'Bills',
+        walletId: wallet.id,
+        dueDate: 1,
+      }],
+      ['/chat', { message: ['invalid'] }],
+      ['/transactions/scan', { imageBase64: 'not-base64' }],
+    ] as const) {
+      const invalidResource = await request(path, login.token, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      assert.equal(invalidResource.response.status, 400);
+    }
+
     for (const [payload, expectedMessage] of [
       [{ walletId: wallet.id, type: 'TRANSFER', amount: 1000 }, 'type'],
       [{ walletId: wallet.id, type: 'EXPENSE', amount: 0 }, 'amount'],

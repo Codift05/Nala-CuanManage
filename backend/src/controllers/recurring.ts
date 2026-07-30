@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/auth';
 import { parseRupiah } from '../utils/money';
+import { parsePeriodPart, parseText } from '../utils/resourceInput';
 
 export const createRecurringBill = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -13,7 +14,11 @@ export const createRecurringBill = async (req: AuthRequest, res: Response): Prom
       return;
     }
 
-    if (!title || !amount || !categoryId || !walletId || !dueDate) {
+    const billTitle = parseText(title, 100);
+    const category = parseText(categoryId, 50);
+    const wallet = parseText(walletId, 100);
+    const numericDueDate = parsePeriodPart(dueDate, 1, 31);
+    if (!billTitle || amount === undefined || !category || !wallet || !numericDueDate) {
       res.status(400).json({ error: 'Missing required fields' });
       return;
     }
@@ -23,19 +28,11 @@ export const createRecurringBill = async (req: AuthRequest, res: Response): Prom
       res.status(400).json({ error: 'Nominal harus berupa rupiah bulat yang valid' });
       return;
     }
-    const numericDueDate = Number(dueDate);
-    if (!Number.isInteger(numericDueDate) ||
-        numericDueDate < 1 ||
-        numericDueDate > 31) {
-      res.status(400).json({ error: 'Tanggal jatuh tempo harus antara 1-31' });
-      return;
-    }
-
-    const wallet = await prisma.wallet.findFirst({
-      where: { id: walletId, userId },
+    const ownedWallet = await prisma.wallet.findFirst({
+      where: { id: wallet, userId },
       select: { id: true },
     });
-    if (!wallet) {
+    if (!ownedWallet) {
       res.status(404).json({ error: 'Wallet not found' });
       return;
     }
@@ -43,10 +40,10 @@ export const createRecurringBill = async (req: AuthRequest, res: Response): Prom
     const bill = await prisma.recurringBill.create({
       data: {
         userId,
-        title,
+        title: billTitle,
         amount: numericAmount,
-        categoryId,
-        walletId,
+        categoryId: category,
+        walletId: wallet,
         dueDate: numericDueDate
       }
     });

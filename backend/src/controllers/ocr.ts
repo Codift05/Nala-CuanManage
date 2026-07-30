@@ -2,13 +2,15 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { parseRupiah } from '../utils/money';
+import { parseBase64Image } from '../utils/resourceInput';
 
 export const scanReceipt = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { imageBase64 } = req.body;
 
-    if (!imageBase64) {
-      res.status(400).json({ error: 'imageBase64 is required' });
+    const image = parseBase64Image(imageBase64);
+    if (!image) {
+      res.status(400).json({ error: 'imageBase64 must be a valid JPEG or PNG payload' });
       return;
     }
 
@@ -35,8 +37,8 @@ Format JSON yang diharapkan:
     const imageParts = [
       {
         inlineData: {
-          data: imageBase64,
-          mimeType: "image/jpeg"
+          data: image.data,
+          mimeType: image.mimeType
         }
       }
     ];
@@ -49,12 +51,24 @@ Format JSON yang diharapkan:
 
     const parsedData = JSON.parse(responseText);
     const amount = parseRupiah(parsedData.amount);
-    if (amount === null) {
-      res.status(422).json({ error: 'Nominal struk tidak valid' });
+    const merchant = typeof parsedData.merchant === 'string'
+      ? parsedData.merchant.trim().slice(0, 100)
+      : '';
+    const notes = typeof parsedData.notes === 'string'
+      ? parsedData.notes.trim().slice(0, 500)
+      : '';
+    const categories = new Set(['Food', 'Shopping', 'Transport', 'Bills', 'Others']);
+    if (amount === null || !merchant || !categories.has(parsedData.categoryId)) {
+      res.status(422).json({ error: 'Hasil ekstraksi struk tidak valid' });
       return;
     }
 
-    res.json({ ...parsedData, amount });
+    res.json({
+      amount,
+      merchant,
+      categoryId: parsedData.categoryId,
+      notes,
+    });
   } catch (error) {
     console.error('Scan receipt error:', error);
     res.status(500).json({ error: 'Gagal memproses struk' });
