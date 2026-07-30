@@ -188,7 +188,7 @@ Acceptance criteria:
 
 ### M2 — Authentication untuk pengguna nyata
 
-Status: **In progress**
+Status: **Complete**
 
 - [x] Access token berumur singkat
 - [x] Refresh token rotation dan session per perangkat
@@ -197,15 +197,15 @@ Status: **In progress**
 - [x] Password reset dengan token sekali pakai
 - [x] Verifikasi email
 - [x] Reauthentication sebelum penghapusan akun
-- [ ] Biometric app unlock pada perangkat yang mendukung
+- [x] Biometric app unlock pada perangkat yang mendukung
 - [x] CORS production allowlist dan secret tanpa fallback
 
 Acceptance criteria:
 
-- Session dapat dilihat dan dicabut.
-- Password berubah menyebabkan session lama tidak lagi dipercaya.
-- Endpoint auth memiliki test sukses, gagal, expiry, dan rate limit.
-- Secret production wajib berasal dari environment/secret manager.
+- Session dapat dilihat dan dicabut. ✅
+- Password berubah menyebabkan session lama tidak lagi dipercaya. ✅
+- Endpoint auth memiliki test sukses, gagal, expiry, dan rate limit. ✅
+- Secret production wajib berasal dari environment/secret manager. ✅
 
 ### M3 — Keandalan fitur inti
 
@@ -538,6 +538,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Delivery email reset password tersedia | Resend HTTP API, timeout 8 detik, idempotency key, fail-fast config production, dan token dihapus jika delivery gagal |
 | 30 Juli 2026 | Reset password tersambung ke mobile | Tombol lupa password, form password baru, route web, dan Android deep link `nala://reset-password` |
 | 30 Juli 2026 | Verifikasi email diwajibkan sebelum login | Token hash sekali pakai 24 jam, resend anti-enumerasi, delivery email, dan migration akun lama |
+| 30 Juli 2026 | Biometric app unlock tersedia | Plugin resmi local_auth, opt-in dari profil, secure session unlock, dan native Android configuration |
 
 ### Log keputusan
 
@@ -554,8 +555,9 @@ Pada akhir setiap sesi pengembangan:
 
 ## 14. Langkah Berikutnya
 
-Pekerjaan coding berikutnya berada di **M2 — Authentication untuk pengguna nyata**:
+Pekerjaan coding berikutnya berada di **M3 — Keandalan fitur inti**:
 
 1. Push workflow lalu verifikasi hasil GitHub Actions.
-2. Tambahkan verifikasi email.
-3. Tambahkan biometric app unlock pada perangkat yang mendukung.
+2. Tambahkan schema validation pada endpoint yang tersisa.
+3. Tambahkan global error response dan request ID.
+4. Tambahkan pagination transaksi.

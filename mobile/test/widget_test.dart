@@ -8,6 +8,7 @@ import 'package:nala/screens/login_screen.dart';
 import 'package:nala/screens/reset_password_screen.dart';
 import 'package:nala/screens/onboarding_screen.dart';
 import 'package:nala/services/token_storage.dart';
+import 'package:nala/services/biometric_service.dart';
 import 'package:nala/services/chat_service.dart';
 import 'package:nala/services/transaction_service.dart';
 import 'package:nala/models/transaction.dart';
@@ -53,6 +54,17 @@ void main() {
     await TokenStorage.clear();
     expect(await TokenStorage.read(), isNull);
     expect(await TokenStorage.readRefresh(), isNull);
+  });
+
+  test('Biometric unlock remains opt-in', () async {
+    SharedPreferences.setMockInitialValues({});
+    final biometrics = BiometricService();
+
+    expect(await biometrics.isEnabled(), isFalse);
+    await biometrics.setEnabled(true);
+    expect(await biometrics.isEnabled(), isTrue);
+    await biometrics.setEnabled(false);
+    expect(await biometrics.isEnabled(), isFalse);
   });
 
   test('AI transaction draft rejects unsafe payloads', () {

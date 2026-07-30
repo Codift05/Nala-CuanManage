@@ -3,7 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 
 import '../services/auth_service.dart';
+import '../services/biometric_service.dart';
 import 'onboarding_screen.dart';
+import 'login_screen.dart';
 import '../widgets/main_shell.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -35,6 +37,17 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _checkAuthStatus() async {
+    final biometrics = BiometricService();
+    if (await biometrics.isEnabled() &&
+        !await biometrics.unlockSavedSession()) {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      }
+      return;
+    }
     final isLoggedIn = await AuthService().isLoggedIn();
 
     if (mounted) {

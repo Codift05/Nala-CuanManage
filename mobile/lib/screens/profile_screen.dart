@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
+import '../services/biometric_service.dart';
 import 'login_screen.dart';
 import 'wallet_management_screen.dart';
 import 'recurring_bills_screen.dart';
@@ -19,11 +20,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? _user;
   bool _isLoading = true;
   String? _loadError;
+  bool _biometricEnabled = false;
 
   @override
   void initState() {
     super.initState();
     _loadUser();
+    BiometricService().isEnabled().then((enabled) {
+      if (mounted) setState(() => _biometricEnabled = enabled);
+    });
   }
 
   Future<void> _loadUser() async {
@@ -154,6 +159,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     icon: Icons.shield_outlined,
                     title: 'Keamanan akun',
                     onTap: () => _showChangePasswordDialog(context),
+                  ),
+                  _buildDivider(),
+                  _buildMenuTile(
+                    icon: Icons.fingerprint_rounded,
+                    title: 'Buka dengan biometrik',
+                    trailing: Switch(
+                      value: _biometricEnabled,
+                      onChanged: (_) => _toggleBiometric(),
+                    ),
+                    onTap: _toggleBiometric,
                   ),
                   _buildDivider(),
                   _buildMenuTile(
@@ -300,6 +315,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String title,
     Color? textColor,
     bool hideArrow = false,
+    Widget? trailing,
     required VoidCallback onTap,
   }) {
     return Material(
@@ -326,7 +342,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
-              if (!hideArrow)
+              if (trailing != null)
+                trailing
+              else if (!hideArrow)
                 const Icon(
                   Icons.chevron_right_rounded,
                   color: Color(0xFFB0B5BE),
@@ -337,6 +355,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _toggleBiometric() async {
+    final biometrics = BiometricService();
+    if (!_biometricEnabled && !await biometrics.isAvailable()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Biometrik belum tersedia di perangkat.')),
+        );
+      }
+      return;
+    }
+    if (!await biometrics.authenticate()) return;
+    final enabled = !_biometricEnabled;
+    await biometrics.setEnabled(enabled);
+    if (mounted) setState(() => _biometricEnabled = enabled);
   }
 
   Widget _buildDivider() {

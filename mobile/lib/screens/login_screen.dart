@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../services/auth_service.dart';
+import '../services/biometric_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/auth_visuals.dart';
 import '../widgets/main_shell.dart';
@@ -50,12 +51,6 @@ class _LoginScreenState extends State<LoginScreen> {
         .showSnackBar(SnackBar(content: Text(result.message)));
   }
 
-  void _comingSoon(String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$feature segera hadir di NALA.')),
-    );
-  }
-
   Future<void> _forgotPassword() async {
     final email = TextEditingController(text: _emailController.text.trim());
     final submitted = await showDialog<String>(
@@ -95,6 +90,35 @@ class _LoginScreenState extends State<LoginScreen> {
             token: result.developmentToken!,
           ),
         ),
+      );
+    }
+  }
+
+  Future<void> _biometricLogin() async {
+    final biometrics = BiometricService();
+    if (!await biometrics.isEnabled()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aktifkan login biometrik dari pengaturan akun.'),
+          ),
+        );
+      }
+      return;
+    }
+    final unlocked = await biometrics.unlockSavedSession();
+    final sessionValid = unlocked && await _authService.isLoggedIn();
+    if (!mounted) return;
+    if (sessionValid) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const MainShell()),
+        (_) => false,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Biometrik gagal atau sesi telah berakhir.')),
       );
     }
   }
@@ -340,7 +364,7 @@ class _LoginScreenState extends State<LoginScreen> {
       width: double.infinity,
       height: 50,
       child: TextButton.icon(
-        onPressed: () => _comingSoon('Login biometrik'),
+        onPressed: _biometricLogin,
         icon: const Icon(Icons.fingerprint_rounded, size: 22),
         label: const Text('Gunakan biometrik'),
         style: TextButton.styleFrom(
