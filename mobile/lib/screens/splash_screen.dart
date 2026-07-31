@@ -80,40 +80,48 @@ class _SplashScreenState extends State<SplashScreen>
           opacity: _fadeAnimation,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(28, 24, 28, 26),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Stack(
+              fit: StackFit.expand,
               children: [
-                Image.asset(
-                  'img/Nala baru.png',
-                  width: 118,
-                  fit: BoxFit.contain,
-                  filterQuality: FilterQuality.high,
-                  semanticLabel: 'Logo Nala',
-                ),
-                const SizedBox(height: 30),
-                Text(
-                  'NALA · DANA KELOLA',
-                  textAlign: TextAlign.center,
-                  style: appleStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
-                    letterSpacing: 1,
+                Center(
+                  child: Image.asset(
+                    'img/Nala baru.png',
+                    width: 88,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                    semanticLabel: 'Logo Nala',
                   ),
                 ),
-                const SizedBox(height: 10),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 290),
-                  child: Text(
-                    'Karya mahasiswa Teknik Informatika angkatan 2023\n'
-                    'Fakultas Teknik · Universitas Sam Ratulangi, Manado\n'
-                    'untuk GEMASTIK 2026',
-                    textAlign: TextAlign.center,
-                    style: appleStyle(
-                      fontSize: 10.5,
-                      height: 1.55,
-                      color: AppTheme.textSecondary,
-                    ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'NALA · DANA KELOLA',
+                        textAlign: TextAlign.center,
+                        style: appleStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Karya mahasiswa Teknik Informatika angkatan 2023\n'
+                        'Fakultas Teknik · Universitas Sam Ratulangi, Manado\n'
+                        'untuk GEMASTIK 2026',
+                        textAlign: TextAlign.center,
+                        style: appleStyle(
+                          fontSize: 10,
+                          height: 1.5,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
