@@ -396,10 +396,23 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
   @override
   void initState() {
     super.initState();
-    _loadWallets();
+    final cachedWallets = _walletService.cachedWallets;
+    if (cachedWallets != null) {
+      _wallets = cachedWallets;
+      if (cachedWallets.isNotEmpty) {
+        _selectedWalletId = cachedWallets.first.id;
+      }
+      _isLoadingWallets = false;
+    } else {
+      _loadWallets();
+    }
   }
 
   Future<void> _loadWallets() async {
+    setState(() {
+      _isLoadingWallets = true;
+      _walletLoadError = null;
+    });
     try {
       final wallets = await _walletService.getWallets();
       if (!mounted) return;
@@ -457,24 +470,6 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoadingWallets || _walletLoadError != null) {
-      return Container(
-        height: 200,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Center(
-          child: _isLoadingWallets
-              ? const CircularProgressIndicator()
-              : Text(
-                  _walletLoadError!,
-                  style: GoogleFonts.inter(color: AppTheme.textSecondary),
-                ),
-        ),
-      );
-    }
-
     return Container(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -575,28 +570,18 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
                 },
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedWalletId,
-                decoration: InputDecoration(
-                  labelText: 'Sumber dana',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                ),
-                items: _wallets.map((w) {
-                  return DropdownMenuItem(
-                      value: w.id,
-                      child: Text(w.name, style: GoogleFonts.inter()));
-                }).toList(),
-                onChanged: (val) {
-                  if (val != null) setState(() => _selectedWalletId = val);
-                },
-              ),
+              _buildWalletField(),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isSaving ? null : _save,
+                  onPressed: _isSaving ||
+                          _isLoadingWallets ||
+                          _walletLoadError != null ||
+                          _selectedWalletId == null
+                      ? null
+                      : _save,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryColor,
                     shape: RoundedRectangleBorder(
@@ -619,6 +604,54 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildWalletField() {
+    const decoration = InputDecoration(labelText: 'Sumber dana');
+    if (_isLoadingWallets) {
+      return const InputDecorator(
+        decoration: decoration,
+        child: Row(
+          children: [
+            SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 10),
+            Text('Memuat sumber dana...'),
+          ],
+        ),
+      );
+    }
+    if (_walletLoadError != null) {
+      return InputDecorator(
+        decoration: decoration,
+        child: Row(
+          children: [
+            Expanded(child: Text(_walletLoadError!)),
+            TextButton(onPressed: _loadWallets, child: const Text('Coba lagi')),
+          ],
+        ),
+      );
+    }
+    if (_wallets.isEmpty) {
+      return const InputDecorator(
+        decoration: decoration,
+        child: Text('Belum ada sumber dana'),
+      );
+    }
+    return DropdownButtonFormField<String>(
+      initialValue: _selectedWalletId,
+      decoration: decoration,
+      items: _wallets
+          .map((wallet) => DropdownMenuItem(
+                value: wallet.id,
+                child: Text(wallet.name, style: GoogleFonts.inter()),
+              ))
+          .toList(),
+      onChanged: (walletId) => setState(() => _selectedWalletId = walletId),
     );
   }
 }

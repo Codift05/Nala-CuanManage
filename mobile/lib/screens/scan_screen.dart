@@ -6,7 +6,6 @@ import '../theme/app_theme.dart';
 import '../services/transaction_service.dart';
 import '../services/wallet_service.dart';
 import '../models/wallet.dart';
-import '../widgets/load_error_view.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -44,7 +43,14 @@ class _ScanScreenState extends State<ScanScreen> {
   @override
   void initState() {
     super.initState();
-    _loadWallets();
+    final cachedWallets = _walletService.cachedWallets;
+    if (cachedWallets != null) {
+      _wallets = cachedWallets;
+      if (cachedWallets.isNotEmpty) _selectedWallet = cachedWallets.first;
+      _isLoadingWallets = false;
+    } else {
+      _loadWallets();
+    }
   }
 
   Future<void> _loadWallets() async {
@@ -209,16 +215,7 @@ class _ScanScreenState extends State<ScanScreen> {
         ),
       ),
       body: SafeArea(
-        child: _isLoadingWallets
-            ? const Center(child: CircularProgressIndicator())
-            : _walletLoadError != null
-                ? LoadErrorView(
-                    message: _walletLoadError,
-                    onRetry: _loadWallets,
-                  )
-                : _scannedData != null
-                    ? _buildResultForm()
-                    : _buildScannerView(),
+        child: _scannedData != null ? _buildResultForm() : _buildScannerView(),
       ),
     );
   }
@@ -429,15 +426,7 @@ class _ScanScreenState extends State<ScanScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                DropdownButtonFormField<Wallet>(
-                  initialValue: _selectedWallet,
-                  decoration: _inputDecoration(),
-                  items: _wallets
-                      .map((w) =>
-                          DropdownMenuItem(value: w, child: Text(w.name)))
-                      .toList(),
-                  onChanged: (v) => setState(() => _selectedWallet = v),
-                ),
+                _buildWalletField(),
               ],
             ),
           ),
@@ -468,7 +457,12 @@ class _ScanScreenState extends State<ScanScreen> {
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: _isSaving ? null : _saveTransaction,
+                  onPressed: _isSaving ||
+                          _isLoadingWallets ||
+                          _walletLoadError != null ||
+                          _selectedWallet == null
+                      ? null
+                      : _saveTransaction,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryColor,
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -498,6 +492,53 @@ class _ScanScreenState extends State<ScanScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildWalletField() {
+    if (_isLoadingWallets) {
+      return InputDecorator(
+        decoration: _inputDecoration(),
+        child: const Row(
+          children: [
+            SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 10),
+            Text('Memuat sumber dana...'),
+          ],
+        ),
+      );
+    }
+    if (_walletLoadError != null) {
+      return InputDecorator(
+        decoration: _inputDecoration(),
+        child: Row(
+          children: [
+            Expanded(child: Text(_walletLoadError!)),
+            TextButton(onPressed: _loadWallets, child: const Text('Coba lagi')),
+          ],
+        ),
+      );
+    }
+    if (_wallets.isEmpty) {
+      return InputDecorator(
+        decoration: _inputDecoration(),
+        child: const Text('Belum ada sumber dana'),
+      );
+    }
+    return DropdownButtonFormField<Wallet>(
+      initialValue: _selectedWallet,
+      decoration: _inputDecoration(),
+      items: _wallets
+          .map((wallet) => DropdownMenuItem(
+                value: wallet,
+                child: Text(wallet.name),
+              ))
+          .toList(),
+      onChanged: (wallet) => setState(() => _selectedWallet = wallet),
     );
   }
 

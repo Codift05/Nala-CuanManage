@@ -578,6 +578,7 @@ Pada akhir setiap sesi pengembangan:
 | 1 Agustus 2026 | Indikator bottom navigation dibuat sliding | Kapsul lime kini bergeser 320 ms dengan kurva yang sama seperti segmented control Home tanpa mengganti state halaman |
 | 1 Agustus 2026 | Halaman utama memakai PageView | Konten bergeser bersama indikator navbar, halaman dibangun bertahap untuk mengurangi beban awal, dan state halaman yang sudah dibuka dipertahankan |
 | 1 Agustus 2026 | Katalog wallet diberi cache per sesi | Tambah Transaksi dapat tampil tanpa request ulang setelah Dashboard dimuat; request bersamaan dideduplikasi dan cache dibersihkan pada pergantian sesi |
+| 1 Agustus 2026 | Loading wallet tidak lagi memblokir flow | Scanner dan form Tagihan Berulang langsung tampil; status loading/error dibatasi pada field sumber dana dengan retry lokal |
 
 ### Log keputusan
 
