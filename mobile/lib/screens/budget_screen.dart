@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../services/budget_service.dart';
 import '../models/budget.dart';
@@ -17,6 +18,11 @@ class _BudgetScreenState extends State<BudgetScreen> {
   bool _isLoading = true;
   String? _loadError;
   List<Budget> _budgets = [];
+  final _currencyFormat = NumberFormat.currency(
+    locale: 'id_ID',
+    symbol: 'Rp ',
+    decimalDigits: 0,
+  );
 
   final int _currentMonth = DateTime.now().month;
   final int _currentYear = DateTime.now().year;
@@ -68,7 +74,13 @@ class _BudgetScreenState extends State<BudgetScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Anggaran Bulanan'),
+        title: Text(
+          'Budget',
+          style: GoogleFonts.inter(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         actions: [
           IconButton(
             tooltip: 'Tambah anggaran',
@@ -85,43 +97,138 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   ? _buildEmptyState()
                   : RefreshIndicator(
                       onRefresh: _loadBudgets,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(20),
-                        itemCount: _budgets.length,
-                        itemBuilder: (context, index) {
-                          final budget = _budgets[index];
-                          return _buildBudgetCard(budget);
-                        },
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+                        children: [
+                          _buildSummaryCard(),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Batas per kategori',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ..._budgets.map(_buildBudgetCard),
+                        ],
                       ),
                     ),
     );
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Center(
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFFEAEDF2)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF0DA),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(
+                  Icons.donut_large_rounded,
+                  size: 26,
+                  color: AppTheme.primaryColor,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Belum ada anggaran bulan ini',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 14),
+              ElevatedButton(
+                onPressed: _showAddBudgetSheet,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: const Text('Buat Anggaran'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard() {
+    final total = _budgets.fold<int>(0, (sum, budget) => sum + budget.amount);
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFF8738), Color(0xFFFFA04D)],
+        ),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Row(
         children: [
-          Icon(Icons.pie_chart_outline, size: 64, color: Colors.grey[300]),
-          const SizedBox(height: 16),
-          Text(
-            'Belum ada anggaran bulan ini',
-            style: GoogleFonts.interTight(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textSecondary,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'TOTAL BUDGET BULAN INI',
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.6,
+                    color: const Color(0xE6FFFFFF),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    _currencyFormat.format(total),
+                    style: GoogleFonts.inter(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: _showAddBudgetSheet,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Text(
+              '${_budgets.length} kategori',
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF54290B),
               ),
             ),
-            child: const Text('Buat Anggaran'),
           ),
         ],
       ),
@@ -129,58 +236,64 @@ class _BudgetScreenState extends State<BudgetScreen> {
   }
 
   Widget _buildBudgetCard(Budget budget) {
-    IconData icon = Icons.category;
     Color color = AppTheme.primaryColor;
 
     if (budget.categoryId == 'Food' || budget.categoryId == 'Makanan') {
-      icon = Icons.restaurant;
       color = Colors.orange;
     } else if (budget.categoryId == 'Transport' ||
         budget.categoryId == 'Transportasi') {
-      icon = Icons.directions_bus;
       color = AppTheme.secondaryColor;
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        border: Border.all(color: AppTheme.borderColor),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFEAEDF2)),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            width: 8,
+            height: 44,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
+              color: color,
+              borderRadius: BorderRadius.circular(4),
             ),
-            child: Icon(icon, color: color, size: 24),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   budget.categoryId,
-                  style: GoogleFonts.interTight(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Batas: Rp ${budget.amount.toInt()}',
-                  style: GoogleFonts.interTight(
-                    fontSize: 13,
+                  'Batas bulanan',
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
                     color: AppTheme.textSecondary,
                   ),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            _currencyFormat.format(budget.amount),
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
             ),
           ),
         ],
@@ -218,6 +331,12 @@ class _AddBudgetSheetState extends State<_AddBudgetSheet> {
     'Bills',
     'Others'
   ];
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    super.dispose();
+  }
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
@@ -269,15 +388,15 @@ class _AddBudgetSheetState extends State<_AddBudgetSheet> {
             children: [
               Text(
                 'Buat Anggaran Baru',
-                style: GoogleFonts.interTight(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                style: GoogleFonts.inter(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
                 ),
               ),
               const SizedBox(height: 24),
               DropdownButtonFormField<String>(
-                value: _categoryId,
+                initialValue: _categoryId,
                 decoration: InputDecoration(
                   labelText: 'Kategori',
                   border: OutlineInputBorder(
@@ -285,8 +404,7 @@ class _AddBudgetSheetState extends State<_AddBudgetSheet> {
                 ),
                 items: _categories.map((c) {
                   return DropdownMenuItem(
-                      value: c,
-                      child: Text(c, style: GoogleFonts.interTight()));
+                      value: c, child: Text(c, style: GoogleFonts.inter()));
                 }).toList(),
                 onChanged: (val) {
                   if (val != null) setState(() => _categoryId = val);
@@ -296,16 +414,20 @@ class _AddBudgetSheetState extends State<_AddBudgetSheet> {
               TextFormField(
                 controller: _amountController,
                 keyboardType: TextInputType.number,
-                style: GoogleFonts.interTight(),
+                style: GoogleFonts.inter(),
                 decoration: InputDecoration(
                   labelText: 'Batas Anggaran Bulanan',
                   prefixText: 'Rp ',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16)),
                 ),
-                validator: (val) => val == null || val.isEmpty
-                    ? 'Batas anggaran tidak boleh kosong'
-                    : null,
+                validator: (val) {
+                  final amount = int.tryParse(
+                        val?.replaceAll(RegExp(r'[^0-9]'), '') ?? '',
+                      ) ??
+                      0;
+                  return amount > 0 ? null : 'Nominal harus lebih dari Rp 0';
+                },
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -322,9 +444,9 @@ class _AddBudgetSheetState extends State<_AddBudgetSheet> {
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
                           'Simpan Anggaran',
-                          style: GoogleFonts.interTight(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
                         ),
