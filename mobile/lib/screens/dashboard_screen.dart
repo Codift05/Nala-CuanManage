@@ -604,124 +604,153 @@ class DashboardScreenState extends State<DashboardScreen> {
   Widget _buildBalanceCard() {
     final primaryWallet = _wallets.isNotEmpty ? _wallets.first : null;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFFFA321), Color(0xFFF4820A)],
-        ),
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryColor.withValues(alpha: 0.22),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(22),
+      child: Container(
+        width: double.infinity,
+        height: 164,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [Color(0xFFFF8738), Color(0xFFFFA04D)],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Total saldo',
-                      style: TextStyle(
-                        fontFamily: '.SF Pro Text',
-                        color: Color(0xE6FFFFFF),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -62,
+              top: -76,
+              child: Container(
+                width: 210,
+                height: 210,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.10),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 22,
+              bottom: -82,
+              child: Container(
+                width: 170,
+                height: 170,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFFE86620).withValues(alpha: 0.16),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 17),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'TOTAL DANA',
+                              style: TextStyle(
+                                fontFamily: '.SF Pro Text',
+                                color: Color(0xE6FFFFFF),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.7,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              primaryWallet?.name ?? 'Belum ada wallet',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontFamily: '.SF Pro Display',
+                                color: Colors.white,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 11,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: const Text(
+                          'Utama',
+                          style: TextStyle(
+                            fontFamily: '.SF Pro Text',
+                            color: Color(0xFF54290B),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  const Text(
+                    'Saldo tersedia',
+                    style: TextStyle(
+                      fontFamily: '.SF Pro Text',
+                      color: Color(0xE6FFFFFF),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
                     ),
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _isBalanceVisible = !_isBalanceVisible;
-                        });
-                      },
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                _isBalanceVisible
-                                    ? _currencyFormat.format(_totalBalance)
-                                    : 'Rp •••••••',
-                                style: const TextStyle(
-                                  fontFamily: '.SF Pro Display',
-                                  color: Colors.white,
-                                  fontSize: 29,
-                                  height: 1,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                  ),
+                  const SizedBox(height: 4),
+                  GestureDetector(
+                    onTap: () => setState(() {
+                      _isBalanceVisible = !_isBalanceVisible;
+                    }),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              _isBalanceVisible
+                                  ? _currencyFormat.format(_totalBalance)
+                                  : 'Rp •••••••',
+                              style: const TextStyle(
+                                fontFamily: '.SF Pro Display',
+                                color: Colors.white,
+                                fontSize: 27,
+                                height: 1,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            _isBalanceVisible
-                                ? Icons.keyboard_arrow_down_rounded
-                                : Icons.visibility_off_rounded,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(width: 9),
+                        Icon(
+                          _isBalanceVisible
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: Colors.white,
+                          size: 19,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      primaryWallet == null
-                          ? 'Tidak ada wallet aktif'
-                          : '${primaryWallet.name} · Active',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontFamily: '.SF Pro Text',
-                        color: Color(0xE6FFFFFF),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              _buildWalletBadge(primaryWallet?.type ?? 'CASH'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWalletBadge(String type) {
-    return Container(
-      width: 42,
-      height: 42,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white.withValues(alpha: 0.20),
-      ),
-      child: Center(
-        child: Icon(
-          type == 'EWALLET'
-              ? Icons.account_balance_wallet_rounded
-              : type == 'BANK'
-                  ? Icons.account_balance_rounded
-                  : Icons.payments_rounded,
-          color: Colors.white,
-          size: 20,
+            ),
+          ],
         ),
       ),
     );
