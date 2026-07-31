@@ -16,6 +16,9 @@ import '../models/transaction.dart';
 import '../models/budget.dart';
 import 'budget_screen.dart';
 import 'add_transaction_screen.dart';
+import 'scan_screen.dart';
+import 'transaction_screen.dart';
+import 'report_screen.dart';
 import 'package:telephony/telephony.dart';
 import 'package:home_widget/home_widget.dart';
 
@@ -238,9 +241,13 @@ class DashboardScreenState extends State<DashboardScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildHeader(),
+                          const SizedBox(height: 22),
+                          _buildHomeSegments(),
                           const SizedBox(height: 20),
                           _buildBalanceCard(),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 26),
+                          _buildSectionTitle('Fitur pilihan kamu', null),
+                          const SizedBox(height: 14),
                           _buildQuickActions(),
                           const SizedBox(height: 24),
                           if (_nudgeMessage.isNotEmpty) ...[
@@ -372,6 +379,68 @@ class DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildHomeSegments() {
+    return Container(
+      height: 54,
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(27),
+        border: Border.all(color: const Color(0xFFEAEDF2)),
+      ),
+      child: Row(
+        children: [
+          _buildHomeSegment('Insight', true, () {}),
+          _buildHomeSegment(
+            'Transaksi',
+            false,
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const TransactionScreen()),
+            ),
+          ),
+          _buildHomeSegment(
+            'Growth',
+            false,
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ReportScreen()),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHomeSegment(
+    String label,
+    bool selected,
+    VoidCallback onTap,
+  ) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: selected ? const Color(0xFFDFF45B) : Colors.transparent,
+            borderRadius: BorderRadius.circular(22),
+          ),
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -618,43 +687,48 @@ class DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildQuickActions() {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(
-          child: _buildActionTile(
-            CupertinoIcons.add,
-            'Catat',
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const AddTransactionScreen(),
-                ),
-              ).then((result) {
-                if (result == true && mounted) _loadData();
-              });
-            },
+        _buildActionTile(
+          Icons.edit_note_rounded,
+          'Catat',
+          const Color(0xFF66D7CC),
+          () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const AddTransactionScreen(),
+              ),
+            ).then((result) {
+              if (result == true && mounted) _loadData();
+            });
+          },
+        ),
+        _buildActionTile(
+          Icons.donut_large_rounded,
+          'Budget',
+          const Color(0xFF93AEF4),
+          () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const BudgetScreen()),
           ),
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _buildActionTile(
-            CupertinoIcons.chart_pie,
-            'Budget',
-            () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const BudgetScreen()),
-            ),
+        _buildActionTile(
+          Icons.document_scanner_rounded,
+          'Scan',
+          const Color(0xFFB8A0E8),
+          () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ScanScreen()),
           ),
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _buildActionTile(
-            CupertinoIcons.heart,
-            'Skor $_healthScore',
-            () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const HealthScreen()),
-            ),
+        _buildActionTile(
+          Icons.monitor_heart_rounded,
+          'Skor $_healthScore',
+          const Color(0xFFFFBE73),
+          () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const HealthScreen()),
           ),
         ),
       ],
@@ -664,30 +738,32 @@ class DashboardScreenState extends State<DashboardScreen> {
   Widget _buildActionTile(
     IconData icon,
     String label,
+    Color color,
     VoidCallback onTap,
   ) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        height: 78,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.borderColor),
-        ),
+    return SizedBox(
+      width: 72,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 21, color: AppTheme.primaryColor),
-            const SizedBox(height: 8),
+            Container(
+              width: 58,
+              height: 58,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(icon, size: 26, color: const Color(0xFF15171B)),
+            ),
+            const SizedBox(height: 9),
             Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontFamily: '.SF Pro Text',
-                fontSize: 12,
+              style: GoogleFonts.inter(
+                fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
               ),
@@ -747,7 +823,7 @@ class DashboardScreenState extends State<DashboardScreen> {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -874,7 +950,7 @@ class DashboardScreenState extends State<DashboardScreen> {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -923,7 +999,7 @@ class DashboardScreenState extends State<DashboardScreen> {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(22),
         ),
         child: Text(
           'Belum ada transaksi.',
@@ -939,7 +1015,7 @@ class DashboardScreenState extends State<DashboardScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),

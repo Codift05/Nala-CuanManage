@@ -546,6 +546,7 @@ Pada akhir setiap sesi pengembangan:
 | 31 Juli 2026 | State kegagalan mobile dan session recovery disatukan | Shared authenticated client, refresh rotation lock, global session-expired redirect, retry UI, empty state transaksi, analyzer, dan 17 Flutter test |
 | 31 Juli 2026 | M3 ditutup dengan pengujian IDOR lintas akun | HTTP test read/update/delete wallet dan transaksi, budget, recurring, session, mass-assignment profil, serta verifikasi resource pemilik tetap utuh |
 | 31 Juli 2026 | Startup Flutter Web diverifikasi | Plugin home widget dibatasi ke platform native; Chrome debug aktif dan 17 Flutter test lulus |
+| 31 Juli 2026 | Home dan navigation shell dimodernisasi | Segmented shortcut, kartu fitur berwarna, icon Material modern, radius kartu konsisten, serta bottom navigation kapsul mengambang tanpa dependency baru |
 
 ### Log keputusan
 

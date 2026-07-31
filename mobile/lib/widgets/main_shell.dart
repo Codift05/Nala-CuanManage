@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import '../theme/app_theme.dart';
 import '../screens/dashboard_screen.dart';
 import '../screens/report_screen.dart';
@@ -69,38 +68,48 @@ class _MainShellState extends State<MainShell> {
       body: IndexedStack(index: _selectedIndex, children: _screens),
       bottomNavigationBar: SafeArea(
         top: false,
+        minimum: const EdgeInsets.fromLTRB(14, 0, 14, 10),
         child: Container(
-          height: 66,
-          decoration: const BoxDecoration(
+          height: 70,
+          decoration: BoxDecoration(
             color: Colors.white,
-            border: Border(
-              top: BorderSide(color: AppTheme.borderColor),
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: _buildNavItem(CupertinoIcons.house_fill, 'Beranda', 0),
-              ),
-              Expanded(
-                child: _buildNavItem(
-                  CupertinoIcons.list_bullet,
-                  'Transaksi',
-                  1,
-                ),
-              ),
-              Expanded(child: _buildScanNavItem()),
-              Expanded(
-                child: _buildNavItem(
-                  CupertinoIcons.chart_bar_fill,
-                  'Laporan',
-                  3,
-                ),
-              ),
-              Expanded(
-                child: _buildNavItem(CupertinoIcons.person_fill, 'Profil', 4),
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(color: const Color(0xFFE9ECF1)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.10),
+                blurRadius: 28,
+                offset: const Offset(0, 10),
               ),
             ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(26),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildNavItem(Icons.home_rounded, 'Beranda', 0),
+                ),
+                Expanded(
+                  child: _buildNavItem(
+                    Icons.receipt_long_rounded,
+                    'Transaksi',
+                    1,
+                  ),
+                ),
+                Expanded(child: _buildScanNavItem()),
+                Expanded(
+                  child: _buildNavItem(
+                    Icons.bar_chart_rounded,
+                    'Laporan',
+                    3,
+                  ),
+                ),
+                Expanded(
+                  child: _buildNavItem(Icons.person_rounded, 'Profil', 4),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -116,8 +125,8 @@ class _MainShellState extends State<MainShell> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 42,
-            height: 42,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
               color: AppTheme.primaryColor,
               shape: BoxShape.circle,
@@ -130,8 +139,8 @@ class _MainShellState extends State<MainShell> {
               ],
             ),
             child: const Icon(
-              CupertinoIcons.add,
-              size: 22,
+              Icons.add_rounded,
+              size: 28,
               color: Colors.white,
             ),
           ),
@@ -149,12 +158,22 @@ class _MainShellState extends State<MainShell> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            color: isSelected ? AppTheme.primaryColor : const Color(0xFF8A94A3),
-            size: 23,
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            width: 38,
+            height: 28,
+            decoration: BoxDecoration(
+              color: isSelected ? const Color(0xFFFFF0DA) : Colors.transparent,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              icon,
+              color:
+                  isSelected ? AppTheme.primaryColor : const Color(0xFF8A94A3),
+              size: 22,
+            ),
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 2),
           Text(
             label,
             style: TextStyle(
