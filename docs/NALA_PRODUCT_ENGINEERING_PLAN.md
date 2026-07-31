@@ -101,7 +101,7 @@ Legenda:
 | Redis | ✅ | Menyimpan auth rate limit lintas instance | Tambahkan health/monitoring production |
 | Recurring scheduler | 🟡 | Execution record, duplicate protection, dan bulan pendek tersedia | Perlu monitoring dan timezone production |
 | AI safety | 🟡 | Mutasi AI berupa draft terkonfirmasi dan output transaksi/struk divalidasi | Privacy dan evaluasi prompt injection |
-| Audit trail | ⬜ | Belum tersedia | Event keamanan dan perubahan data penting |
+| Audit trail | ✅ | Auth, profil, session, akun, dan mutasi transaksi tercatat atomik | Tetapkan retensi dan akses admin sebelum production |
 | Backend test | 🟡 | Unit test dan recurring integration test tersedia | Perluas ke auth dan seluruh perubahan saldo |
 | Observability | 🟡 | Request ID dan access log JSON tersedia | Error tracking dan metrik production |
 | Production deployment | ⬜ | Docker Compose development tersedia | Image production, TLS, secrets, migration |
@@ -217,7 +217,7 @@ Status: **In progress**
 - [x] Schema validation seluruh endpoint
 - [x] Global error response yang konsisten
 - [x] Pagination transaksi
-- [ ] Audit log untuk auth, profil, dan perubahan transaksi
+- [x] Audit log untuk auth, profil, dan perubahan transaksi
 - [ ] Loading, empty, error, retry, dan session-expired state
 
 Acceptance criteria:
@@ -542,6 +542,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Schema validation endpoint fitur inti diselesaikan | Typecheck, 11 unit test, dan HTTP integration test menolak payload invalid pada wallet, budget, recurring, chat, OCR, serta transaksi |
 | 31 Juli 2026 | Error API dan request tracing diseragamkan | Unit test kontrak error; HTTP test validasi, malformed JSON, 404, header `X-Request-ID`, dan integration suite lulus |
 | 31 Juli 2026 | Histori transaksi memakai cursor pagination | Unit test cursor, HTTP test dua halaman tanpa duplikat, dashboard limit 20, 15 Flutter test, dan integration suite lulus |
+| 31 Juli 2026 | Audit trail keamanan dan finansial tersedia | Migration terkontrol; integration test request ID untuk profil/transaksi, create-update-delete transaksi, scheduler, dan audit akun terhapus |
 
 ### Log keputusan
 
@@ -561,6 +562,6 @@ Pada akhir setiap sesi pengembangan:
 Pekerjaan coding berikutnya berada di **M3 — Keandalan fitur inti**:
 
 1. Push workflow lalu verifikasi hasil GitHub Actions.
-2. Tambahkan audit log untuk perubahan keamanan dan data finansial.
-3. Lengkapi loading, empty, error, retry, dan session-expired state di mobile.
-4. Lengkapi ownership/IDOR test seluruh resource.
+2. Lengkapi loading, empty, error, retry, dan session-expired state di mobile.
+3. Lengkapi ownership/IDOR test seluruh resource.
+4. Tetapkan retensi audit log dan akses operasional sebelum production.

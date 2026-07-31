@@ -44,6 +44,7 @@ const run = async () => {
   const wallet = wallets[0];
   const initialBalance = wallet.balance;
   let transactionId: string | undefined;
+  let auditedTransactionId: string | undefined;
   let temporaryUserId: string | undefined;
 
   try {
@@ -203,6 +204,19 @@ const run = async () => {
     assert.equal(reusedRefreshResponse.status, 401);
     const temporaryToken = refreshed.accessToken;
 
+    const profileUpdate = await request('/auth/profile', temporaryToken, {
+      method: 'PUT',
+      body: JSON.stringify({ name: 'Ownership Updated', email: temporaryEmail }),
+    });
+    assert.equal(profileUpdate.response.status, 200);
+    const profileAudit = await prisma.auditLog.findFirst({
+      where: { action: 'PROFILE_UPDATED', actorUserId: temporaryUserId },
+    });
+    assert.equal(
+      profileAudit?.requestId,
+      profileUpdate.response.headers.get('x-request-id'),
+    );
+
     const walletCreation = await request('/wallets', temporaryToken, {
       method: 'POST',
       body: JSON.stringify({
@@ -343,6 +357,10 @@ const run = async () => {
     });
     const loginAfterReset = await loginAfterResetResponse.json();
     assert.equal(loginAfterResetResponse.status, 200);
+    const temporarySessionIds = (await prisma.session.findMany({
+      where: { userId: temporaryUserId },
+      select: { id: true },
+    })).map((session) => session.id);
 
     const deleteWithPassword = await request(
       '/auth/me',
@@ -353,6 +371,18 @@ const run = async () => {
       },
     );
     assert.equal(deleteWithPassword.response.status, 200);
+    const accountDeletionAudit = await prisma.auditLog.findFirst({
+      where: {
+        action: 'ACCOUNT_DELETED',
+        resourceId: temporaryUserId,
+      },
+    });
+    assert.equal(accountDeletionAudit?.actorUserId, null);
+    await prisma.auditLog.deleteMany({
+      where: {
+        resourceId: { in: [temporaryUserId!, ...temporarySessionIds] },
+      },
+    });
     temporaryUserId = undefined;
 
     const payload = {
@@ -371,6 +401,14 @@ const run = async () => {
     assert.equal(create.response.status, 201);
     assert.equal(create.body.replayed, false);
     transactionId = create.body.transaction.id;
+    auditedTransactionId = transactionId;
+    const creationAudit = await prisma.auditLog.findFirst({
+      where: { action: 'TRANSACTION_CREATED', resourceId: transactionId },
+    });
+    assert.equal(
+      creationAudit?.requestId,
+      create.response.headers.get('x-request-id'),
+    );
 
     const replay = await request('/transactions', login.token, {
       method: 'POST',
@@ -424,6 +462,16 @@ const run = async () => {
     assert.equal(deletion.response.status, 200);
     transactionId = undefined;
 
+    const transactionAudits = await prisma.auditLog.findMany({
+      where: { resourceId: auditedTransactionId },
+      select: { action: true },
+      orderBy: { createdAt: 'asc' },
+    });
+    assert.deepEqual(
+      transactionAudits.map((audit) => audit.action),
+      ['TRANSACTION_CREATED', 'TRANSACTION_UPDATED', 'TRANSACTION_DELETED'],
+    );
+
     const afterDelete = await request(`/wallets/${wallet.id}`, login.token);
     assert.equal(afterDelete.body.balance, initialBalance);
 
@@ -463,6 +511,14 @@ const run = async () => {
     }
     if (temporaryUserId) {
       await prisma.$transaction(async (tx) => {
+        await tx.auditLog.deleteMany({
+          where: {
+            OR: [
+              { actorUserId: temporaryUserId },
+              { resourceId: temporaryUserId },
+            ],
+          },
+        });
         await tx.recurringBill.deleteMany({ where: { userId: temporaryUserId } });
         await tx.transaction.deleteMany({ where: { userId: temporaryUserId } });
         await tx.budget.deleteMany({ where: { userId: temporaryUserId } });
@@ -470,6 +526,23 @@ const run = async () => {
         await tx.user.deleteMany({ where: { id: temporaryUserId } });
       });
     }
+    if (auditedTransactionId) {
+      await prisma.auditLog.deleteMany({
+        where: { resourceId: auditedTransactionId },
+      });
+    }
+    const adminIntegrationSessions = await prisma.session.findMany({
+      where: {
+        userId: login.user.id,
+        deviceName: 'Integration primary',
+      },
+      select: { id: true },
+    });
+    await prisma.auditLog.deleteMany({
+      where: {
+        resourceId: { in: adminIntegrationSessions.map((session) => session.id) },
+      },
+    });
     await prisma.session.updateMany({
       where: {
         userId: login.user.id,

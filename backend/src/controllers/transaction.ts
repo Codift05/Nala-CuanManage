@@ -97,8 +97,8 @@ export const createTransaction = async (req: Request, res: Response) => {
     }
 
     // Use a transaction to ensure both operations succeed or fail together
-    const [transaction, updatedWallet] = await prisma.$transaction([
-      prisma.transaction.create({
+    const { transaction, updatedWallet } = await prisma.$transaction(async (tx) => {
+      const transaction = await tx.transaction.create({
         data: {
           userId,
           walletId: parsedWalletId,
@@ -110,16 +110,31 @@ export const createTransaction = async (req: Request, res: Response) => {
           idempotencyKey,
           date: transactionDate
         }
-      }),
-      prisma.wallet.update({
+      });
+      const updatedWallet = await tx.wallet.update({
         where: { id: parsedWalletId },
         data: {
           balance: {
             increment: balanceChange
           }
         }
-      })
-    ]);
+      });
+      await tx.auditLog.create({
+        data: {
+          actorUserId: userId,
+          action: 'TRANSACTION_CREATED',
+          resourceType: 'TRANSACTION',
+          resourceId: transaction.id,
+          requestId: res.locals.requestId,
+          metadata: {
+            walletId: parsedWalletId,
+            type: transactionType,
+            amount: numericAmount.toString(),
+          },
+        },
+      });
+      return { transaction, updatedWallet };
+    });
 
     res.status(201).json({
       message: 'Transaction created successfully',
@@ -258,19 +273,33 @@ export const deleteTransaction = async (req: Request, res: Response) => {
     // Revert the balance change
     const balanceChange = transaction.type === 'INCOME' ? -transaction.amount : transaction.amount;
 
-    await prisma.$transaction([
-      prisma.transaction.delete({
+    await prisma.$transaction(async (tx) => {
+      await tx.transaction.delete({
         where: { id }
-      }),
-      prisma.wallet.update({
+      });
+      await tx.wallet.update({
         where: { id: transaction.walletId },
         data: {
           balance: {
             increment: balanceChange
           }
         }
-      })
-    ]);
+      });
+      await tx.auditLog.create({
+        data: {
+          actorUserId: userId,
+          action: 'TRANSACTION_DELETED',
+          resourceType: 'TRANSACTION',
+          resourceId: id,
+          requestId: res.locals.requestId,
+          metadata: {
+            walletId: transaction.walletId,
+            type: transaction.type,
+            amount: transaction.amount.toString(),
+          },
+        },
+      });
+    });
 
     res.json({ message: 'Transaction deleted successfully' });
   } catch (error) {
@@ -366,6 +395,27 @@ export const updateTransaction = async (req: Request, res: Response) => {
           notes: parsedNotes,
           date: transactionDate
         }
+      });
+      await tx.auditLog.create({
+        data: {
+          actorUserId: userId,
+          action: 'TRANSACTION_UPDATED',
+          resourceType: 'TRANSACTION',
+          resourceId: id,
+          requestId: res.locals.requestId,
+          metadata: {
+            previous: {
+              walletId: oldTransaction.walletId,
+              type: oldTransaction.type,
+              amount: oldTransaction.amount.toString(),
+            },
+            current: {
+              walletId: parsedWalletId,
+              type: transactionType,
+              amount: numericAmount.toString(),
+            },
+          },
+        },
       });
     });
 

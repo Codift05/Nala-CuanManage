@@ -58,6 +58,13 @@ const run = async () => {
     assert.equal(transactions.length, 1);
     assert.equal(execution?.transactionId, transactions[0]?.id);
     assert.equal(updatedWallet.balance, wallet.balance - 321n);
+    const audit = await prisma.auditLog.findFirst({
+      where: {
+        action: 'TRANSACTION_CREATED',
+        resourceId: transactions[0]!.id,
+      },
+    });
+    assert.equal(audit?.requestId, `scheduler:${recurringPeriod(runAt)}`);
 
     await prisma.$transaction([
       prisma.transaction.delete({ where: { id: transactions[0]!.id } }),
@@ -92,6 +99,7 @@ const run = async () => {
         where: { recurringBillId: bill.id },
       });
       if (transaction) {
+        await tx.auditLog.deleteMany({ where: { resourceId: transaction.id } });
         await tx.transaction.delete({ where: { id: transaction.id } });
         await tx.wallet.update({
           where: { id: wallet.id },

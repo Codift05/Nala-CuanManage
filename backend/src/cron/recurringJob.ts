@@ -45,6 +45,22 @@ export const processRecurringBills = async (runAt = new Date()) => {
           where: { id: execution.id },
           data: { transactionId: transaction.id },
         });
+        await tx.auditLog.create({
+          data: {
+            actorUserId: bill.userId,
+            action: 'TRANSACTION_CREATED',
+            resourceType: 'TRANSACTION',
+            resourceId: transaction.id,
+            requestId: `scheduler:${period}`,
+            metadata: {
+              source: 'RECURRING_BILL',
+              recurringBillId: bill.id,
+              walletId: bill.walletId,
+              type: 'EXPENSE',
+              amount: bill.amount.toString(),
+            },
+          },
+        });
       });
       processed++;
     } catch (error) {

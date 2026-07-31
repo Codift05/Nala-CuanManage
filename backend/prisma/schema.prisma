@@ -28,6 +28,22 @@ model User {
   sessions       Session[]
   passwordResetTokens PasswordResetToken[]
   emailVerificationTokens EmailVerificationToken[]
+  auditLogs      AuditLog[]
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  actorUserId String?
+  action      String   @db.VarChar(50)
+  resourceType String  @db.VarChar(50)
+  resourceId  String?
+  requestId   String   @db.VarChar(100)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  actor       User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([actorUserId, createdAt])
+  @@index([action, createdAt])
 }
 
 model EmailVerificationToken {

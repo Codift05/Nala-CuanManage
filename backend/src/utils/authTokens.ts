@@ -17,17 +17,32 @@ export const createAccessToken = (userId: string, sessionId: string): string =>
 export const createSession = async (
   userId: string,
   deviceName: unknown,
+  requestId: string,
 ) => {
   const refreshToken = createRefreshToken();
-  const session = await prisma.session.create({
-    data: {
-      userId,
-      refreshTokenHash: hashRefreshToken(refreshToken),
-      deviceName: typeof deviceName === 'string' && deviceName.trim()
-        ? deviceName.trim().slice(0, 100)
-        : 'Unknown device',
-      expiresAt: new Date(Date.now() + REFRESH_TOKEN_DAYS * 86400000),
-    },
+  const normalizedDeviceName = typeof deviceName === 'string' && deviceName.trim()
+    ? deviceName.trim().slice(0, 100)
+    : 'Unknown device';
+  const session = await prisma.$transaction(async (tx) => {
+    const created = await tx.session.create({
+      data: {
+        userId,
+        refreshTokenHash: hashRefreshToken(refreshToken),
+        deviceName: normalizedDeviceName,
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_DAYS * 86400000),
+      },
+    });
+    await tx.auditLog.create({
+      data: {
+        actorUserId: userId,
+        action: 'LOGIN_SUCCEEDED',
+        resourceType: 'SESSION',
+        resourceId: created.id,
+        requestId,
+        metadata: { deviceName: normalizedDeviceName },
+      },
+    });
+    return created;
   });
   return {
     accessToken: createAccessToken(userId, session.id),

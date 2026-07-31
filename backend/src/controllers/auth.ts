@@ -89,6 +89,15 @@ export const register = async (req: Request, res: Response) => {
           expiresAt: verification.expiresAt,
         },
       });
+      await tx.auditLog.create({
+        data: {
+          actorUserId: createdUser.id,
+          action: 'ACCOUNT_REGISTERED',
+          resourceType: 'USER',
+          resourceId: createdUser.id,
+          requestId: res.locals.requestId,
+        },
+      });
 
       return createdUser;
     });
@@ -152,7 +161,11 @@ export const login = async (req: Request, res: Response) => {
       return res.status(403).json({ message: 'Email belum diverifikasi' });
     }
 
-    const tokens = await createSession(user.id, req.body.deviceName);
+    const tokens = await createSession(
+      user.id,
+      req.body.deviceName,
+      res.locals.requestId,
+    );
 
     res.json({
       message: 'Login successful',
@@ -194,6 +207,15 @@ export const verifyEmail = async (req: Request, res: Response) => {
     await tx.user.update({
       where: { id: verification.userId },
       data: { emailVerifiedAt: new Date() },
+    });
+    await tx.auditLog.create({
+      data: {
+        actorUserId: verification.userId,
+        action: 'EMAIL_VERIFIED',
+        resourceType: 'USER',
+        resourceId: verification.userId,
+        requestId: res.locals.requestId,
+      },
     });
     return true;
   });
@@ -309,13 +331,32 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
       return res.status(409).json({ message: 'Email sudah digunakan akun lain' });
     }
 
-    const user = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        name,
-        email,
-        ...(avatar !== undefined ? { avatar } : {})
-      }
+    const user = await prisma.$transaction(async (tx) => {
+      const updated = await tx.user.update({
+        where: { id: userId },
+        data: {
+          name,
+          email,
+          ...(avatar !== undefined ? { avatar } : {})
+        }
+      });
+      await tx.auditLog.create({
+        data: {
+          actorUserId: userId,
+          action: 'PROFILE_UPDATED',
+          resourceType: 'USER',
+          resourceId: userId,
+          requestId: res.locals.requestId,
+          metadata: {
+            changedFields: [
+              'name',
+              'email',
+              ...(avatar !== undefined ? ['avatar'] : []),
+            ],
+          },
+        },
+      });
+      return updated;
     });
 
     return res.json({
@@ -383,6 +424,15 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
       prisma.session.updateMany({
         where: { userId, revokedAt: null },
         data: { revokedAt: new Date() }
+      }),
+      prisma.auditLog.create({
+        data: {
+          actorUserId: userId,
+          action: 'PASSWORD_CHANGED',
+          resourceType: 'USER',
+          resourceId: userId,
+          requestId: res.locals.requestId,
+        },
       })
     ]);
 
@@ -410,10 +460,21 @@ export const logout = async (req: AuthRequest, res: Response) => {
   if (!req.user?.sessionId) {
     return res.status(401).json({ message: 'Sesi tidak valid' });
   }
-  await prisma.session.updateMany({
-    where: { id: req.user.sessionId, userId: req.user.userId },
-    data: { revokedAt: new Date() },
-  });
+  await prisma.$transaction([
+    prisma.session.updateMany({
+      where: { id: req.user.sessionId, userId: req.user.userId },
+      data: { revokedAt: new Date() },
+    }),
+    prisma.auditLog.create({
+      data: {
+        actorUserId: req.user.userId,
+        action: 'LOGOUT',
+        resourceType: 'SESSION',
+        resourceId: req.user.sessionId,
+        requestId: res.locals.requestId,
+      },
+    }),
+  ]);
   return res.json({ message: 'Logout berhasil' });
 };
 
@@ -431,9 +492,23 @@ export const getSessions = async (req: AuthRequest, res: Response) => {
 
 export const revokeSession = async (req: AuthRequest, res: Response) => {
   const id = req.params.id as string;
-  const revoked = await prisma.session.updateMany({
-    where: { id, userId: req.user!.userId, revokedAt: null },
-    data: { revokedAt: new Date() },
+  const revoked = await prisma.$transaction(async (tx) => {
+    const result = await tx.session.updateMany({
+      where: { id, userId: req.user!.userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+    if (result.count) {
+      await tx.auditLog.create({
+        data: {
+          actorUserId: req.user!.userId,
+          action: 'SESSION_REVOKED',
+          resourceType: 'SESSION',
+          resourceId: id,
+          requestId: res.locals.requestId,
+        },
+      });
+    }
+    return result;
   });
   if (!revoked.count) {
     return res.status(404).json({ message: 'Sesi tidak ditemukan' });
@@ -515,6 +590,15 @@ export const resetPassword = async (req: Request, res: Response) => {
       where: { userId: reset.userId, revokedAt: null },
       data: { revokedAt: new Date() },
     });
+    await tx.auditLog.create({
+      data: {
+        actorUserId: reset.userId,
+        action: 'PASSWORD_RESET',
+        resourceType: 'USER',
+        resourceId: reset.userId,
+        requestId: res.locals.requestId,
+      },
+    });
     return true;
   });
 
@@ -545,6 +629,15 @@ export const deleteAccount = async (req: AuthRequest, res: Response) => {
     }
 
     await prisma.$transaction(async (tx) => {
+      await tx.auditLog.create({
+        data: {
+          actorUserId: userId,
+          action: 'ACCOUNT_DELETED',
+          resourceType: 'USER',
+          resourceId: userId,
+          requestId: res.locals.requestId,
+        },
+      });
       await tx.transaction.deleteMany({ where: { userId } });
       await tx.recurringBill.deleteMany({ where: { userId } });
       await tx.budget.deleteMany({ where: { userId } });
