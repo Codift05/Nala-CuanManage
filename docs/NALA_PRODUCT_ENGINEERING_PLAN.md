@@ -560,6 +560,7 @@ Pada akhir setiap sesi pengembangan:
 | 31 Juli 2026 | Form Tambah/Edit Transaksi diselaraskan dengan Home | Nominal menjadi fokus, detail dikelompokkan dalam card, segmented control dan tipografi dipadatkan, serta loading/error wallet diperbaiki |
 | 31 Juli 2026 | Alur Scan Struk diselaraskan dengan Home | Scanner menjadi workspace terang, review OCR dikelompokkan dalam card, validasi nominal ditambahkan, serta loading/error wallet dan pesan gagal diamankan |
 | 31 Juli 2026 | Halaman Budget diselaraskan dengan Home | Ringkasan total dan jumlah kategori ditambahkan, card batas kategori dipadatkan tanpa progress palsu, empty state dan form dibuat konsisten, serta nominal positif divalidasi |
+| 31 Juli 2026 | Halaman Bank & Dompet diselaraskan dengan Home | Total dana dan jumlah akun diringkas, card wallet tanpa icon memakai penanda jenis, label enum dinormalisasi, serta form dan saldo awal opsional dirapikan |
 
 ### Log keputusan
 

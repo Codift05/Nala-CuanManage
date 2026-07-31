@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../services/wallet_service.dart';
 import '../models/wallet.dart';
@@ -17,6 +18,11 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
   bool _isLoading = true;
   String? _loadError;
   List<Wallet> _wallets = [];
+  final _currencyFormat = NumberFormat.currency(
+    locale: 'id_ID',
+    symbol: 'Rp ',
+    decimalDigits: 0,
+  );
 
   @override
   void initState() {
@@ -62,7 +68,13 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Manajemen Dompet'),
+        title: Text(
+          'Bank & Dompet',
+          style: GoogleFonts.inter(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         actions: [
           IconButton(
             tooltip: 'Tambah dompet',
@@ -79,44 +91,137 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
                   ? _buildEmptyState()
                   : RefreshIndicator(
                       onRefresh: _loadWallets,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(20),
-                        itemCount: _wallets.length,
-                        itemBuilder: (context, index) {
-                          final wallet = _wallets[index];
-                          return _buildWalletCard(wallet);
-                        },
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+                        children: [
+                          _buildSummaryCard(),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Sumber dana',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ..._wallets.map(_buildWalletCard),
+                        ],
                       ),
                     ),
     );
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Center(
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFFEAEDF2)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF0DA),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(
+                  Icons.account_balance_wallet_outlined,
+                  size: 26,
+                  color: AppTheme.primaryColor,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Belum ada dompet',
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 14),
+              ElevatedButton(
+                onPressed: _showAddWalletSheet,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: const Text('Tambah Dompet'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard() {
+    final total = _wallets.fold<int>(0, (sum, wallet) => sum + wallet.balance);
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFF8738), Color(0xFFFFA04D)],
+        ),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Row(
         children: [
-          Icon(Icons.account_balance_wallet_outlined,
-              size: 64, color: Colors.grey[300]),
-          const SizedBox(height: 16),
-          Text(
-            'Belum ada dompet',
-            style: GoogleFonts.interTight(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textSecondary,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'TOTAL DANA',
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.6,
+                    color: const Color(0xE6FFFFFF),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    _currencyFormat.format(total),
+                    style: GoogleFonts.inter(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: _showAddWalletSheet,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Text(
+              '${_wallets.length} akun',
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF54290B),
               ),
             ),
-            child: const Text('Tambah Dompet'),
           ),
         ],
       ),
@@ -124,56 +229,54 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
   }
 
   Widget _buildWalletCard(Wallet wallet) {
-    IconData icon = Icons.account_balance_wallet;
-    Color color = AppTheme.primaryColor;
-
-    if (wallet.type.toLowerCase() == 'bank') {
-      icon = Icons.account_balance;
-      color = AppTheme.primaryColor;
-    } else if (wallet.type.toLowerCase() == 'e-wallet') {
-      icon = Icons.phone_iphone;
-      color = const Color(0xFF388E3C);
-    } else if (wallet.type.toLowerCase() == 'cash') {
-      icon = Icons.money;
-      color = const Color(0xFFB45309);
-    }
+    final type = wallet.type.toUpperCase().replaceAll('-', '');
+    final color = type == 'BANK'
+        ? const Color(0xFF8FAAF3)
+        : type == 'EWALLET'
+            ? const Color(0xFF65D5CA)
+            : const Color(0xFFFFB86A);
+    final typeLabel = type == 'BANK'
+        ? 'Rekening bank'
+        : type == 'EWALLET'
+            ? 'E-Wallet'
+            : 'Tunai';
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        border: Border.all(color: AppTheme.borderColor),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFEAEDF2)),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            width: 8,
+            height: 46,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
+              color: color,
+              borderRadius: BorderRadius.circular(4),
             ),
-            child: Icon(icon, color: color, size: 24),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   wallet.name,
-                  style: GoogleFonts.interTight(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  wallet.type,
-                  style: GoogleFonts.interTight(
-                    fontSize: 13,
+                  typeLabel,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
                     color: AppTheme.textSecondary,
                   ),
                 ),
@@ -181,10 +284,10 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
             ),
           ),
           Text(
-            'Rp ${wallet.balance.toInt()}',
-            style: GoogleFonts.interTight(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
+            _currencyFormat.format(wallet.balance),
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
             ),
           ),
@@ -214,6 +317,13 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
   bool _isSaving = false;
 
   final List<String> _types = ['E-Wallet', 'Bank', 'Cash'];
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _balanceController.dispose();
+    super.dispose();
+  }
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
@@ -259,16 +369,16 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
             children: [
               Text(
                 'Tambah Dompet Baru',
-                style: GoogleFonts.interTight(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                style: GoogleFonts.inter(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
                 ),
               ),
               const SizedBox(height: 24),
               TextFormField(
                 controller: _nameController,
-                style: GoogleFonts.interTight(),
+                style: GoogleFonts.inter(),
                 decoration: InputDecoration(
                   labelText: 'Nama Dompet (Misal: BCA, GoPay)',
                   border: OutlineInputBorder(
@@ -280,7 +390,7 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _type,
+                initialValue: _type,
                 decoration: InputDecoration(
                   labelText: 'Tipe Dompet',
                   border: OutlineInputBorder(
@@ -288,8 +398,7 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
                 ),
                 items: _types.map((t) {
                   return DropdownMenuItem(
-                      value: t,
-                      child: Text(t, style: GoogleFonts.interTight()));
+                      value: t, child: Text(t, style: GoogleFonts.inter()));
                 }).toList(),
                 onChanged: (val) {
                   if (val != null) setState(() => _type = val);
@@ -299,16 +408,20 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
               TextFormField(
                 controller: _balanceController,
                 keyboardType: TextInputType.number,
-                style: GoogleFonts.interTight(),
+                style: GoogleFonts.inter(),
                 decoration: InputDecoration(
-                  labelText: 'Saldo Awal',
+                  labelText: 'Saldo awal (opsional)',
                   prefixText: 'Rp ',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16)),
                 ),
-                validator: (val) => val == null || val.isEmpty
-                    ? 'Saldo awal tidak boleh kosong'
-                    : null,
+                validator: (val) {
+                  if (val == null || val.isEmpty) return null;
+                  final balance = int.tryParse(
+                    val.replaceAll(RegExp(r'[^0-9]'), ''),
+                  );
+                  return balance == null ? 'Saldo awal tidak valid' : null;
+                },
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -325,9 +438,9 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
                           'Simpan Dompet',
-                          style: GoogleFonts.interTight(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
                         ),
