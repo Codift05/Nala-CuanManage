@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../services/wallet_service.dart';
 import '../models/wallet.dart';
+import '../widgets/load_error_view.dart';
 
 class WalletManagementScreen extends StatefulWidget {
   const WalletManagementScreen({super.key});
@@ -14,6 +15,7 @@ class WalletManagementScreen extends StatefulWidget {
 class _WalletManagementScreenState extends State<WalletManagementScreen> {
   final _walletService = WalletService();
   bool _isLoading = true;
+  String? _loadError;
   List<Wallet> _wallets = [];
 
   @override
@@ -23,12 +25,19 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
   }
 
   Future<void> _loadWallets() async {
-    setState(() => _isLoading = true);
-    final wallets = await _walletService.getWallets();
     setState(() {
-      _wallets = wallets;
-      _isLoading = false;
+      _isLoading = true;
+      _loadError = null;
     });
+    try {
+      final wallets = await _walletService.getWallets();
+      if (!mounted) return;
+      setState(() => _wallets = wallets);
+    } catch (_) {
+      if (mounted) setState(() => _loadError = 'Dompet belum dapat dimuat.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _showAddWalletSheet() {
@@ -64,19 +73,21 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _wallets.isEmpty
-              ? _buildEmptyState()
-              : RefreshIndicator(
-                  onRefresh: _loadWallets,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(20),
-                    itemCount: _wallets.length,
-                    itemBuilder: (context, index) {
-                      final wallet = _wallets[index];
-                      return _buildWalletCard(wallet);
-                    },
-                  ),
-                ),
+          : _loadError != null
+              ? LoadErrorView(message: _loadError, onRetry: _loadWallets)
+              : _wallets.isEmpty
+                  ? _buildEmptyState()
+                  : RefreshIndicator(
+                      onRefresh: _loadWallets,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(20),
+                        itemCount: _wallets.length,
+                        itemBuilder: (context, index) {
+                          final wallet = _wallets[index];
+                          return _buildWalletCard(wallet);
+                        },
+                      ),
+                    ),
     );
   }
 

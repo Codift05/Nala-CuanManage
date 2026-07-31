@@ -11,6 +11,8 @@ import 'package:nala/services/token_storage.dart';
 import 'package:nala/services/biometric_service.dart';
 import 'package:nala/services/chat_service.dart';
 import 'package:nala/services/transaction_service.dart';
+import 'package:nala/services/api_client.dart';
+import 'package:nala/widgets/load_error_view.dart';
 import 'package:nala/models/transaction.dart';
 import 'package:nala/models/wallet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -65,6 +67,27 @@ void main() {
     expect(await biometrics.isEnabled(), isTrue);
     await biometrics.setEnabled(false);
     expect(await biometrics.isEnabled(), isFalse);
+  });
+
+  test('Expired sessions are broadcast to the app shell', () async {
+    FlutterSecureStorage.setMockInitialValues({'access_token': 'expired'});
+    ApiSession.expired.value = false;
+
+    await ApiSession.markExpired();
+
+    expect(ApiSession.expired.value, isTrue);
+    expect(await TokenStorage.read(), isNull);
+    ApiSession.expired.value = false;
+  });
+
+  testWidgets('Load error offers a working retry action', (tester) async {
+    var retried = false;
+    await tester.pumpWidget(MaterialApp(
+      home: LoadErrorView(onRetry: () => retried = true),
+    ));
+
+    await tester.tap(find.text('Coba lagi'));
+    expect(retried, isTrue);
   });
 
   test('AI transaction draft rejects unsafe payloads', () {

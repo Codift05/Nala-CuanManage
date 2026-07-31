@@ -6,6 +6,7 @@ import '../services/recurring_service.dart';
 import '../services/wallet_service.dart';
 import '../models/recurring_bill.dart';
 import '../models/wallet.dart';
+import '../widgets/load_error_view.dart';
 
 class RecurringBillsScreen extends StatefulWidget {
   const RecurringBillsScreen({super.key});
@@ -17,6 +18,7 @@ class RecurringBillsScreen extends StatefulWidget {
 class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
   final _recurringService = RecurringService();
   bool _isLoading = true;
+  String? _loadError;
   List<RecurringBill> _bills = [];
   final NumberFormat _currencyFormat =
       NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
@@ -28,12 +30,19 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
   }
 
   Future<void> _loadBills() async {
-    setState(() => _isLoading = true);
-    final bills = await _recurringService.getRecurringBills();
     setState(() {
-      _bills = bills;
-      _isLoading = false;
+      _isLoading = true;
+      _loadError = null;
     });
+    try {
+      final bills = await _recurringService.getRecurringBills();
+      if (!mounted) return;
+      setState(() => _bills = bills);
+    } catch (_) {
+      if (mounted) setState(() => _loadError = 'Tagihan belum dapat dimuat.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _showAddBillSheet() {
@@ -82,19 +91,21 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _bills.isEmpty
-              ? _buildEmptyState()
-              : RefreshIndicator(
-                  onRefresh: _loadBills,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(20),
-                    itemCount: _bills.length,
-                    itemBuilder: (context, index) {
-                      final bill = _bills[index];
-                      return _buildBillCard(bill);
-                    },
-                  ),
-                ),
+          : _loadError != null
+              ? LoadErrorView(message: _loadError, onRetry: _loadBills)
+              : _bills.isEmpty
+                  ? _buildEmptyState()
+                  : RefreshIndicator(
+                      onRefresh: _loadBills,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(20),
+                        itemCount: _bills.length,
+                        itemBuilder: (context, index) {
+                          final bill = _bills[index];
+                          return _buildBillCard(bill);
+                        },
+                      ),
+                    ),
     );
   }
 

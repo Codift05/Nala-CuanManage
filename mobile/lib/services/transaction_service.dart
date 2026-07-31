@@ -1,34 +1,26 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import '../models/transaction.dart';
 import '../config/api_config.dart';
-import 'token_storage.dart';
+import 'api_client.dart';
 
 class TransactionService {
   static String get baseUrl => ApiConfig.baseUrl;
 
-  Future<String?> _getToken() async {
-    return TokenStorage.read();
-  }
+  final _api = ApiClient();
 
   Future<List<TransactionItem>> getTransactions({int? limit}) async {
     try {
-      final token = await _getToken();
-      if (token == null) throw Exception('No token found');
-
       final transactions = <TransactionItem>[];
       String? cursor;
       do {
-        final uri = Uri.parse('$baseUrl/transactions').replace(queryParameters: {
+        final uri =
+            Uri.parse('$baseUrl/transactions').replace(queryParameters: {
           'limit': '${limit ?? 100}',
           if (cursor != null) 'cursor': cursor,
         });
-        final response = await http.get(uri, headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        });
+        final response = await _api.get(uri);
         if (response.statusCode != 200) {
           throw Exception('Failed to load transactions');
         }
@@ -40,7 +32,7 @@ class TransactionService {
       return transactions;
     } catch (e) {
       debugPrint('Get transactions error: $e');
-      return [];
+      rethrow;
     }
   }
 
@@ -54,14 +46,9 @@ class TransactionService {
     String? idempotencyKey,
   }) async {
     try {
-      final token = await _getToken();
-      if (token == null) throw Exception('No token found');
-
-      final response = await http.post(
+      final response = await _api.post(
         Uri.parse('$baseUrl/transactions'),
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
           'Idempotency-Key': idempotencyKey ?? createIdempotencyKey(),
         },
         body: jsonEncode({
@@ -91,15 +78,8 @@ class TransactionService {
 
   Future<Map<String, dynamic>?> scanReceipt(String base64Image) async {
     try {
-      final token = await _getToken();
-      if (token == null) throw Exception('No token found');
-
-      final response = await http.post(
+      final response = await _api.post(
         Uri.parse('$baseUrl/transactions/scan'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
         body: jsonEncode({
           'imageBase64': base64Image,
         }),
@@ -127,15 +107,8 @@ class TransactionService {
     String? notes,
   }) async {
     try {
-      final token = await _getToken();
-      if (token == null) throw Exception('No token found');
-
-      final response = await http.put(
+      final response = await _api.put(
         Uri.parse('$baseUrl/transactions/$id'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
         body: jsonEncode({
           'walletId': walletId,
           'type': type,

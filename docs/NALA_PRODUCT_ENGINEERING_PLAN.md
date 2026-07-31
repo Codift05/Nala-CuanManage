@@ -71,10 +71,10 @@ Legenda:
 |---|---:|---|---|
 | Welcome dan login | ✅ | UI diperbarui dan memiliki widget test | Pertahankan tanpa overflow |
 | Secure token storage | ✅ | Token memakai `flutter_secure_storage` dan migrasi token lama | Tetap diuji di CI |
-| Dashboard | ✅ | Saldo, aksi cepat, budget, dan transaksi terbaru tersedia | Uji loading/error/empty state |
-| Multi-wallet | 🟡 | CRUD dan validasi backend tersedia | Empty state dan integration test CRUD lengkap |
-| Transaksi manual | 🟡 | CRUD, integer rupiah, idempotency, dan cursor pagination tersedia | Empty/error state dan uji konkurensi wallet |
-| Budget planner | 🟡 | CRUD dan progress tersedia | Edge case dan integration test |
+| Dashboard | ✅ | Saldo, aksi cepat, budget, transaksi terbaru, refresh, dan empty state tersedia | Pertahankan widget test |
+| Multi-wallet | 🟡 | CRUD, loading, empty, error, retry, dan refresh tersedia | Integration test CRUD lengkap |
+| Transaksi manual | 🟡 | CRUD, integer rupiah, idempotency, pagination, dan state UI tersedia | Uji konkurensi wallet |
+| Budget planner | 🟡 | CRUD, progress, loading, empty, error, dan retry tersedia | Edge case dan integration test |
 | Financial score | 🟡 | Skor serta tren tiga bulan tersedia | Formula baru, penjelasan, dan test |
 | AI Coach | 🟡 | Chat kontekstual dan pembuatan transaksi tersedia | Wajib diubah menjadi draft + konfirmasi |
 | Scan struk | 🟡 | Gemini mengekstrak gambar Base64 | Validasi file, schema output, review, evaluasi |
@@ -218,7 +218,7 @@ Status: **In progress**
 - [x] Global error response yang konsisten
 - [x] Pagination transaksi
 - [x] Audit log untuk auth, profil, dan perubahan transaksi
-- [ ] Loading, empty, error, retry, dan session-expired state
+- [x] Loading, empty, error, retry, dan session-expired state
 
 Acceptance criteria:
 
@@ -543,6 +543,7 @@ Pada akhir setiap sesi pengembangan:
 | 31 Juli 2026 | Error API dan request tracing diseragamkan | Unit test kontrak error; HTTP test validasi, malformed JSON, 404, header `X-Request-ID`, dan integration suite lulus |
 | 31 Juli 2026 | Histori transaksi memakai cursor pagination | Unit test cursor, HTTP test dua halaman tanpa duplikat, dashboard limit 20, 15 Flutter test, dan integration suite lulus |
 | 31 Juli 2026 | Audit trail keamanan dan finansial tersedia | Migration terkontrol; integration test request ID untuk profil/transaksi, create-update-delete transaksi, scheduler, dan audit akun terhapus |
+| 31 Juli 2026 | State kegagalan mobile dan session recovery disatukan | Shared authenticated client, refresh rotation lock, global session-expired redirect, retry UI, empty state transaksi, analyzer, dan 17 Flutter test |
 
 ### Log keputusan
 
@@ -562,6 +563,6 @@ Pada akhir setiap sesi pengembangan:
 Pekerjaan coding berikutnya berada di **M3 — Keandalan fitur inti**:
 
 1. Push workflow lalu verifikasi hasil GitHub Actions.
-2. Lengkapi loading, empty, error, retry, dan session-expired state di mobile.
-3. Lengkapi ownership/IDOR test seluruh resource.
-4. Tetapkan retensi audit log dan akses operasional sebelum production.
+2. Lengkapi ownership/IDOR test seluruh resource untuk menutup acceptance criteria M3.
+3. Tetapkan retensi audit log dan akses operasional sebelum production.
+4. Mulai M4 dari frictionless capture dan receipt review setelah M3 ditutup.

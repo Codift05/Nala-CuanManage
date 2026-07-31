@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart' show debugPrint;
 import '../config/api_config.dart';
 import 'token_storage.dart';
+import 'api_client.dart';
 
 class AuthResult {
   const AuthResult({required this.success, required this.message});
@@ -48,6 +49,7 @@ class CurrentUserResult {
 
 class AuthService {
   static String get baseUrl => ApiConfig.baseUrl;
+  final _api = ApiClient();
 
   String _responseMessage(http.Response response, String fallback) {
     try {
@@ -264,10 +266,6 @@ class AuthService {
     }
   }
 
-  Future<String?> _getToken() async {
-    return TokenStorage.read();
-  }
-
   Future<Map<String, dynamic>?> getCurrentUser() async {
     final result = await getCurrentUserResult();
     return result.user;
@@ -275,43 +273,9 @@ class AuthService {
 
   Future<CurrentUserResult> getCurrentUserResult() async {
     try {
-      final token = await _getToken();
-      if (token == null) {
-        return const CurrentUserResult(
-          success: false,
-          message: 'Sesi login tidak ditemukan.',
-          sessionExpired: true,
-        );
-      }
-
-      var response = await http.get(
+      final response = await _api.get(
         Uri.parse('$baseUrl/auth/me'),
-        headers: {'Authorization': 'Bearer $token'},
       );
-
-      if (response.statusCode == 401 || response.statusCode == 403) {
-        final refreshedToken = await _refreshAccessToken();
-        if (refreshedToken != null) {
-          response = await http.get(
-            Uri.parse('$baseUrl/auth/me'),
-            headers: {'Authorization': 'Bearer $refreshedToken'},
-          );
-        }
-      }
-
-      if (response.statusCode == 401 ||
-          response.statusCode == 403 ||
-          response.statusCode == 404) {
-        await logout();
-        return CurrentUserResult(
-          success: false,
-          message: _responseMessage(
-            response,
-            'Sesi telah berakhir. Silakan masuk kembali.',
-          ),
-          sessionExpired: true,
-        );
-      }
 
       if (response.statusCode != 200) {
         return CurrentUserResult(
@@ -337,6 +301,12 @@ class AuthService {
         message: 'Profil berhasil dimuat',
         user: user,
       );
+    } on SessionExpiredException {
+      return const CurrentUserResult(
+        success: false,
+        message: 'Sesi telah berakhir. Silakan masuk kembali.',
+        sessionExpired: true,
+      );
     } catch (e) {
       debugPrint('Get current user error: $e');
       return const CurrentUserResult(
@@ -352,25 +322,13 @@ class AuthService {
     String? avatarBase64,
   }) async {
     try {
-      final token = await _getToken();
-      if (token == null) {
-        return const AuthResult(
-          success: false,
-          message: 'Sesi login tidak ditemukan.',
-        );
-      }
-
       final bodyData = <String, dynamic>{'name': name, 'email': email};
       if (avatarBase64 != null) {
         bodyData['avatar'] = avatarBase64;
       }
 
-      final response = await http.put(
+      final response = await _api.put(
         Uri.parse('$baseUrl/auth/profile'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
         body: jsonEncode(bodyData),
       );
 
@@ -397,20 +355,8 @@ class AuthService {
     String newPassword,
   ) async {
     try {
-      final token = await _getToken();
-      if (token == null) {
-        return const AuthResult(
-          success: false,
-          message: 'Sesi login tidak ditemukan.',
-        );
-      }
-
-      final response = await http.put(
+      final response = await _api.put(
         Uri.parse('$baseUrl/auth/password'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
         body: jsonEncode({
           'oldPassword': oldPassword,
           'newPassword': newPassword,
@@ -437,20 +383,8 @@ class AuthService {
 
   Future<AuthResult> deleteAccount(String password) async {
     try {
-      final token = await _getToken();
-      if (token == null) {
-        return const AuthResult(
-          success: false,
-          message: 'Sesi login tidak ditemukan.',
-        );
-      }
-
-      final response = await http.delete(
+      final response = await _api.delete(
         Uri.parse('$baseUrl/auth/me'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
         body: jsonEncode({'password': password}),
       );
 

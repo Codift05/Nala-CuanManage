@@ -1,28 +1,17 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import '../models/recurring_bill.dart';
 import '../config/api_config.dart';
-import 'token_storage.dart';
+import 'api_client.dart';
 
 class RecurringService {
   static String get baseUrl => ApiConfig.baseUrl;
 
-  Future<String?> _getToken() async {
-    return TokenStorage.read();
-  }
+  final _api = ApiClient();
 
   Future<List<RecurringBill>> getRecurringBills() async {
     try {
-      final token = await _getToken();
-      if (token == null) throw Exception('No token found');
-
-      final response = await http.get(
-        Uri.parse('$baseUrl/recurring'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
+      final response = await _api.get(Uri.parse('$baseUrl/recurring'));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -31,8 +20,8 @@ class RecurringService {
         throw Exception('Failed to load recurring bills');
       }
     } catch (e) {
-      print('Get recurring bills error: $e');
-      return [];
+      debugPrint('Get recurring bills error: $e');
+      rethrow;
     }
   }
 
@@ -44,15 +33,8 @@ class RecurringService {
     required int dueDate,
   }) async {
     try {
-      final token = await _getToken();
-      if (token == null) throw Exception('No token found');
-
-      final response = await http.post(
+      final response = await _api.post(
         Uri.parse('$baseUrl/recurring'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
         body: jsonEncode({
           'title': title,
           'amount': amount,
@@ -68,27 +50,20 @@ class RecurringService {
       }
       return null;
     } catch (e) {
-      print('Create recurring bill error: $e');
+      debugPrint('Create recurring bill error: $e');
       return null;
     }
   }
 
   Future<bool> deleteRecurringBill(String id) async {
     try {
-      final token = await _getToken();
-      if (token == null) throw Exception('No token found');
-
-      final response = await http.delete(
+      final response = await _api.delete(
         Uri.parse('$baseUrl/recurring/$id'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
       );
 
       return response.statusCode == 200;
     } catch (e) {
-      print('Delete recurring bill error: $e');
+      debugPrint('Delete recurring bill error: $e');
       return false;
     }
   }

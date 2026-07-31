@@ -1,21 +1,16 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import '../models/budget.dart';
 import '../config/api_config.dart';
-import 'token_storage.dart';
+import 'api_client.dart';
 
 class BudgetService {
   static String get baseUrl => ApiConfig.baseUrl;
 
-  Future<String?> _getToken() async {
-    return TokenStorage.read();
-  }
+  final _api = ApiClient();
 
   Future<List<Budget>> getBudgets({int? month, int? year}) async {
     try {
-      final token = await _getToken();
-      if (token == null) throw Exception('No token found');
-
       String url = '$baseUrl/budgets';
       List<String> queryParams = [];
       if (month != null) queryParams.add('month=$month');
@@ -25,13 +20,7 @@ class BudgetService {
         url += '?${queryParams.join('&')}';
       }
 
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
+      final response = await _api.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -40,8 +29,8 @@ class BudgetService {
         throw Exception('Failed to load budgets');
       }
     } catch (e) {
-      print('Get budgets error: $e');
-      return [];
+      debugPrint('Get budgets error: $e');
+      rethrow;
     }
   }
 
@@ -52,15 +41,8 @@ class BudgetService {
     required int year,
   }) async {
     try {
-      final token = await _getToken();
-      if (token == null) throw Exception('No token found');
-
-      final response = await http.post(
+      final response = await _api.post(
         Uri.parse('$baseUrl/budgets'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
         body: jsonEncode({
           'categoryId': categoryId,
           'amount': amount,
@@ -75,7 +57,7 @@ class BudgetService {
       }
       return null;
     } catch (e) {
-      print('Create budget error: $e');
+      debugPrint('Create budget error: $e');
       return null;
     }
   }

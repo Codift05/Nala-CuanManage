@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../services/budget_service.dart';
 import '../models/budget.dart';
+import '../widgets/load_error_view.dart';
 
 class BudgetScreen extends StatefulWidget {
   const BudgetScreen({super.key});
@@ -14,6 +15,7 @@ class BudgetScreen extends StatefulWidget {
 class _BudgetScreenState extends State<BudgetScreen> {
   final _budgetService = BudgetService();
   bool _isLoading = true;
+  String? _loadError;
   List<Budget> _budgets = [];
 
   final int _currentMonth = DateTime.now().month;
@@ -26,13 +28,20 @@ class _BudgetScreenState extends State<BudgetScreen> {
   }
 
   Future<void> _loadBudgets() async {
-    setState(() => _isLoading = true);
-    final budgets = await _budgetService.getBudgets(
-        month: _currentMonth, year: _currentYear);
     setState(() {
-      _budgets = budgets;
-      _isLoading = false;
+      _isLoading = true;
+      _loadError = null;
     });
+    try {
+      final budgets = await _budgetService.getBudgets(
+          month: _currentMonth, year: _currentYear);
+      if (!mounted) return;
+      setState(() => _budgets = budgets);
+    } catch (_) {
+      if (mounted) setState(() => _loadError = 'Anggaran belum dapat dimuat.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _showAddBudgetSheet() {
@@ -70,19 +79,21 @@ class _BudgetScreenState extends State<BudgetScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _budgets.isEmpty
-              ? _buildEmptyState()
-              : RefreshIndicator(
-                  onRefresh: _loadBudgets,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(20),
-                    itemCount: _budgets.length,
-                    itemBuilder: (context, index) {
-                      final budget = _budgets[index];
-                      return _buildBudgetCard(budget);
-                    },
-                  ),
-                ),
+          : _loadError != null
+              ? LoadErrorView(message: _loadError, onRetry: _loadBudgets)
+              : _budgets.isEmpty
+                  ? _buildEmptyState()
+                  : RefreshIndicator(
+                      onRefresh: _loadBudgets,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(20),
+                        itemCount: _budgets.length,
+                        itemBuilder: (context, index) {
+                          final budget = _budgets[index];
+                          return _buildBudgetCard(budget);
+                        },
+                      ),
+                    ),
     );
   }
 

@@ -6,6 +6,7 @@ import '../services/transaction_service.dart';
 import '../services/wallet_service.dart';
 import '../models/transaction.dart';
 import 'add_transaction_screen.dart';
+import '../widgets/load_error_view.dart';
 
 class TransactionScreen extends StatefulWidget {
   const TransactionScreen({super.key});
@@ -24,6 +25,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
   );
 
   bool _isLoading = true;
+  String? _loadError;
   int _totalIncome = 0;
   int _totalExpense = 0;
   int _totalBalance = 0;
@@ -85,7 +87,10 @@ class _TransactionScreenState extends State<TransactionScreen> {
   }
 
   Future<void> _loadTransactions() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _loadError = null;
+    });
     try {
       final transactionsFuture = _transactionService.getTransactions();
       final walletsFuture = _walletService.getWallets();
@@ -104,7 +109,12 @@ class _TransactionScreenState extends State<TransactionScreen> {
       _applyFilters();
     } catch (e) {
       debugPrint('Load transactions error: $e');
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _loadError = 'Riwayat transaksi belum dapat dimuat.';
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -227,42 +237,58 @@ class _TransactionScreenState extends State<TransactionScreen> {
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
-                onRefresh: _loadTransactions,
-                child: CustomScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildHeader(),
-                            const SizedBox(height: 24),
-                            _buildSummaryCard(),
-                            const SizedBox(height: 24),
-                            _buildFilterRow(),
-                            const SizedBox(height: 16),
-                          ],
+            : _loadError != null
+                ? LoadErrorView(
+                    message: _loadError,
+                    onRetry: _loadTransactions,
+                  )
+                : RefreshIndicator(
+                    onRefresh: _loadTransactions,
+                    child: CustomScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildHeader(),
+                                const SizedBox(height: 24),
+                                _buildSummaryCard(),
+                                const SizedBox(height: 24),
+                                _buildFilterRow(),
+                                const SizedBox(height: 16),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          sliver: SliverList(
+                            delegate:
+                                SliverChildBuilderDelegate((context, index) {
+                              final group = _transactionGroups[index];
+                              return _buildTransactionGroup(group);
+                            }, childCount: _transactionGroups.length),
+                          ),
+                        ),
+                        if (_transactionGroups.isEmpty)
+                          const SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: Center(
+                              child: Text(
+                                'Belum ada transaksi pada bulan ini.',
+                                style: TextStyle(color: AppTheme.textSecondary),
+                              ),
+                            ),
+                          ),
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: 24),
+                        ),
+                      ],
                     ),
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final group = _transactionGroups[index];
-                          return _buildTransactionGroup(group);
-                        }, childCount: _transactionGroups.length),
-                      ),
-                    ),
-                    const SliverToBoxAdapter(
-                      child: SizedBox(height: 24),
-                    ),
-                  ],
-                ),
-              ),
+                  ),
       ),
     );
   }

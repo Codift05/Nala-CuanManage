@@ -5,6 +5,8 @@ import 'package:home_widget/home_widget.dart';
 import 'screens/splash_screen.dart';
 import 'screens/reset_password_screen.dart';
 import 'screens/verify_email_screen.dart';
+import 'screens/login_screen.dart';
+import 'services/api_client.dart';
 
 String? passwordResetTokenFromRoute(String? routeName) {
   if (routeName == null) return null;
@@ -44,12 +46,41 @@ void main() async {
   );
 }
 
-class NalaApp extends StatelessWidget {
+class NalaApp extends StatefulWidget {
   const NalaApp({super.key});
+
+  @override
+  State<NalaApp> createState() => _NalaAppState();
+}
+
+class _NalaAppState extends State<NalaApp> {
+  final _navigatorKey = GlobalKey<NavigatorState>();
+
+  @override
+  void initState() {
+    super.initState();
+    ApiSession.expired.addListener(_handleExpiredSession);
+  }
+
+  @override
+  void dispose() {
+    ApiSession.expired.removeListener(_handleExpiredSession);
+    super.dispose();
+  }
+
+  void _handleExpiredSession() {
+    if (!ApiSession.expired.value) return;
+    ApiSession.expired.value = false;
+    _navigatorKey.currentState?.pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (_) => false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: _navigatorKey,
       title: 'NALA Finance',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,

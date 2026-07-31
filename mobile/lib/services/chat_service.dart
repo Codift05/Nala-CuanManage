@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'auth_service.dart';
-import 'token_storage.dart';
+import 'api_client.dart';
 
 class ChatReply {
   final String message;
@@ -26,21 +25,15 @@ Map<String, dynamic>? parseTransactionDraft(Object? value) {
 }
 
 class ChatService {
+  final _api = ApiClient();
+
   Future<ChatReply?> sendMessage(String message) async {
     try {
-      final token = await TokenStorage.read();
-      if (token == null) return null;
-
-      final response = await http
-          .post(
-            Uri.parse('${AuthService.baseUrl}/chat'),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $token',
-            },
-            body: jsonEncode({'message': message}),
-          )
-          .timeout(const Duration(seconds: 12));
+      final response = await _api.post(
+        Uri.parse('${AuthService.baseUrl}/chat'),
+        body: jsonEncode({'message': message}),
+        timeout: const Duration(seconds: 12),
+      );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
