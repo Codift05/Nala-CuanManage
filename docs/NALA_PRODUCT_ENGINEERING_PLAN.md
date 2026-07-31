@@ -579,6 +579,7 @@ Pada akhir setiap sesi pengembangan:
 | 1 Agustus 2026 | Halaman utama memakai PageView | Konten bergeser bersama indikator navbar, halaman dibangun bertahap untuk mengurangi beban awal, dan state halaman yang sudah dibuka dipertahankan |
 | 1 Agustus 2026 | Katalog wallet diberi cache per sesi | Tambah Transaksi dapat tampil tanpa request ulang setelah Dashboard dimuat; request bersamaan dideduplikasi dan cache dibersihkan pada pergantian sesi |
 | 1 Agustus 2026 | Loading wallet tidak lagi memblokir flow | Scanner dan form Tagihan Berulang langsung tampil; status loading/error dibatasi pada field sumber dana dengan retry lokal |
+| 1 Agustus 2026 | Lompatan tab utama dipangkas menjadi satu halaman | Navigasi non-berurutan tidak lagi menganimasikan dan membangun seluruh halaman perantara; efek geser satu langkah tetap dipertahankan |
 
 ### Log keputusan
 

@@ -46,7 +46,15 @@ class _MainShellState extends State<MainShell> {
   void _onItemTapped(int index) {
     final page = _navIndexes.indexOf(index);
     if (page == -1 || index == _selectedIndex) return;
+
+    final currentPage = _pageController.hasClients
+        ? (_pageController.page ?? 0).round()
+        : _navIndexes.indexOf(_selectedIndex);
     setState(() => _selectedIndex = index);
+
+    if ((page - currentPage).abs() > 1) {
+      _pageController.jumpToPage(page > currentPage ? page - 1 : page + 1);
+    }
     _pageController.animateToPage(
       page,
       duration: const Duration(milliseconds: 320),
