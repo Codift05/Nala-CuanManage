@@ -20,6 +20,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _password = TextEditingController();
   final _confirmation = TextEditingController();
   bool _loading = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmation = true;
 
   @override
   void dispose() {
@@ -51,8 +53,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7F9),
-      appBar: AppBar(title: const Text('Reset password')),
+      backgroundColor: AppTheme.backgroundColor,
+      appBar: AppBar(),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -64,52 +66,126 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Center(
+                      child: Container(
+                        width: 86,
+                        height: 62,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Image.asset('img/Logo Nala 4.png'),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                     Text(
                       'Buat password baru',
                       style: appleStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textPrimary,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    const Text('Gunakan minimal 8 karakter.'),
-                    const SizedBox(height: 28),
-                    AuthTextField(
-                      controller: _password,
-                      label: 'Password baru',
-                      icon: CupertinoIcons.lock,
-                      obscureText: true,
-                      validator: (value) => (value?.length ?? 0) < 8
-                          ? 'Password minimal 8 karakter'
-                          : null,
-                    ),
-                    const SizedBox(height: 16),
-                    AuthTextField(
-                      controller: _confirmation,
-                      label: 'Ulangi password',
-                      icon: CupertinoIcons.lock,
-                      obscureText: true,
-                      validator: (value) => value != _password.text
-                          ? 'Konfirmasi password tidak sama'
-                          : null,
+                    const SizedBox(height: 6),
+                    Text(
+                      'Gunakan minimal 8 karakter yang mudah kamu ingat.',
+                      style: appleStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 14,
+                      ),
                     ),
                     const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: _loading ? null : _submit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
-                        minimumSize: const Size.fromHeight(54),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: const Color(0xFFEAEDF2)),
                       ),
-                      child: _loading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Password baru', style: _fieldLabelStyle),
+                          const SizedBox(height: 8),
+                          AuthTextField(
+                            controller: _password,
+                            label: 'Minimal 8 karakter',
+                            icon: CupertinoIcons.lock,
+                            fillColor: const Color(0xFFF7F8FA),
+                            obscureText: _obscurePassword,
+                            textInputAction: TextInputAction.next,
+                            autofillHints: const [AutofillHints.newPassword],
+                            suffixIcon: IconButton(
+                              tooltip: _obscurePassword
+                                  ? 'Tampilkan password'
+                                  : 'Sembunyikan password',
+                              onPressed: () => setState(
+                                () => _obscurePassword = !_obscurePassword,
                               ),
-                            )
-                          : const Text('Simpan password baru'),
+                              icon: Icon(
+                                _obscurePassword
+                                    ? CupertinoIcons.eye
+                                    : CupertinoIcons.eye_slash,
+                                size: 19,
+                              ),
+                            ),
+                            validator: (value) => (value?.length ?? 0) < 8
+                                ? 'Password minimal 8 karakter'
+                                : null,
+                          ),
+                          const SizedBox(height: 16),
+                          Text('Konfirmasi password', style: _fieldLabelStyle),
+                          const SizedBox(height: 8),
+                          AuthTextField(
+                            controller: _confirmation,
+                            label: 'Ulangi password baru',
+                            icon: CupertinoIcons.lock,
+                            fillColor: const Color(0xFFF7F8FA),
+                            obscureText: _obscureConfirmation,
+                            textInputAction: TextInputAction.done,
+                            autofillHints: const [AutofillHints.newPassword],
+                            onFieldSubmitted: (_) {
+                              if (!_loading) _submit();
+                            },
+                            suffixIcon: IconButton(
+                              tooltip: _obscureConfirmation
+                                  ? 'Tampilkan konfirmasi password'
+                                  : 'Sembunyikan konfirmasi password',
+                              onPressed: () => setState(
+                                () => _obscureConfirmation =
+                                    !_obscureConfirmation,
+                              ),
+                              icon: Icon(
+                                _obscureConfirmation
+                                    ? CupertinoIcons.eye
+                                    : CupertinoIcons.eye_slash,
+                                size: 19,
+                              ),
+                            ),
+                            validator: (value) => value != _password.text
+                                ? 'Konfirmasi password tidak sama'
+                                : null,
+                          ),
+                          const SizedBox(height: 20),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _loading ? null : _submit,
+                              child: _loading
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Text('Simpan password baru'),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -120,4 +196,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       ),
     );
   }
+
+  TextStyle get _fieldLabelStyle => appleStyle(
+        color: AppTheme.textPrimary,
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+      );
 }
