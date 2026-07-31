@@ -74,7 +74,7 @@ class _MainShellState extends State<MainShell> {
         ),
         bottomNavigationBar: SafeArea(
           top: false,
-          minimum: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+          minimum: const EdgeInsets.fromLTRB(14, 0, 14, 16),
           child: Container(
             height: 64,
             decoration: BoxDecoration(
