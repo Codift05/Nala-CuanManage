@@ -555,6 +555,7 @@ Pada akhir setiap sesi pengembangan:
 | 31 Juli 2026 | Kartu saldo diubah menjadi kartu dana NALA | Badge icon dihapus; identitas wallet, status utama, saldo privat, dan pola geometris menggantikan kartu gradient generik |
 | 31 Juli 2026 | Halaman Transaksi diselaraskan dengan Home | Request saldo duplikat dihapus; header, ringkasan arus kas, filter segmented, empty state, dan kartu aktivitas memakai bahasa visual NALA |
 | 31 Juli 2026 | Density layout Transaksi diperhalus | Heading dan angka diringkas, action button diperkecil, summary dipadatkan, serta empty state dipindahkan dekat filter |
+| 31 Juli 2026 | Halaman Laporan diselaraskan dengan Home | Metrik dan grafik dipadatkan, font Inter diterapkan, error/empty state ditambahkan, serta badge palsu dan tombol ekspor nonfungsional dihapus |
 
 ### Log keputusan
 
