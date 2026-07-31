@@ -75,46 +75,46 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      body: Center(
+      body: SafeArea(
         child: FadeTransition(
           opacity: _fadeAnimation,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 112,
-                height: 82,
-                padding: const EdgeInsets.all(17),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryColor,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Image.asset(
-                  'img/Logo Nala 4.png',
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(28, 24, 28, 26),
+            child: Column(
+              children: [
+                const Spacer(),
+                Image.asset(
+                  'img/Nala baru.png',
+                  width: 168,
                   fit: BoxFit.contain,
                   filterQuality: FilterQuality.high,
                   semanticLabel: 'Logo Nala',
                 ),
-              ),
-              const SizedBox(height: 22),
-              Text(
-                'NALA',
-                style: appleStyle(
-                  fontSize: 27,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textPrimary,
-                  letterSpacing: 1.2,
+                const Spacer(),
+                Text(
+                  'NALA · DANA KELOLA',
+                  textAlign: TextAlign.center,
+                  style: appleStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                    letterSpacing: 1,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'Kelola uang dengan lebih tenang',
-                style: appleStyle(
-                  fontSize: 14,
-                  color: AppTheme.textSecondary,
+                const SizedBox(height: 8),
+                Text(
+                  'Karya mahasiswa Teknik Informatika angkatan 2023\n'
+                  'Fakultas Teknik · Universitas Sam Ratulangi, Manado\n'
+                  'untuk GEMASTIK 2026',
+                  textAlign: TextAlign.center,
+                  style: appleStyle(
+                    fontSize: 11,
+                    height: 1.55,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

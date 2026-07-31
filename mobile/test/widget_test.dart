@@ -186,7 +186,7 @@ void main() {
   testWidgets('App loads smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(const NalaApp());
 
-    expect(find.text('NALA'), findsOneWidget);
+    expect(find.text('NALA · DANA KELOLA'), findsOneWidget);
   });
 
   testWidgets('Welcome screen fits a narrow phone', (tester) async {
