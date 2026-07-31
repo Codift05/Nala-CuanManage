@@ -1,8 +1,9 @@
 import 'dotenv/config';
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import { rupiahToJson } from './utils/money';
 import { getCorsOrigins, getEmailConfig, isOriginAllowed } from './utils/config';
+import { requestContext } from './middleware/requestContext';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -12,6 +13,7 @@ getEmailConfig();
 app.set('json replacer', (_key: string, value: unknown) =>
   typeof value === 'bigint' ? rupiahToJson(value) : value
 );
+app.use(requestContext);
 app.use(cors({
   origin: (origin, callback) => callback(
     isOriginAllowed(origin, corsOrigins)
@@ -40,11 +42,6 @@ import chatRoutes from './routes/chat';
 import recurringRoutes from './routes/recurring';
 import { initRecurringJob } from './cron/recurringJob';
 
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  next();
-});
-
 app.use('/api/auth', authRoutes);
 app.use('/api/wallets', walletRoutes);
 app.use('/api/transactions', transactionRoutes);
@@ -55,6 +52,24 @@ app.use('/api/recurring', recurringRoutes);
 
 app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', message: 'NALA Backend API is running' });
+});
+
+app.use((_req, res) => {
+  res.status(404).json({ message: 'Endpoint not found' });
+});
+
+app.use((
+  error: unknown,
+  _req: Request,
+  res: Response,
+  _next: NextFunction,
+) => {
+  console.error('Unhandled request error:', error);
+  if (res.headersSent) return;
+  const status = error instanceof SyntaxError ? 400 : 500;
+  res.status(status).json({
+    message: status === 400 ? 'Invalid JSON body' : 'Internal server error',
+  });
 });
 
 initRecurringJob();

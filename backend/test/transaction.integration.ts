@@ -57,6 +57,26 @@ const run = async () => {
     });
     assert.equal(invalidBody.status, 400);
 
+    const malformedJson = await fetch(`${apiUrl}/wallets`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${login.token}`,
+      },
+      body: '{',
+    });
+    const malformedError = await malformedJson.json();
+    assert.equal(malformedJson.status, 400);
+    assert.equal(malformedError.error.code, 'VALIDATION_ERROR');
+    assert.equal(
+      malformedError.error.requestId,
+      malformedJson.headers.get('x-request-id'),
+    );
+
+    const missingEndpoint = await request('/does-not-exist', login.token);
+    assert.equal(missingEndpoint.response.status, 404);
+    assert.equal(missingEndpoint.body.error.code, 'NOT_FOUND');
+
     for (const [path, payload] of [
       ['/wallets', { name: 'Invalid wallet', type: 'CRYPTO' }],
       ['/budgets', { categoryId: 'Food', amount: 1000, month: 13, year: 2026 }],
@@ -75,6 +95,12 @@ const run = async () => {
         body: JSON.stringify(payload),
       });
       assert.equal(invalidResource.response.status, 400);
+      assert.equal(
+        invalidResource.body.error.requestId,
+        invalidResource.response.headers.get('x-request-id'),
+      );
+      assert.equal(invalidResource.body.error.code, 'VALIDATION_ERROR');
+      assert.equal(typeof invalidResource.body.message, 'string');
     }
 
     for (const [payload, expectedMessage] of [

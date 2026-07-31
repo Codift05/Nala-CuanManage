@@ -3,7 +3,7 @@
 Dokumen ini adalah sumber acuan utama untuk menyelaraskan proposal GEMASTIK,
 pengembangan produk, pengujian, dan validasi pengguna NALA.
 
-Terakhir diperbarui: 30 Juli 2026  
+Terakhir diperbarui: 31 Juli 2026
 Status produk: Beta internal / belum siap untuk pengguna publik
 
 ## 1. Arah Produk
@@ -103,7 +103,7 @@ Legenda:
 | AI safety | 🟡 | Mutasi AI berupa draft terkonfirmasi dan output transaksi/struk divalidasi | Privacy dan evaluasi prompt injection |
 | Audit trail | ⬜ | Belum tersedia | Event keamanan dan perubahan data penting |
 | Backend test | 🟡 | Unit test dan recurring integration test tersedia | Perluas ke auth dan seluruh perubahan saldo |
-| Observability | ⬜ | Masih memakai `console.log` | Request ID, structured log, error tracking |
+| Observability | 🟡 | Request ID dan access log JSON tersedia | Error tracking dan metrik production |
 | Production deployment | ⬜ | Docker Compose development tersedia | Image production, TLS, secrets, migration |
 
 ### Proposal dan validasi
@@ -215,7 +215,7 @@ Status: **In progress**
 - [x] Duplicate protection untuk scheduler
 - [x] Perilaku tanggal 29–31 didefinisikan
 - [x] Schema validation seluruh endpoint
-- [ ] Global error response yang konsisten
+- [x] Global error response yang konsisten
 - [ ] Pagination transaksi
 - [ ] Audit log untuk auth, profil, dan perubahan transaksi
 - [ ] Loading, empty, error, retry, dan session-expired state
@@ -540,6 +540,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Verifikasi email diwajibkan sebelum login | Token hash sekali pakai 24 jam, resend anti-enumerasi, delivery email, dan migration akun lama |
 | 30 Juli 2026 | Biometric app unlock tersedia | Plugin resmi local_auth, opt-in dari profil, secure session unlock, dan native Android configuration |
 | 30 Juli 2026 | Schema validation endpoint fitur inti diselesaikan | Typecheck, 11 unit test, dan HTTP integration test menolak payload invalid pada wallet, budget, recurring, chat, OCR, serta transaksi |
+| 31 Juli 2026 | Error API dan request tracing diseragamkan | Unit test kontrak error; HTTP test validasi, malformed JSON, 404, header `X-Request-ID`, dan integration suite lulus |
 
 ### Log keputusan
 
@@ -559,6 +560,6 @@ Pada akhir setiap sesi pengembangan:
 Pekerjaan coding berikutnya berada di **M3 — Keandalan fitur inti**:
 
 1. Push workflow lalu verifikasi hasil GitHub Actions.
-2. Tambahkan global error response dan request ID.
-3. Tambahkan pagination transaksi.
-4. Tambahkan audit log untuk perubahan keamanan dan data finansial.
+2. Tambahkan pagination transaksi.
+3. Tambahkan audit log untuk perubahan keamanan dan data finansial.
+4. Lengkapi loading, empty, error, retry, dan session-expired state di mobile.
