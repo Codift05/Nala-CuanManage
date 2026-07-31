@@ -31,6 +31,13 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
   ];
   bool _isLoading = false;
 
+  @override
+  void dispose() {
+    _textController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -44,6 +51,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
   }
 
   Future<void> _sendMessage() async {
+    if (_isLoading) return;
     final text = _textController.text.trim();
     if (text.isEmpty) return;
 
@@ -103,8 +111,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
               itemCount: _messages.length + (_isLoading ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == _messages.length && _isLoading) {
@@ -113,12 +120,12 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
                 final msg = _messages[index];
                 if (msg.isUser) {
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
+                    padding: const EdgeInsets.only(bottom: 12.0),
                     child: _buildUserMessage(msg.text),
                   );
                 } else {
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
+                    padding: const EdgeInsets.only(bottom: 12.0),
                     child: _buildNalaMessage(msg.text, showAvatar: true),
                   );
                 }
@@ -140,12 +147,17 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
       title: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(6),
-            decoration: const BoxDecoration(
-              color: AppTheme.primaryColor,
-              shape: BoxShape.circle,
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: const Color(0xFFDFF45B),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.smart_toy, color: Colors.white, size: 20),
+            child: const Icon(
+              Icons.auto_awesome_rounded,
+              color: AppTheme.textPrimary,
+              size: 19,
+            ),
           ),
           const SizedBox(width: 12),
           Column(
@@ -153,29 +165,23 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
             children: [
               Text(
                 'Nala',
-                style: GoogleFonts.interTight(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                   color: Colors.black,
                 ),
               ),
               Text(
-                'AI Financial Coach',
-                style: GoogleFonts.interTight(
-                  fontSize: 12,
-                  color: Colors.grey[600],
+                'Asisten finansial • AI',
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  color: AppTheme.textSecondary,
                 ),
               ),
             ],
           ),
         ],
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.more_vert, color: Colors.black),
-          onPressed: () {},
-        ),
-      ],
     );
   }
 
@@ -185,34 +191,42 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
       children: [
         Container(
           margin: const EdgeInsets.only(right: 8),
-          padding: const EdgeInsets.all(8),
-          decoration: const BoxDecoration(
-            color: AppTheme.primaryColor,
-            shape: BoxShape.circle,
+          width: 30,
+          height: 30,
+          decoration: BoxDecoration(
+            color: const Color(0xFFDFF45B),
+            borderRadius: BorderRadius.circular(10),
           ),
-          child: const Icon(Icons.smart_toy, color: Colors.white, size: 16),
+          child: const Icon(
+            Icons.auto_awesome_rounded,
+            color: AppTheme.textPrimary,
+            size: 15,
+          ),
         ),
         Container(
-          padding: const EdgeInsets.all(16),
-          decoration: const BoxDecoration(
-            color: Color(0xFFF3F4F6),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-              bottomRight: Radius.circular(16),
-              bottomLeft: Radius.circular(4),
-            ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: const Color(0xFFEAEDF2)),
           ),
-          child: const SizedBox(
-            width: 40,
-            height: 20,
-            child: Center(
-              child: SizedBox(
-                width: 15,
-                height: 15,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                width: 14,
+                height: 14,
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
-            ),
+              const SizedBox(width: 9),
+              Text(
+                'Nala sedang menyusun...',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -226,43 +240,47 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
         if (showAvatar)
           Container(
             margin: const EdgeInsets.only(right: 8),
-            padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: AppTheme.primaryColor,
-              shape: BoxShape.circle,
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: const Color(0xFFDFF45B),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.smart_toy, color: Colors.white, size: 16),
+            child: const Icon(
+              Icons.auto_awesome_rounded,
+              color: AppTheme.textPrimary,
+              size: 15,
+            ),
           )
         else
-          const SizedBox(width: 40),
+          const SizedBox(width: 38),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.all(16),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF3F4F6),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
-                    bottomLeft: Radius.circular(4),
-                  ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: const Color(0xFFEAEDF2)),
                 ),
                 child: Text(
                   text,
-                  style: GoogleFonts.interTight(
-                    fontSize: 14,
-                    color: Colors.black87,
-                    height: 1.5,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: AppTheme.textPrimary,
+                    height: 1.45,
                   ),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(width: 48),
+        const SizedBox(width: 38),
       ],
     );
   }
@@ -271,25 +289,20 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        const SizedBox(width: 48),
+        const SizedBox(width: 42),
         Flexible(
           child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: AppTheme.primaryColor,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-                bottomLeft: Radius.circular(16),
-                bottomRight: Radius.circular(4),
-              ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFF9630),
+              borderRadius: BorderRadius.circular(18),
             ),
             child: Text(
               text,
-              style: GoogleFonts.interTight(
-                fontSize: 14,
+              style: GoogleFonts.inter(
+                fontSize: 13,
                 color: Colors.white,
-                height: 1.5,
+                height: 1.45,
               ),
             ),
           ),
@@ -300,60 +313,96 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
 
   Widget _buildBottomInputArea() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            offset: const Offset(0, -4),
-            blurRadius: 10,
-          ),
-        ],
+        border: const Border(top: BorderSide(color: Color(0xFFEAEDF2))),
       ),
       child: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (_messages.length == 1 && !_isLoading) ...[
+              _buildQuickPrompts(),
+              const SizedBox(height: 10),
+            ],
             Row(
               children: [
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.grey[300]!),
+                      color: const Color(0xFFF7F8FA),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: const Color(0xFFEAEDF2)),
                     ),
                     child: TextField(
                       controller: _textController,
                       decoration: InputDecoration(
                         hintText: 'Tanya Nala...',
-                        hintStyle: GoogleFonts.interTight(
-                          color: Colors.grey[500],
-                          fontSize: 14,
+                        hintStyle: GoogleFonts.inter(
+                          color: AppTheme.textSecondary,
+                          fontSize: 13,
                         ),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 14),
+                            horizontal: 16, vertical: 12),
                       ),
                       onSubmitted: (_) => _sendMessage(),
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Container(
-                  decoration: const BoxDecoration(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
                     color: AppTheme.primaryColor,
-                    shape: BoxShape.circle,
+                    borderRadius: BorderRadius.circular(15),
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.send, color: Colors.white, size: 20),
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(
+                      Icons.arrow_upward_rounded,
+                      color: Colors.white,
+                      size: 21,
+                    ),
                     onPressed: _isLoading ? null : _sendMessage,
                   ),
                 ),
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickPrompts() {
+    const prompts = [
+      'Ringkas pengeluaranku',
+      'Bantu atur budget',
+      'Catat transaksi',
+    ];
+    return SizedBox(
+      height: 34,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: prompts.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) => ActionChip(
+          label: Text(
+            prompts[index],
+            style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w500),
+          ),
+          onPressed: () {
+            _textController.text = prompts[index];
+            _sendMessage();
+          },
+          backgroundColor: Colors.white,
+          side: const BorderSide(color: Color(0xFFEAEDF2)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(17),
+          ),
         ),
       ),
     );
