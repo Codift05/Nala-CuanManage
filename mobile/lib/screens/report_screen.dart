@@ -79,7 +79,10 @@ class _ReportScreenState extends State<ReportScreen>
       _loadError = null;
     });
     try {
-      final transactions = await _transactionService.getTransactions();
+      final transactions = await _transactionService.getTransactions(
+        dateFrom: DateTime(_selectedDate.year, _selectedDate.month - 2),
+        dateTo: DateTime(_selectedDate.year, _selectedDate.month + 1),
+      );
       final monthlyTransactions = transactions.where(
         (tx) =>
             tx.date.month == _selectedDate.month &&

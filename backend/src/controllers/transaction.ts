@@ -152,7 +152,7 @@ export const createTransaction = async (req: Request, res: Response) => {
 export const getTransactions = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
-    const { walletId, type, categoryId, limit, cursor } = req.query;
+    const { walletId, type, categoryId, limit, cursor, from, to } = req.query;
 
     if (!userId) {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -178,12 +178,24 @@ export const getTransactions = async (req: Request, res: Response) => {
     if (parsedWalletId === null || parsedCategory === null) {
       return res.status(400).json({ message: 'walletId or categoryId is invalid' });
     }
+    const dateFrom = parseTransactionDate(from);
+    const dateTo = parseTransactionDate(to);
+    if (dateFrom === null || dateTo === null ||
+        (dateFrom && dateTo && dateFrom >= dateTo)) {
+      return res.status(400).json({ message: 'from and to must be a valid ascending ISO date range' });
+    }
 
     const whereClause: any = { userId };
 
     if (parsedWalletId) whereClause.walletId = parsedWalletId;
     if (transactionType) whereClause.type = transactionType;
     if (parsedCategory) whereClause.categoryId = parsedCategory;
+    if (dateFrom || dateTo) {
+      whereClause.date = {
+        ...(dateFrom && { gte: dateFrom }),
+        ...(dateTo && { lt: dateTo }),
+      };
+    }
     if (transactionCursor) {
       whereClause.AND = [{
         OR: [

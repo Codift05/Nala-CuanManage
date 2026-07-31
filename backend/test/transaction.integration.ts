@@ -124,6 +124,11 @@ const run = async () => {
     assert.equal(invalidLimit.response.status, 400);
     const invalidCursor = await request('/transactions?cursor=invalid', login.token);
     assert.equal(invalidCursor.response.status, 400);
+    const invalidRange = await request(
+      '/transactions?from=2026-08-01T00%3A00%3A00.000Z&to=2026-07-01T00%3A00%3A00.000Z',
+      login.token,
+    );
+    assert.equal(invalidRange.response.status, 400);
 
     const firstPage = await request('/transactions?limit=1', login.token);
     assert.equal(firstPage.response.status, 200);

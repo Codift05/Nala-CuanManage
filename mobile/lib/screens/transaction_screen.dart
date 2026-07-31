@@ -90,7 +90,10 @@ class _TransactionScreenState extends State<TransactionScreen>
       _loadError = null;
     });
     try {
-      _allTransactions = await _transactionService.getTransactions();
+      _allTransactions = await _transactionService.getTransactions(
+        dateFrom: DateTime(_selectedMonth.year, _selectedMonth.month),
+        dateTo: DateTime(_selectedMonth.year, _selectedMonth.month + 1),
+      );
 
       setState(() {
         _isLoading = false;
@@ -846,8 +849,8 @@ class _TransactionScreenState extends State<TransactionScreen>
                         setState(() {
                           _selectedMonth = month;
                         });
-                        _applyFilters();
                         Navigator.pop(context);
+                        _loadTransactions();
                       },
                     );
                   },

@@ -10,7 +10,11 @@ class TransactionService {
 
   final _api = ApiClient();
 
-  Future<List<TransactionItem>> getTransactions({int? limit}) async {
+  Future<List<TransactionItem>> getTransactions({
+    int? limit,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+  }) async {
     try {
       final transactions = <TransactionItem>[];
       String? cursor;
@@ -19,6 +23,8 @@ class TransactionService {
             Uri.parse('$baseUrl/transactions').replace(queryParameters: {
           'limit': '${limit ?? 100}',
           if (cursor != null) 'cursor': cursor,
+          if (dateFrom != null) 'from': dateFrom.toUtc().toIso8601String(),
+          if (dateTo != null) 'to': dateTo.toUtc().toIso8601String(),
         });
         final response = await _api.get(uri);
         if (response.statusCode != 200) {
