@@ -293,10 +293,10 @@ class DashboardScreenState extends State<DashboardScreen> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.inter(
-              fontSize: 19,
-              fontWeight: FontWeight.w700,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
-              letterSpacing: -0.4,
+              letterSpacing: -0.25,
             ),
           ),
         ),

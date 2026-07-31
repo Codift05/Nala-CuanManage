@@ -551,6 +551,7 @@ Pada akhir setiap sesi pengembangan:
 | 31 Juli 2026 | Segmented control home menjadi navigasi konten | Kapsul aktif bergeser tanpa fade; Ringkasan, Aktivitas, dan Perkembangan menampilkan kelompok data NALA yang berbeda |
 | 31 Juli 2026 | Transisi tab home dipindahkan ke PageView | Konten tidak lagi bertumpuk; tab dapat ditekan atau di-swipe dan indikator mengikuti posisi halaman secara kontinu |
 | 31 Juli 2026 | Header home disederhanakan | Placeholder logo diganti icon profil outline dan sapaan personal satu baris agar lebih jelas serta hemat ruang |
+| 31 Juli 2026 | Tipografi sapaan home diperhalus | Ukuran dan bobot sapaan diturunkan agar header tidak terlalu dominan |
 
 ### Log keputusan
 
