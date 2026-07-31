@@ -73,7 +73,7 @@ Legenda:
 | Secure token storage | ✅ | Token memakai `flutter_secure_storage` dan migrasi token lama | Tetap diuji di CI |
 | Dashboard | ✅ | Saldo, aksi cepat, budget, dan transaksi terbaru tersedia | Uji loading/error/empty state |
 | Multi-wallet | 🟡 | CRUD dan validasi backend tersedia | Empty state dan integration test CRUD lengkap |
-| Transaksi manual | 🟡 | CRUD, integer rupiah, dan idempotency tersedia | Integration test seluruh perubahan saldo |
+| Transaksi manual | 🟡 | CRUD, integer rupiah, idempotency, dan cursor pagination tersedia | Empty/error state dan uji konkurensi wallet |
 | Budget planner | 🟡 | CRUD dan progress tersedia | Edge case dan integration test |
 | Financial score | 🟡 | Skor serta tren tiga bulan tersedia | Formula baru, penjelasan, dan test |
 | AI Coach | 🟡 | Chat kontekstual dan pembuatan transaksi tersedia | Wajib diubah menjadi draft + konfirmasi |
@@ -93,7 +93,7 @@ Legenda:
 
 | Area | Status | Kondisi aktual | Bukti selesai berikutnya |
 |---|---:|---|---|
-| REST API | 🟡 | Express API dengan validasi trust boundary tersedia | Versioning dan error format global |
+| REST API | 🟡 | Validasi, error contract, request ID, dan pagination transaksi tersedia | API versioning dan audit log |
 | PostgreSQL | ✅ | Database utama dan constraint dasar tersedia | Migration terkontrol dan backup |
 | Nilai uang | ✅ | PostgreSQL `BIGINT`, Prisma `BigInt`, dan Flutter `int` | Pertahankan contract test |
 | Authentication | ✅ | Access 15 menit, refresh rotation, revoke, rate limit, reset, dan verifikasi email | Pertahankan integration test |
@@ -216,7 +216,7 @@ Status: **In progress**
 - [x] Perilaku tanggal 29–31 didefinisikan
 - [x] Schema validation seluruh endpoint
 - [x] Global error response yang konsisten
-- [ ] Pagination transaksi
+- [x] Pagination transaksi
 - [ ] Audit log untuk auth, profil, dan perubahan transaksi
 - [ ] Loading, empty, error, retry, dan session-expired state
 
@@ -541,6 +541,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Biometric app unlock tersedia | Plugin resmi local_auth, opt-in dari profil, secure session unlock, dan native Android configuration |
 | 30 Juli 2026 | Schema validation endpoint fitur inti diselesaikan | Typecheck, 11 unit test, dan HTTP integration test menolak payload invalid pada wallet, budget, recurring, chat, OCR, serta transaksi |
 | 31 Juli 2026 | Error API dan request tracing diseragamkan | Unit test kontrak error; HTTP test validasi, malformed JSON, 404, header `X-Request-ID`, dan integration suite lulus |
+| 31 Juli 2026 | Histori transaksi memakai cursor pagination | Unit test cursor, HTTP test dua halaman tanpa duplikat, dashboard limit 20, 15 Flutter test, dan integration suite lulus |
 
 ### Log keputusan
 
@@ -560,6 +561,6 @@ Pada akhir setiap sesi pengembangan:
 Pekerjaan coding berikutnya berada di **M3 — Keandalan fitur inti**:
 
 1. Push workflow lalu verifikasi hasil GitHub Actions.
-2. Tambahkan pagination transaksi.
-3. Tambahkan audit log untuk perubahan keamanan dan data finansial.
-4. Lengkapi loading, empty, error, retry, dan session-expired state di mobile.
+2. Tambahkan audit log untuk perubahan keamanan dan data finansial.
+3. Lengkapi loading, empty, error, retry, dan session-expired state di mobile.
+4. Lengkapi ownership/IDOR test seluruh resource.

@@ -119,6 +119,21 @@ const run = async () => {
 
     const invalidLimit = await request('/transactions?limit=101', login.token);
     assert.equal(invalidLimit.response.status, 400);
+    const invalidCursor = await request('/transactions?cursor=invalid', login.token);
+    assert.equal(invalidCursor.response.status, 400);
+
+    const firstPage = await request('/transactions?limit=1', login.token);
+    assert.equal(firstPage.response.status, 200);
+    assert.equal(firstPage.body.data.length, 1);
+    assert.equal(typeof firstPage.body.pagination.hasMore, 'boolean');
+    if (firstPage.body.pagination.nextCursor) {
+      const secondPage = await request(
+        `/transactions?limit=1&cursor=${encodeURIComponent(firstPage.body.pagination.nextCursor)}`,
+        login.token,
+      );
+      assert.equal(secondPage.response.status, 200);
+      assert.notEqual(secondPage.body.data[0]?.id, firstPage.body.data[0].id);
+    }
 
     const temporaryEmail = `ownership-${Date.now()}@nala.test`;
     const registrationResponse = await fetch(`${apiUrl}/auth/register`, {

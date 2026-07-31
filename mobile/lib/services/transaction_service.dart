@@ -18,25 +18,26 @@ class TransactionService {
       final token = await _getToken();
       if (token == null) throw Exception('No token found');
 
-      String url = '$baseUrl/transactions';
-      if (limit != null) {
-        url += '?limit=$limit';
-      }
-
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
+      final transactions = <TransactionItem>[];
+      String? cursor;
+      do {
+        final uri = Uri.parse('$baseUrl/transactions').replace(queryParameters: {
+          'limit': '${limit ?? 100}',
+          if (cursor != null) 'cursor': cursor,
+        });
+        final response = await http.get(uri, headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
-        },
-      );
+        });
+        if (response.statusCode != 200) {
+          throw Exception('Failed to load transactions');
+        }
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data.map((json) => TransactionItem.fromJson(json)).toList();
-      } else {
-        throw Exception('Failed to load transactions');
-      }
+        final page = parseTransactionPage(jsonDecode(response.body));
+        transactions.addAll(page.items);
+        cursor = limit == null ? page.nextCursor : null;
+      } while (cursor != null);
+      return transactions;
     } catch (e) {
       debugPrint('Get transactions error: $e');
       return [];
@@ -158,6 +159,20 @@ class TransactionService {
       return null;
     }
   }
+}
+
+({List<TransactionItem> items, String? nextCursor}) parseTransactionPage(
+  dynamic value,
+) {
+  final body = value as Map<String, dynamic>;
+  final data = body['data'] as List<dynamic>;
+  final pagination = body['pagination'] as Map<String, dynamic>;
+  return (
+    items: data
+        .map((item) => TransactionItem.fromJson(item as Map<String, dynamic>))
+        .toList(),
+    nextCursor: pagination['nextCursor'] as String?,
+  );
 }
 
 String createIdempotencyKey() {

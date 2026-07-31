@@ -141,7 +141,7 @@ class DashboardScreenState extends State<DashboardScreen> {
           const <Wallet>[],
         ),
         _safeLoad<List<TransactionItem>>(
-          _transactionService.getTransactions(),
+          _transactionService.getTransactions(limit: 20),
           const <TransactionItem>[],
         ),
         _safeLoad<Map<String, dynamic>?>(

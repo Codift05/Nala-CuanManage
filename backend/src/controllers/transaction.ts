@@ -3,7 +3,9 @@ import prisma from '../utils/prisma';
 import { parseRupiah } from '../utils/money';
 import { parseIdempotencyKey } from '../utils/idempotency';
 import {
+  createTransactionCursor,
   parseTransactionDate,
+  parseTransactionCursor,
   parseTransactionLimit,
   parseTransactionType,
 } from '../utils/transactionInput';
@@ -135,7 +137,7 @@ export const createTransaction = async (req: Request, res: Response) => {
 export const getTransactions = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
-    const { walletId, type, categoryId, limit } = req.query;
+    const { walletId, type, categoryId, limit, cursor } = req.query;
 
     if (!userId) {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -152,6 +154,10 @@ export const getTransactions = async (req: Request, res: Response) => {
     if (transactionLimit === null) {
       return res.status(400).json({ message: 'limit must be an integer from 1 to 100' });
     }
+    const transactionCursor = parseTransactionCursor(cursor);
+    if (transactionCursor === null) {
+      return res.status(400).json({ message: 'cursor is invalid' });
+    }
     const parsedWalletId = parseText(walletId, 100, { optional: true });
     const parsedCategory = parseText(categoryId, 50, { optional: true });
     if (parsedWalletId === null || parsedCategory === null) {
@@ -163,11 +169,21 @@ export const getTransactions = async (req: Request, res: Response) => {
     if (parsedWalletId) whereClause.walletId = parsedWalletId;
     if (transactionType) whereClause.type = transactionType;
     if (parsedCategory) whereClause.categoryId = parsedCategory;
+    if (transactionCursor) {
+      whereClause.AND = [{
+        OR: [
+          { date: { lt: transactionCursor.date } },
+          { date: transactionCursor.date, id: { lt: transactionCursor.id } },
+        ],
+      }];
+    }
+
+    const pageSize = transactionLimit ?? 20;
 
     const transactions = await prisma.transaction.findMany({
       where: whereClause,
-      orderBy: { date: 'desc' },
-      take: transactionLimit,
+      orderBy: [{ date: 'desc' }, { id: 'desc' }],
+      take: pageSize + 1,
       include: {
         wallet: {
           select: { name: true, type: true }
@@ -175,7 +191,18 @@ export const getTransactions = async (req: Request, res: Response) => {
       }
     });
 
-    res.json(transactions);
+    const hasMore = transactions.length > pageSize;
+    const data = hasMore ? transactions.slice(0, pageSize) : transactions;
+    const last = data.at(-1);
+    res.json({
+      data,
+      pagination: {
+        hasMore,
+        nextCursor: hasMore && last
+          ? createTransactionCursor({ date: last.date, id: last.id })
+          : null,
+      },
+    });
   } catch (error) {
     console.error('Get transactions error:', error);
     res.status(500).json({ message: 'Internal server error' });

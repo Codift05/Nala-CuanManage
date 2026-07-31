@@ -32,3 +32,23 @@ export const parseTransactionLimit = (value: unknown): number | undefined | null
     ? limit
     : null;
 };
+
+export type TransactionCursor = { date: Date; id: string };
+
+export const createTransactionCursor = ({ date, id }: TransactionCursor): string =>
+  Buffer.from(JSON.stringify({ date: date.toISOString(), id })).toString('base64url');
+
+export const parseTransactionCursor = (value: unknown): TransactionCursor | undefined | null => {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'string' || value.length > 500) return null;
+
+  try {
+    const parsed = JSON.parse(Buffer.from(value, 'base64url').toString()) as Record<string, unknown>;
+    const date = parseTransactionDate(parsed.date);
+    return date && typeof parsed.id === 'string' && parsed.id.length <= 100
+      ? { date, id: parsed.id }
+      : null;
+  } catch {
+    return null;
+  }
+};

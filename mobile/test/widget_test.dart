@@ -108,6 +108,24 @@ void main() {
     expect(transaction.amount, 25000);
   });
 
+  test('Transaction page preserves items and next cursor', () {
+    final page = parseTransactionPage({
+      'data': [
+        {
+          'id': 'tx-1',
+          'walletId': 'wallet-1',
+          'type': 'EXPENSE',
+          'amount': 1000,
+          'date': '2026-07-31T10:00:00.000Z',
+        },
+      ],
+      'pagination': {'nextCursor': 'next-page'},
+    });
+
+    expect(page.items.single.id, 'tx-1');
+    expect(page.nextCursor, 'next-page');
+  });
+
   test('Transaction idempotency keys are unique and API-safe', () {
     final first = createIdempotencyKey();
     final second = createIdempotencyKey();
