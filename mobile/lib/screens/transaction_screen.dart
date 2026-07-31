@@ -244,9 +244,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 _buildHeader(),
-                                const SizedBox(height: 20),
+                                const SizedBox(height: 16),
                                 _buildSummaryCard(),
-                                const SizedBox(height: 20),
+                                const SizedBox(height: 16),
                                 _buildFilterRow(),
                                 const SizedBox(height: 16),
                               ],
@@ -264,15 +264,21 @@ class _TransactionScreenState extends State<TransactionScreen> {
                           ),
                         ),
                         if (_transactionGroups.isEmpty)
-                          SliverFillRemaining(
-                            hasScrollBody: false,
-                            child: Center(
+                          SliverPadding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            sliver: SliverToBoxAdapter(
                               child: Container(
-                                margin: const EdgeInsets.all(20),
-                                padding: const EdgeInsets.all(24),
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 22,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(22),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: const Color(0xFFEAEDF2),
+                                  ),
                                 ),
                                 child: Text(
                                   'Belum ada aktivitas pada bulan ini.',
@@ -362,10 +368,10 @@ class _TransactionScreenState extends State<TransactionScreen> {
               Text(
                 'Aktivitas',
                 style: GoogleFonts.inter(
-                  fontSize: 22,
+                  fontSize: 19,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
-                  letterSpacing: -0.5,
+                  letterSpacing: -0.3,
                 ),
               ),
               const SizedBox(height: 4),
@@ -376,7 +382,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     Text(
                       _formatMonthYear(_selectedMonth),
                       style: GoogleFonts.inter(
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: AppTheme.textSecondary,
                       ),
@@ -400,49 +406,59 @@ class _TransactionScreenState extends State<TransactionScreen> {
         const SizedBox(width: 12),
         Row(
           children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppTheme.borderColor),
-              ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.add_rounded,
-                  color: AppTheme.textPrimary,
-                  size: 20,
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppTheme.borderColor),
                 ),
-                onPressed: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const AddTransactionScreen(),
-                    ),
-                  );
-                  if (result == true) {
-                    _loadTransactions();
-                  }
-                },
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  icon: const Icon(
+                    Icons.add_rounded,
+                    color: AppTheme.textPrimary,
+                    size: 20,
+                  ),
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AddTransactionScreen(),
+                      ),
+                    );
+                    if (result == true) {
+                      _loadTransactions();
+                    }
+                  },
+                ),
               ),
             ),
-            const SizedBox(width: 12),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppTheme.borderColor),
-              ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.search,
-                  color: AppTheme.textPrimary,
-                  size: 20,
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppTheme.borderColor),
                 ),
-                onPressed: () {
-                  setState(() {
-                    _isSearching = true;
-                  });
-                },
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  icon: const Icon(
+                    Icons.search,
+                    color: AppTheme.textPrimary,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isSearching = true;
+                    });
+                  },
+                ),
               ),
             ),
           ],
@@ -455,7 +471,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
     final difference = _totalIncome - _totalExpense;
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
@@ -465,24 +481,37 @@ class _TransactionScreenState extends State<TransactionScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Arus kas ${_formatMonthYear(_selectedMonth)}',
+            'Ringkasan arus kas',
             style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w500,
               color: AppTheme.textSecondary,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            _formatCurrency(difference),
-            style: GoogleFonts.inter(
-              fontSize: 25,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimary,
-              letterSpacing: -0.7,
-            ),
+          const SizedBox(height: 3),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _formatMonthYear(_selectedMonth),
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+              Text(
+                'Selisih ${_formatCurrency(difference)}',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: -0.3,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 14),
           Row(
             children: [
               Expanded(
@@ -516,10 +545,10 @@ class _TransactionScreenState extends State<TransactionScreen> {
     Color color,
   ) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -538,19 +567,23 @@ class _TransactionScreenState extends State<TransactionScreen> {
               Text(
                 label,
                 style: GoogleFonts.inter(
-                  fontSize: 12,
+                  fontSize: 11,
                   color: AppTheme.textSecondary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            _currencyFormat.format(amount),
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimary,
+          const SizedBox(height: 6),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              _currencyFormat.format(amount),
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+              ),
             ),
           ),
         ],
@@ -563,7 +596,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
     final selectedIndex = filters.indexOf(_selectedFilter);
 
     return Container(
-      height: 48,
+      height: 44,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: Colors.white,
