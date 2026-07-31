@@ -95,9 +95,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Text(
                     'Profil belum dapat dimuat',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.interTight(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w700,
+                    style: GoogleFonts.inter(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                       color: AppTheme.textPrimary,
                     ),
                   ),
@@ -105,7 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Text(
                     _loadError ?? 'Silakan coba beberapa saat lagi.',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.interTight(
+                    style: GoogleFonts.inter(
                       color: AppTheme.textSecondary,
                       height: 1.4,
                     ),
@@ -133,47 +133,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Profil dan Pengaturan',
-                style: GoogleFonts.interTight(
-                  fontSize: 20,
+                'Profil',
+                style: GoogleFonts.inter(
+                  fontSize: 19,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
                 ),
               ),
-              const SizedBox(height: 26),
-              _buildProfileHeader(),
-              const SizedBox(height: 32),
-              _buildMenuGroup(
-                children: [
-                  _buildMenuTile(
-                    icon: Icons.edit_outlined,
-                    title: 'Profil & data',
-                    onTap: _navigateToEditProfile,
-                  ),
-                ],
-              ),
               const SizedBox(height: 16),
+              _buildProfileHeader(),
+              const SizedBox(height: 24),
+              _buildSectionLabel('Keuangan'),
+              const SizedBox(height: 10),
               _buildMenuGroup(
                 children: [
-                  _buildMenuTile(
-                    icon: Icons.shield_outlined,
-                    title: 'Keamanan akun',
-                    onTap: () => _showChangePasswordDialog(context),
-                  ),
-                  _buildDivider(),
-                  _buildMenuTile(
-                    icon: Icons.fingerprint_rounded,
-                    title: 'Buka dengan biometrik',
-                    trailing: Switch(
-                      value: _biometricEnabled,
-                      onChanged: (_) => _toggleBiometric(),
-                    ),
-                    onTap: _toggleBiometric,
-                  ),
-                  _buildDivider(),
                   _buildMenuTile(
                     icon: Icons.account_balance_wallet_outlined,
-                    title: 'Bank & Dompet',
+                    title: 'Bank & dompet',
                     onTap: () {
                       Navigator.push(
                         context,
@@ -185,8 +161,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   _buildDivider(),
                   _buildMenuTile(
-                    icon: Icons.autorenew_rounded,
-                    title: 'Tagihan Berulang',
+                    icon: Icons.event_repeat_rounded,
+                    title: 'Tagihan berulang',
                     onTap: () {
                       Navigator.push(
                         context,
@@ -195,6 +171,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       );
                     },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              _buildSectionLabel('Keamanan'),
+              const SizedBox(height: 10),
+              _buildMenuGroup(
+                children: [
+                  _buildMenuTile(
+                    icon: Icons.lock_outline_rounded,
+                    title: 'Ubah password',
+                    onTap: () => _showChangePasswordDialog(context),
+                  ),
+                  _buildDivider(),
+                  _buildMenuTile(
+                    icon: Icons.fingerprint_rounded,
+                    title: 'Buka dengan biometrik',
+                    trailing: Switch.adaptive(
+                      value: _biometricEnabled,
+                      activeTrackColor: const Color(0xFFDFF45B),
+                      onChanged: (_) => _toggleBiometric(),
+                    ),
+                    onTap: _toggleBiometric,
                   ),
                 ],
               ),
@@ -220,72 +219,87 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildProfileHeader() {
     final avatarImage = _decodeAvatar(_user?['avatar']);
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: _navigateToEditProfile,
-          child: Stack(
-            alignment: Alignment.bottomRight,
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        onTap: _navigateToEditProfile,
+        borderRadius: BorderRadius.circular(22),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFFEAEDF2)),
+          ),
+          child: Row(
             children: [
               Container(
-                width: 92,
-                height: 92,
+                width: 58,
+                height: 58,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: const Color(0xFFFFF0DA),
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: avatarImage == null
-                        ? AppTheme.textPrimary
-                        : Colors.white,
-                    width: avatarImage == null ? 1.5 : 4,
-                  ),
                   image: avatarImage != null
-                      ? DecorationImage(
-                          image: avatarImage,
-                          fit: BoxFit.cover,
-                        )
+                      ? DecorationImage(image: avatarImage, fit: BoxFit.cover)
                       : null,
                 ),
+                child: avatarImage == null
+                    ? const Icon(
+                        Icons.person_outline_rounded,
+                        size: 28,
+                        color: AppTheme.textPrimary,
+                      )
+                    : null,
               ),
-              if (avatarImage == null)
-                const Positioned.fill(
-                  child: Center(
-                    child: Icon(
-                      Icons.person_outline_rounded,
-                      size: 48,
-                      color: AppTheme.textPrimary,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _user?['name'] ?? 'Pengguna',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _user?['email'] ?? 'Kelola data akun',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppTheme.borderColor),
-                ),
-                child: const Icon(
-                  Icons.camera_alt_rounded,
-                  size: 15,
-                  color: AppTheme.primaryColor,
-                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.edit_outlined,
+                size: 19,
+                color: AppTheme.textSecondary,
               ),
             ],
           ),
         ),
-        const SizedBox(height: 14),
-        Text(
-          _user?['name'] ?? 'Pengguna',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.interTight(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.textPrimary,
-          ),
-        ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildSectionLabel(String label) {
+    return Text(
+      label,
+      style: GoogleFonts.inter(
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        color: AppTheme.textSecondary,
+      ),
     );
   }
 
@@ -304,7 +318,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFEAEDF2)),
       ),
       child: Column(children: children),
     );
@@ -323,21 +338,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 17),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
           child: Row(
             children: [
-              Icon(
-                icon,
-                color: textColor ?? AppTheme.primaryColor,
-                size: 22,
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: (textColor ?? AppTheme.primaryColor)
+                      .withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: textColor ?? AppTheme.primaryColor,
+                  size: 19,
+                ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   title,
-                  style: GoogleFonts.interTight(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                     color: textColor ?? AppTheme.textPrimary,
                   ),
                 ),
@@ -376,7 +400,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildDivider() {
     return const Padding(
-      padding: EdgeInsets.only(left: 56),
+      padding: EdgeInsets.only(left: 62),
       child: Divider(
         height: 1,
         thickness: 1,
