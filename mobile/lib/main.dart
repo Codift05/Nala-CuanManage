@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
 import 'package:home_widget/home_widget.dart';
@@ -32,7 +33,7 @@ String? emailVerificationTokenFromRoute(String? routeName) {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  HomeWidget.setAppGroupId('group.nala');
+  if (!kIsWeb) HomeWidget.setAppGroupId('group.nala');
 
   runApp(
     // Setup Provider at the highest level
