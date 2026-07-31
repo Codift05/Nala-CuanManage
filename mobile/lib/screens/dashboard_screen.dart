@@ -17,8 +17,6 @@ import '../models/budget.dart';
 import 'budget_screen.dart';
 import 'add_transaction_screen.dart';
 import 'scan_screen.dart';
-import 'transaction_screen.dart';
-import 'report_screen.dart';
 import 'package:telephony/telephony.dart';
 import 'package:home_widget/home_widget.dart';
 
@@ -39,6 +37,8 @@ class DashboardScreenState extends State<DashboardScreen> {
   bool _isLoading = true;
   bool _isRefreshing = false;
   bool _isBalanceVisible = true;
+  int _selectedHomeTab = 0;
+  int _tabDirection = 1;
   int _totalBalance = 0;
   List<Wallet> _wallets = [];
   List<TransactionItem> _recentTransactions = [];
@@ -244,35 +244,21 @@ class DashboardScreenState extends State<DashboardScreen> {
                           const SizedBox(height: 22),
                           _buildHomeSegments(),
                           const SizedBox(height: 20),
-                          _buildBalanceCard(),
-                          const SizedBox(height: 26),
-                          _buildSectionTitle('Fitur pilihan kamu', null),
-                          const SizedBox(height: 14),
-                          _buildQuickActions(),
-                          const SizedBox(height: 24),
-                          if (_nudgeMessage.isNotEmpty) ...[
-                            _buildNudgeBanner(),
-                            const SizedBox(height: 24),
-                          ],
-                          _buildSectionTitle('Ringkasan bulan ini', null),
-                          const SizedBox(height: 12),
-                          _buildExpenseChart(),
-                          const SizedBox(height: 24),
-                          _buildSectionTitle('Budget', () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const BudgetScreen(),
-                              ),
-                            );
-                          }),
-                          const SizedBox(height: 12),
-                          _buildBudgetCard(),
-                          const SizedBox(height: 24),
-                          _buildSectionTitle('Transaksi terbaru', null),
-                          const SizedBox(height: 12),
-                          _buildRecentTransactions(),
-                          const SizedBox(height: 28),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 260),
+                            switchInCurve: Curves.easeOutCubic,
+                            switchOutCurve: Curves.easeInCubic,
+                            transitionBuilder: (child, animation) {
+                              return SlideTransition(
+                                position: Tween<Offset>(
+                                  begin: Offset(_tabDirection * 0.12, 0),
+                                  end: Offset.zero,
+                                ).animate(animation),
+                                child: child,
+                              );
+                            },
+                            child: _buildSelectedHomeContent(),
+                          ),
                         ],
                       ),
                     ),
@@ -391,56 +377,123 @@ class DashboardScreenState extends State<DashboardScreen> {
         borderRadius: BorderRadius.circular(27),
         border: Border.all(color: const Color(0xFFEAEDF2)),
       ),
-      child: Row(
+      child: Stack(
         children: [
-          _buildHomeSegment('Insight', true, () {}),
-          _buildHomeSegment(
-            'Transaksi',
-            false,
-            () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const TransactionScreen()),
+          AnimatedAlign(
+            duration: const Duration(milliseconds: 260),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment((_selectedHomeTab - 1).toDouble(), 0),
+            child: FractionallySizedBox(
+              widthFactor: 1 / 3,
+              heightFactor: 1,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDFF45B),
+                  borderRadius: BorderRadius.circular(22),
+                ),
+              ),
             ),
           ),
-          _buildHomeSegment(
-            'Growth',
-            false,
-            () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ReportScreen()),
-            ),
+          Row(
+            children: [
+              _buildHomeSegment('Ringkasan', 0),
+              _buildHomeSegment('Aktivitas', 1),
+              _buildHomeSegment('Perkembangan', 2),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildHomeSegment(
-    String label,
-    bool selected,
-    VoidCallback onTap,
-  ) {
+  Widget _buildHomeSegment(String label, int index) {
+    final selected = _selectedHomeTab == index;
     return Expanded(
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          if (selected) return;
+          setState(() {
+            _tabDirection = index > _selectedHomeTab ? 1 : -1;
+            _selectedHomeTab = index;
+          });
+        },
         borderRadius: BorderRadius.circular(22),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
+        child: Container(
           alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: selected ? const Color(0xFFDFF45B) : Colors.transparent,
-            borderRadius: BorderRadius.circular(22),
-          ),
           child: Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.inter(
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
               color: AppTheme.textPrimary,
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSelectedHomeContent() {
+    if (_selectedHomeTab == 1) {
+      return Column(
+        key: const ValueKey('activity'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionTitle('Aktivitas terbaru', null),
+          const SizedBox(height: 12),
+          _buildRecentTransactions(),
+          const SizedBox(height: 28),
+        ],
+      );
+    }
+
+    if (_selectedHomeTab == 2) {
+      return Column(
+        key: const ValueKey('growth'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_nudgeMessage.isNotEmpty) ...[
+            _buildNudgeBanner(),
+            const SizedBox(height: 24),
+          ],
+          _buildSectionTitle('Perkembangan bulan ini', null),
+          const SizedBox(height: 12),
+          _buildExpenseChart(),
+          const SizedBox(height: 24),
+          _buildSectionTitle('Rencana budget', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const BudgetScreen()),
+            );
+          }),
+          const SizedBox(height: 12),
+          _buildBudgetCard(),
+          const SizedBox(height: 28),
+        ],
+      );
+    }
+
+    return Column(
+      key: const ValueKey('summary'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildBalanceCard(),
+        const SizedBox(height: 26),
+        _buildSectionTitle('Pilihan cepat', null),
+        const SizedBox(height: 14),
+        _buildQuickActions(),
+        const SizedBox(height: 24),
+        if (_nudgeMessage.isNotEmpty) ...[
+          _buildNudgeBanner(),
+          const SizedBox(height: 24),
+        ],
+        _buildSectionTitle('Transaksi terbaru', null),
+        const SizedBox(height: 12),
+        _buildRecentTransactions(),
+        const SizedBox(height: 28),
+      ],
     );
   }
 
