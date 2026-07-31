@@ -255,8 +255,8 @@ class _ReportScreenState extends State<ReportScreen>
         children: [
           GestureDetector(
             onTap: () {
-              setState(() => _selectedDate =
-                  DateTime(_selectedDate.year, _selectedDate.month - 1));
+              _selectedDate =
+                  DateTime(_selectedDate.year, _selectedDate.month - 1);
               _loadReport();
             },
             child: const Padding(
@@ -281,8 +281,8 @@ class _ReportScreenState extends State<ReportScreen>
           ),
           GestureDetector(
             onTap: () {
-              setState(() => _selectedDate =
-                  DateTime(_selectedDate.year, _selectedDate.month + 1));
+              _selectedDate =
+                  DateTime(_selectedDate.year, _selectedDate.month + 1);
               _loadReport();
             },
             child: const Padding(

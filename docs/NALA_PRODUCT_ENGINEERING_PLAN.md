@@ -581,6 +581,7 @@ Pada akhir setiap sesi pengembangan:
 | 1 Agustus 2026 | Loading wallet tidak lagi memblokir flow | Scanner dan form Tagihan Berulang langsung tampil; status loading/error dibatasi pada field sumber dana dengan retry lokal |
 | 1 Agustus 2026 | Lompatan tab utama dipangkas menjadi satu halaman | Navigasi non-berurutan tidak lagi menganimasikan dan membangun seluruh halaman perantara; efek geser satu langkah tetap dipertahankan |
 | 1 Agustus 2026 | Query histori dibatasi rentang waktu | Aktivitas hanya mengambil bulan terpilih dan Laporan hanya mengambil tiga bulan yang divisualisasikan; endpoint memvalidasi batas `from`/`to` sebelum query database |
+| 1 Agustus 2026 | Rebuild Aktivitas dan Laporan dikurangi | Hasil filter, total, dan kelompok transaksi diterapkan dalam satu `setState`; perubahan filter, bulan, dan panah laporan tidak lagi memicu rebuild pendahuluan yang redundan |
 
 ### Log keputusan
 

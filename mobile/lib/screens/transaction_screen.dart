@@ -30,7 +30,6 @@ class _TransactionScreenState extends State<TransactionScreen>
   List<Map<String, dynamic>> _transactionGroups = [];
   String _selectedFilter = 'Semua';
   List<TransactionItem> _allTransactions = [];
-  List<TransactionItem> _filteredMonthlyTransactions = [];
   DateTime _selectedMonth = DateTime.now();
   bool _isSearching = false;
   bool _isMonthPickerOpen = false;
@@ -90,15 +89,13 @@ class _TransactionScreenState extends State<TransactionScreen>
       _loadError = null;
     });
     try {
-      _allTransactions = await _transactionService.getTransactions(
+      final transactions = await _transactionService.getTransactions(
         dateFrom: DateTime(_selectedMonth.year, _selectedMonth.month),
         dateTo: DateTime(_selectedMonth.year, _selectedMonth.month + 1),
       );
-
-      setState(() {
-        _isLoading = false;
-      });
-
+      if (!mounted) return;
+      _allTransactions = transactions;
+      _isLoading = false;
       _applyFilters();
     } catch (e) {
       debugPrint('Load transactions error: $e');
@@ -114,7 +111,7 @@ class _TransactionScreenState extends State<TransactionScreen>
   void _applyFilters() {
     final query = _searchController.text.toLowerCase();
 
-    _filteredMonthlyTransactions = _allTransactions.where((tx) {
+    final filteredTransactions = _allTransactions.where((tx) {
       // Filter by Month and Year
       if (tx.date.month != _selectedMonth.month ||
           tx.date.year != _selectedMonth.year) {
@@ -140,27 +137,29 @@ class _TransactionScreenState extends State<TransactionScreen>
     int income = 0;
     int expense = 0;
 
-    for (var tx in _filteredMonthlyTransactions) {
+    for (var tx in filteredTransactions) {
       if (tx.type == 'INCOME') {
         income += tx.amount;
       } else {
         expense += tx.amount;
       }
     }
+    final transactionGroups = _buildTransactionGroups(filteredTransactions);
 
     setState(() {
       _totalIncome = income;
       _totalExpense = expense;
+      _transactionGroups = transactionGroups;
     });
-
-    _updateTransactionGroups();
   }
 
-  void _updateTransactionGroups() {
+  List<Map<String, dynamic>> _buildTransactionGroups(
+    List<TransactionItem> transactions,
+  ) {
     Map<String, List<TransactionItem>> grouped = {};
     final now = DateTime.now();
 
-    for (var tx in _filteredMonthlyTransactions) {
+    for (var tx in transactions) {
       String dateStr = _formatDate(tx.date);
 
       final today = DateTime(now.year, now.month, now.day);
@@ -213,9 +212,7 @@ class _TransactionScreenState extends State<TransactionScreen>
       });
     });
 
-    setState(() {
-      _transactionGroups = groups;
-    });
+    return groups;
   }
 
   String _formatCurrency(int amount) {
@@ -639,9 +636,7 @@ class _TransactionScreenState extends State<TransactionScreen>
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          setState(() {
-            _selectedFilter = label;
-          });
+          _selectedFilter = label;
           _applyFilters();
         },
         child: Container(
@@ -846,9 +841,7 @@ class _TransactionScreenState extends State<TransactionScreen>
                               color: AppTheme.primaryColor)
                           : null,
                       onTap: () {
-                        setState(() {
-                          _selectedMonth = month;
-                        });
+                        _selectedMonth = month;
                         Navigator.pop(context);
                         _loadTransactions();
                       },
