@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../services/transaction_service.dart';
-import '../services/wallet_service.dart';
 import '../models/transaction.dart';
 import 'add_transaction_screen.dart';
 import '../widgets/load_error_view.dart';
@@ -17,7 +16,6 @@ class TransactionScreen extends StatefulWidget {
 
 class _TransactionScreenState extends State<TransactionScreen> {
   final TransactionService _transactionService = TransactionService();
-  final WalletService _walletService = WalletService();
   final NumberFormat _currencyFormat = NumberFormat.currency(
     locale: 'id_ID',
     symbol: 'Rp ',
@@ -28,7 +26,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
   String? _loadError;
   int _totalIncome = 0;
   int _totalExpense = 0;
-  int _totalBalance = 0;
   List<Map<String, dynamic>> _transactionGroups = [];
   String _selectedFilter = 'Semua';
   List<TransactionItem> _allTransactions = [];
@@ -92,17 +89,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
       _loadError = null;
     });
     try {
-      final transactionsFuture = _transactionService.getTransactions();
-      final walletsFuture = _walletService.getWallets();
-
-      _allTransactions = await transactionsFuture;
-      final wallets = await walletsFuture;
+      _allTransactions = await _transactionService.getTransactions();
 
       setState(() {
-        _totalBalance = wallets.fold(
-          0,
-          (total, wallet) => total + wallet.balance,
-        );
         _isLoading = false;
       });
 
@@ -137,8 +126,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
       }
       // Filter by Type (Semua/Pemasukan/Pengeluaran)
       if (_selectedFilter == 'Pemasukan' && tx.type != 'INCOME') return false;
-      if (_selectedFilter == 'Pengeluaran' && tx.type != 'EXPENSE')
+      if (_selectedFilter == 'Pengeluaran' && tx.type != 'EXPENSE') {
         return false;
+      }
 
       return true;
     }).toList();
@@ -249,14 +239,14 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       slivers: [
                         SliverToBoxAdapter(
                           child: Padding(
-                            padding: const EdgeInsets.all(20.0),
+                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 _buildHeader(),
-                                const SizedBox(height: 24),
+                                const SizedBox(height: 20),
                                 _buildSummaryCard(),
-                                const SizedBox(height: 24),
+                                const SizedBox(height: 20),
                                 _buildFilterRow(),
                                 const SizedBox(height: 16),
                               ],
@@ -274,12 +264,25 @@ class _TransactionScreenState extends State<TransactionScreen> {
                           ),
                         ),
                         if (_transactionGroups.isEmpty)
-                          const SliverFillRemaining(
+                          SliverFillRemaining(
                             hasScrollBody: false,
                             child: Center(
-                              child: Text(
-                                'Belum ada transaksi pada bulan ini.',
-                                style: TextStyle(color: AppTheme.textSecondary),
+                              child: Container(
+                                margin: const EdgeInsets.all(20),
+                                padding: const EdgeInsets.all(24),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(22),
+                                ),
+                                child: Text(
+                                  'Belum ada aktivitas pada bulan ini.',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.inter(
+                                    color: AppTheme.textSecondary,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -301,23 +304,19 @@ class _TransactionScreenState extends State<TransactionScreen> {
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: AppTheme.borderColor),
               ),
               child: TextField(
                 controller: _searchController,
                 autofocus: true,
-                style: GoogleFonts.interTight(fontSize: 14),
+                style: GoogleFonts.inter(fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Cari transaksi...',
-                  hintStyle: GoogleFonts.interTight(
-                      color: AppTheme.textSecondary, fontSize: 14),
+                  hintStyle: GoogleFonts.inter(
+                    color: AppTheme.textSecondary,
+                    fontSize: 14,
+                  ),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                       borderSide: BorderSide.none),
@@ -335,13 +334,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              border: Border.all(color: AppTheme.borderColor),
             ),
             child: IconButton(
               icon: const Icon(Icons.close,
@@ -362,62 +355,60 @@ class _TransactionScreenState extends State<TransactionScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Riwayat Transaksi',
-              style: GoogleFonts.interTight(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Aktivitas',
+                style: GoogleFonts.inter(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: -0.5,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            GestureDetector(
-              onTap: _showMonthPicker,
-              child: Row(
-                children: [
-                  Text(
-                    _formatMonthYear(_selectedMonth),
-                    style: GoogleFonts.interTight(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppTheme.textSecondary,
+              const SizedBox(height: 4),
+              GestureDetector(
+                onTap: _showMonthPicker,
+                child: Row(
+                  children: [
+                    Text(
+                      _formatMonthYear(_selectedMonth),
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 4),
-                  AnimatedRotation(
-                    turns: _isMonthPickerOpen ? 0.5 : 0.0,
-                    duration: const Duration(milliseconds: 300),
-                    child: const Icon(
-                      Icons.keyboard_arrow_down,
-                      size: 16,
-                      color: AppTheme.textSecondary,
+                    const SizedBox(width: 4),
+                    AnimatedRotation(
+                      turns: _isMonthPickerOpen ? 0.5 : 0.0,
+                      duration: const Duration(milliseconds: 300),
+                      child: const Icon(
+                        Icons.keyboard_arrow_down,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+        const SizedBox(width: 12),
         Row(
           children: [
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppTheme.borderColor),
               ),
               child: IconButton(
                 icon: const Icon(
-                  Icons.add,
+                  Icons.add_rounded,
                   color: AppTheme.textPrimary,
                   size: 20,
                 ),
@@ -438,14 +429,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppTheme.borderColor),
               ),
               child: IconButton(
                 icon: const Icon(
@@ -467,59 +452,54 @@ class _TransactionScreenState extends State<TransactionScreen> {
   }
 
   Widget _buildSummaryCard() {
+    final difference = _totalIncome - _totalExpense;
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFFEAEDF2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Total Saldo',
-            style: GoogleFonts.interTight(
-              fontSize: 14,
+            'Arus kas ${_formatMonthYear(_selectedMonth)}',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
               color: AppTheme.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            _currencyFormat.format(_totalBalance),
-            style: GoogleFonts.interTight(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryColor,
+            _formatCurrency(difference),
+            style: GoogleFonts.inter(
+              fontSize: 25,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+              letterSpacing: -0.7,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
           Row(
             children: [
               Expanded(
                 child: _buildSummaryItem(
                   'Pemasukan',
                   _totalIncome,
-                  Icons.arrow_downward,
+                  Icons.south_west_rounded,
                   AppTheme.successColor,
                 ),
               ),
-              Container(height: 40, width: 1, color: Colors.grey[200]),
+              const SizedBox(width: 10),
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: _buildSummaryItem(
-                    'Pengeluaran',
-                    _totalExpense,
-                    Icons.arrow_upward,
-                    AppTheme.errorColor,
-                  ),
+                child: _buildSummaryItem(
+                  'Pengeluaran',
+                  _totalExpense,
+                  Icons.north_east_rounded,
+                  AppTheme.errorColor,
                 ),
               ),
             ],
@@ -535,78 +515,103 @@ class _TransactionScreenState extends State<TransactionScreen> {
     IconData icon,
     Color color,
   ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 12, color: color),
               ),
-              child: Icon(icon, size: 12, color: color),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: GoogleFonts.interTight(
-                fontSize: 12,
-                color: AppTheme.textSecondary,
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: AppTheme.textSecondary,
+                ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          _currencyFormat.format(amount),
-          style: GoogleFonts.interTight(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.textPrimary,
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 8),
+          Text(
+            _currencyFormat.format(amount),
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildFilterRow() {
-    return Row(
-      children: [
-        _buildFilterChip('Semua'),
-        const SizedBox(width: 8),
-        _buildFilterChip('Pemasukan'),
-        const SizedBox(width: 8),
-        _buildFilterChip('Pengeluaran'),
-      ],
+    const filters = ['Semua', 'Pemasukan', 'Pengeluaran'];
+    final selectedIndex = filters.indexOf(_selectedFilter);
+
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFEAEDF2)),
+      ),
+      child: Stack(
+        children: [
+          AnimatedAlign(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment((selectedIndex - 1).toDouble(), 0),
+            child: FractionallySizedBox(
+              widthFactor: 1 / 3,
+              heightFactor: 1,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDFF45B),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+          ),
+          Row(children: filters.map(_buildFilterChip).toList()),
+        ],
+      ),
     );
   }
 
   Widget _buildFilterChip(String label) {
     bool isSelected = _selectedFilter == label;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedFilter = label;
-        });
-        _applyFilters();
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryColor : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppTheme.primaryColor : Colors.grey[300]!,
-          ),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.interTight(
-            fontSize: 13,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            color: isSelected ? Colors.white : AppTheme.textSecondary,
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedFilter = label;
+          });
+          _applyFilters();
+        },
+        child: Container(
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              color: isSelected ? AppTheme.textPrimary : AppTheme.textSecondary,
+            ),
           ),
         ),
       ),
@@ -624,7 +629,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
         children: [
           Text(
             date,
-            style: GoogleFonts.interTight(
+            style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
@@ -634,14 +639,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: const Color(0xFFEAEDF2)),
             ),
             child: Column(
               children: transactions.asMap().entries.map((entry) {
@@ -700,7 +699,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     children: [
                       Text(
                         tx['title'] as String,
-                        style: GoogleFonts.interTight(
+                        style: GoogleFonts.inter(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: AppTheme.textPrimary,
@@ -709,7 +708,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       const SizedBox(height: 4),
                       Text(
                         tx['account'] as String,
-                        style: GoogleFonts.interTight(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           color: AppTheme.textSecondary,
                         ),
@@ -719,7 +718,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 ),
                 Text(
                   _formatCurrency(amount),
-                  style: GoogleFonts.interTight(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color:

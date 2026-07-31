@@ -553,6 +553,7 @@ Pada akhir setiap sesi pengembangan:
 | 31 Juli 2026 | Header home disederhanakan | Placeholder logo diganti icon profil outline dan sapaan personal satu baris agar lebih jelas serta hemat ruang |
 | 31 Juli 2026 | Tipografi sapaan home diperhalus | Ukuran dan bobot sapaan diturunkan agar header tidak terlalu dominan |
 | 31 Juli 2026 | Kartu saldo diubah menjadi kartu dana NALA | Badge icon dihapus; identitas wallet, status utama, saldo privat, dan pola geometris menggantikan kartu gradient generik |
+| 31 Juli 2026 | Halaman Transaksi diselaraskan dengan Home | Request saldo duplikat dihapus; header, ringkasan arus kas, filter segmented, empty state, dan kartu aktivitas memakai bahasa visual NALA |
 
 ### Log keputusan
 
