@@ -91,28 +91,61 @@ class _MainShellState extends State<MainShell> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(26),
-              child: Row(
+              child: Stack(
                 children: [
-                  Expanded(
-                    child: _buildNavItem(Icons.home_rounded, 'Beranda', 0),
-                  ),
-                  Expanded(
-                    child: _buildNavItem(
-                      Icons.receipt_long_rounded,
-                      'Transaksi',
-                      1,
+                  AnimatedAlign(
+                    duration: const Duration(milliseconds: 320),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment(-1 + (_selectedIndex * .5), 0),
+                    child: FractionallySizedBox(
+                      widthFactor: 1 / 5,
+                      heightFactor: 1,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 3,
+                          vertical: 5,
+                        ),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFDFF45B),
+                            borderRadius: BorderRadius.circular(22),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                  Expanded(child: _buildAddNavItem()),
-                  Expanded(
-                    child: _buildNavItem(
-                      Icons.bar_chart_rounded,
-                      'Laporan',
-                      3,
-                    ),
-                  ),
-                  Expanded(
-                    child: _buildNavItem(Icons.person_rounded, 'Profil', 4),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildNavItem(
+                          Icons.home_rounded,
+                          'Beranda',
+                          0,
+                        ),
+                      ),
+                      Expanded(
+                        child: _buildNavItem(
+                          Icons.receipt_long_rounded,
+                          'Transaksi',
+                          1,
+                        ),
+                      ),
+                      Expanded(child: _buildAddNavItem()),
+                      Expanded(
+                        child: _buildNavItem(
+                          Icons.bar_chart_rounded,
+                          'Laporan',
+                          3,
+                        ),
+                      ),
+                      Expanded(
+                        child: _buildNavItem(
+                          Icons.person_rounded,
+                          'Profil',
+                          4,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -168,37 +201,29 @@ class _MainShellState extends State<MainShell> {
       behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 5),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFFDFF45B) : Colors.transparent,
-            borderRadius: BorderRadius.circular(22),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: isSelected
+                  ? const Color(0xFF171A12)
+                  : const Color(0xFF8A94A3),
+              size: 21,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: '.SF Pro Text',
+                fontSize: 9.5,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected
                     ? const Color(0xFF171A12)
                     : const Color(0xFF8A94A3),
-                size: 21,
               ),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style: TextStyle(
-                  fontFamily: '.SF Pro Text',
-                  fontSize: 9.5,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected
-                      ? const Color(0xFF171A12)
-                      : const Color(0xFF8A94A3),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

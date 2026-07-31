@@ -575,6 +575,7 @@ Pada akhir setiap sesi pengembangan:
 | 1 Agustus 2026 | Alignment Splash dikunci ke viewport | Logo memakai center absolut berukuran 88 px, sedangkan blok identitas dikunci simetris di bagian bawah agar keduanya tidak saling menggeser |
 | 1 Agustus 2026 | Spacing dan scroll Home disempurnakan | Mengetuk tab aktif mengembalikan konten ke atas, kartu memakai radius/border konsisten tanpa shadow, ruang bawah ditambah, dan nominal panjang diamankan |
 | 1 Agustus 2026 | Bottom navigation dinaikkan | Jarak bawah SafeArea ditambah 6 px agar navbar tidak terlalu dekat dengan home indicator iOS |
+| 1 Agustus 2026 | Indikator bottom navigation dibuat sliding | Kapsul lime kini bergeser 320 ms dengan kurva yang sama seperti segmented control Home tanpa mengganti state halaman |
 
 ### Log keputusan
 
