@@ -27,7 +27,8 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => DashboardScreenState();
 }
 
-class DashboardScreenState extends State<DashboardScreen> {
+class DashboardScreenState extends State<DashboardScreen>
+    with AutomaticKeepAliveClientMixin {
   final WalletService _walletService = WalletService();
   final TransactionService _transactionService = TransactionService();
   final HealthService _healthService = HealthService();
@@ -233,6 +234,7 @@ class DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
@@ -283,6 +285,9 @@ class DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 
   Widget _buildHeader() {
     return Row(

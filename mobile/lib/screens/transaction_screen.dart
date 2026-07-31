@@ -14,7 +14,8 @@ class TransactionScreen extends StatefulWidget {
   State<TransactionScreen> createState() => _TransactionScreenState();
 }
 
-class _TransactionScreenState extends State<TransactionScreen> {
+class _TransactionScreenState extends State<TransactionScreen>
+    with AutomaticKeepAliveClientMixin {
   final TransactionService _transactionService = TransactionService();
   final NumberFormat _currencyFormat = NumberFormat.currency(
     locale: 'id_ID',
@@ -222,6 +223,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
@@ -301,6 +303,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 
   Widget _buildHeader() {
     if (_isSearching) {

@@ -576,6 +576,7 @@ Pada akhir setiap sesi pengembangan:
 | 1 Agustus 2026 | Spacing dan scroll Home disempurnakan | Mengetuk tab aktif mengembalikan konten ke atas, kartu memakai radius/border konsisten tanpa shadow, ruang bawah ditambah, dan nominal panjang diamankan |
 | 1 Agustus 2026 | Bottom navigation dinaikkan | Jarak bawah SafeArea ditambah 6 px agar navbar tidak terlalu dekat dengan home indicator iOS |
 | 1 Agustus 2026 | Indikator bottom navigation dibuat sliding | Kapsul lime kini bergeser 320 ms dengan kurva yang sama seperti segmented control Home tanpa mengganti state halaman |
+| 1 Agustus 2026 | Halaman utama memakai PageView | Konten bergeser bersama indikator navbar, halaman dibangun bertahap untuk mengurangi beban awal, dan state halaman yang sudah dibuka dipertahankan |
 
 ### Log keputusan
 

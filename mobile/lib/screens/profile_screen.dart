@@ -16,7 +16,8 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends State<ProfileScreen>
+    with AutomaticKeepAliveClientMixin {
   Map<String, dynamic>? _user;
   bool _isLoading = true;
   String? _loadError;
@@ -69,6 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: AppTheme.backgroundColor,
@@ -216,6 +218,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 
   Widget _buildProfileHeader() {
     final avatarImage = _decodeAvatar(_user?['avatar']);

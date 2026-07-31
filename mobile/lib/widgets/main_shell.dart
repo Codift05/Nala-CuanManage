@@ -14,8 +14,11 @@ class MainShell extends StatefulWidget {
 }
 
 class _MainShellState extends State<MainShell> {
+  static const _navIndexes = [0, 1, 3, 4];
+
   int _selectedIndex = 0;
   final _dashboardKey = GlobalKey<DashboardScreenState>();
+  final _pageController = PageController();
 
   late final List<Widget> _screens;
 
@@ -25,7 +28,6 @@ class _MainShellState extends State<MainShell> {
     _screens = [
       DashboardScreen(key: _dashboardKey),
       const TransactionScreen(),
-      const SizedBox.shrink(),
       const ReportScreen(),
       const ProfileScreen(),
     ];
@@ -37,15 +39,25 @@ class _MainShellState extends State<MainShell> {
     } else if (index == 1) {
       _screens[1] = TransactionScreen(key: UniqueKey());
     } else if (index == 3) {
-      _screens[3] = ReportScreen(key: UniqueKey());
+      _screens[2] = ReportScreen(key: UniqueKey());
     }
   }
 
   void _onItemTapped(int index) {
-    if (index == 2) return; // Ignore scan button area
-    setState(() {
-      _selectedIndex = index;
-    });
+    final page = _navIndexes.indexOf(index);
+    if (page == -1 || index == _selectedIndex) return;
+    setState(() => _selectedIndex = index);
+    _pageController.animateToPage(
+      page,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   Future<void> _openAddTransaction() async {
@@ -67,9 +79,9 @@ class _MainShellState extends State<MainShell> {
       },
       child: Scaffold(
         backgroundColor: AppTheme.backgroundColor,
-        body: IndexedStack(
-          key: ValueKey('main-tab-$_selectedIndex'),
-          index: _selectedIndex,
+        body: PageView(
+          controller: _pageController,
+          physics: const NeverScrollableScrollPhysics(),
           children: _screens,
         ),
         bottomNavigationBar: SafeArea(
@@ -106,6 +118,7 @@ class _MainShellState extends State<MainShell> {
                           vertical: 5,
                         ),
                         child: DecoratedBox(
+                          key: ValueKey('main-tab-$_selectedIndex'),
                           decoration: BoxDecoration(
                             color: const Color(0xFFDFF45B),
                             borderRadius: BorderRadius.circular(22),

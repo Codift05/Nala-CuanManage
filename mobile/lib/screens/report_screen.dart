@@ -14,7 +14,8 @@ class ReportScreen extends StatefulWidget {
   State<ReportScreen> createState() => _ReportScreenState();
 }
 
-class _ReportScreenState extends State<ReportScreen> {
+class _ReportScreenState extends State<ReportScreen>
+    with AutomaticKeepAliveClientMixin {
   final TransactionService _transactionService = TransactionService();
   final NumberFormat _currencyFormat = NumberFormat.currency(
     locale: 'id_ID',
@@ -177,6 +178,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
@@ -221,6 +223,9 @@ class _ReportScreenState extends State<ReportScreen> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 
   Widget _buildHeader() {
     return Text(
