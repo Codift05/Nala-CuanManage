@@ -33,12 +33,12 @@ class DashboardScreenState extends State<DashboardScreen> {
   final HealthService _healthService = HealthService();
   final BudgetService _budgetService = BudgetService();
   final AuthService _authService = AuthService();
+  final PageController _homePageController = PageController();
 
   bool _isLoading = true;
   bool _isRefreshing = false;
   bool _isBalanceVisible = true;
   int _selectedHomeTab = 0;
-  int _tabDirection = 1;
   int _totalBalance = 0;
   List<Wallet> _wallets = [];
   List<TransactionItem> _recentTransactions = [];
@@ -63,6 +63,12 @@ class DashboardScreenState extends State<DashboardScreen> {
     _loadData(showFullScreenLoader: true);
     _initHomeWidget();
     _initSmsListener();
+  }
+
+  @override
+  void dispose() {
+    _homePageController.dispose();
+    super.dispose();
   }
 
   void _initHomeWidget() {
@@ -229,39 +235,30 @@ class DashboardScreenState extends State<DashboardScreen> {
               )
             : Stack(
                 children: [
-                  RefreshIndicator(
-                    onRefresh: _loadData,
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
+                  Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                        child: Column(
+                          children: [
+                            _buildHeader(),
+                            const SizedBox(height: 22),
+                            _buildHomeSegments(),
+                          ],
+                        ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildHeader(),
-                          const SizedBox(height: 22),
-                          _buildHomeSegments(),
-                          const SizedBox(height: 20),
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 260),
-                            switchInCurve: Curves.easeOutCubic,
-                            switchOutCurve: Curves.easeInCubic,
-                            transitionBuilder: (child, animation) {
-                              return SlideTransition(
-                                position: Tween<Offset>(
-                                  begin: Offset(_tabDirection * 0.12, 0),
-                                  end: Offset.zero,
-                                ).animate(animation),
-                                child: child,
-                              );
-                            },
-                            child: _buildSelectedHomeContent(),
-                          ),
-                        ],
+                      const SizedBox(height: 4),
+                      Expanded(
+                        child: PageView(
+                          controller: _homePageController,
+                          physics: const BouncingScrollPhysics(),
+                          onPageChanged: (index) {
+                            setState(() => _selectedHomeTab = index);
+                          },
+                          children: List.generate(3, _buildHomePage),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                   if (_isRefreshing)
                     const Positioned(
@@ -379,18 +376,25 @@ class DashboardScreenState extends State<DashboardScreen> {
       ),
       child: Stack(
         children: [
-          AnimatedAlign(
-            duration: const Duration(milliseconds: 260),
-            curve: Curves.easeOutCubic,
-            alignment: Alignment((_selectedHomeTab - 1).toDouble(), 0),
-            child: FractionallySizedBox(
-              widthFactor: 1 / 3,
-              heightFactor: 1,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFDFF45B),
-                  borderRadius: BorderRadius.circular(22),
+          AnimatedBuilder(
+            animation: _homePageController,
+            builder: (context, child) {
+              final page = _homePageController.hasClients
+                  ? (_homePageController.page ?? _selectedHomeTab.toDouble())
+                  : _selectedHomeTab.toDouble();
+              return Align(
+                alignment: Alignment(page.clamp(0, 2).toDouble() - 1, 0),
+                child: FractionallySizedBox(
+                  widthFactor: 1 / 3,
+                  heightFactor: 1,
+                  child: child,
                 ),
+              );
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFDFF45B),
+                borderRadius: BorderRadius.circular(22),
               ),
             ),
           ),
@@ -412,10 +416,11 @@ class DashboardScreenState extends State<DashboardScreen> {
       child: InkWell(
         onTap: () {
           if (selected) return;
-          setState(() {
-            _tabDirection = index > _selectedHomeTab ? 1 : -1;
-            _selectedHomeTab = index;
-          });
+          _homePageController.animateToPage(
+            index,
+            duration: const Duration(milliseconds: 320),
+            curve: Curves.easeOutCubic,
+          );
         },
         borderRadius: BorderRadius.circular(22),
         child: Container(
@@ -435,10 +440,20 @@ class DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildSelectedHomeContent() {
-    if (_selectedHomeTab == 1) {
+  Widget _buildHomePage(int index) {
+    return RefreshIndicator(
+      onRefresh: _loadData,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+        child: _buildHomeContent(index),
+      ),
+    );
+  }
+
+  Widget _buildHomeContent(int index) {
+    if (index == 1) {
       return Column(
-        key: const ValueKey('activity'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionTitle('Aktivitas terbaru', null),
@@ -449,9 +464,8 @@ class DashboardScreenState extends State<DashboardScreen> {
       );
     }
 
-    if (_selectedHomeTab == 2) {
+    if (index == 2) {
       return Column(
-        key: const ValueKey('growth'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (_nudgeMessage.isNotEmpty) ...[
@@ -476,7 +490,6 @@ class DashboardScreenState extends State<DashboardScreen> {
     }
 
     return Column(
-      key: const ValueKey('summary'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildBalanceCard(),

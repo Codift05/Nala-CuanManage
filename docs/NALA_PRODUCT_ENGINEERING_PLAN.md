@@ -549,6 +549,7 @@ Pada akhir setiap sesi pengembangan:
 | 31 Juli 2026 | Home dan navigation shell dimodernisasi | Segmented shortcut, kartu fitur berwarna, icon Material modern, radius kartu konsisten, serta bottom navigation kapsul mengambang tanpa dependency baru |
 | 31 Juli 2026 | Bottom navigation diselaraskan dengan segmented control | Tab aktif memakai kapsul lime, elevasi diperhalus, dan tombol catat tetap menjadi aksi utama di tengah |
 | 31 Juli 2026 | Segmented control home menjadi navigasi konten | Kapsul aktif bergeser tanpa fade; Ringkasan, Aktivitas, dan Perkembangan menampilkan kelompok data NALA yang berbeda |
+| 31 Juli 2026 | Transisi tab home dipindahkan ke PageView | Konten tidak lagi bertumpuk; tab dapat ditekan atau di-swipe dan indikator mengikuti posisi halaman secara kontinu |
 
 ### Log keputusan
 
