@@ -70,16 +70,16 @@ class _MainShellState extends State<MainShell> {
         top: false,
         minimum: const EdgeInsets.fromLTRB(14, 0, 14, 10),
         child: Container(
-          height: 70,
+          height: 64,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(26),
             border: Border.all(color: const Color(0xFFE9ECF1)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.10),
-                blurRadius: 28,
-                offset: const Offset(0, 10),
+                color: Colors.black.withValues(alpha: 0.07),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
@@ -125,8 +125,8 @@ class _MainShellState extends State<MainShell> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 46,
+            height: 46,
             decoration: BoxDecoration(
               color: AppTheme.primaryColor,
               shape: BoxShape.circle,
@@ -154,37 +154,40 @@ class _MainShellState extends State<MainShell> {
     return GestureDetector(
       onTap: () => _onItemTapped(index),
       behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            width: 38,
-            height: 28,
-            decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFFFFF0DA) : Colors.transparent,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              icon,
-              color:
-                  isSelected ? AppTheme.primaryColor : const Color(0xFF8A94A3),
-              size: 22,
-            ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 5),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFFDFF45B) : Colors.transparent,
+            borderRadius: BorderRadius.circular(22),
           ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: TextStyle(
-              fontFamily: '.SF Pro Text',
-              fontSize: 10,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              color:
-                  isSelected ? AppTheme.primaryColor : const Color(0xFF8A94A3),
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: isSelected
+                    ? const Color(0xFF171A12)
+                    : const Color(0xFF8A94A3),
+                size: 21,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: TextStyle(
+                  fontFamily: '.SF Pro Text',
+                  fontSize: 9.5,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected
+                      ? const Color(0xFF171A12)
+                      : const Color(0xFF8A94A3),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

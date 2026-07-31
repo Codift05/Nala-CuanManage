@@ -547,6 +547,7 @@ Pada akhir setiap sesi pengembangan:
 | 31 Juli 2026 | M3 ditutup dengan pengujian IDOR lintas akun | HTTP test read/update/delete wallet dan transaksi, budget, recurring, session, mass-assignment profil, serta verifikasi resource pemilik tetap utuh |
 | 31 Juli 2026 | Startup Flutter Web diverifikasi | Plugin home widget dibatasi ke platform native; Chrome debug aktif dan 17 Flutter test lulus |
 | 31 Juli 2026 | Home dan navigation shell dimodernisasi | Segmented shortcut, kartu fitur berwarna, icon Material modern, radius kartu konsisten, serta bottom navigation kapsul mengambang tanpa dependency baru |
+| 31 Juli 2026 | Bottom navigation diselaraskan dengan segmented control | Tab aktif memakai kapsul lime, elevasi diperhalus, dan tombol catat tetap menjadi aksi utama di tengah |
 
 ### Log keputusan
 
