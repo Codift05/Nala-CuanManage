@@ -564,6 +564,7 @@ Pada akhir setiap sesi pengembangan:
 | 31 Juli 2026 | Halaman Tagihan Berulang diselaraskan dengan Home | Total bulanan dan jadwal tanggal diringkas, card dibuat mudah dipindai, hapus wajib konfirmasi, kategori form diaktifkan, serta loading wallet dan validasi dibenahi |
 | 31 Juli 2026 | Financial Habit Score diselaraskan dengan Home | Skor dan chart dipadatkan, simbol kelulusan dihapus, faktor menjadi daftar progress, disclaimer non-kredit ditambahkan, serta CTA Nala Chat diperhalus |
 | 31 Juli 2026 | Nala Chat diselaraskan dengan Home | Bubble, avatar AI, loader, quick prompts, input, dan CTA dipadatkan; aksi kosong dihapus, pengiriman ganda dicegah, dan jalur draft-konfirmasi dipertahankan |
+| 31 Juli 2026 | Edit Profil diselaraskan dengan Home | Avatar dan form dikelompokkan dalam card, tipografi dipadatkan, error gambar diamankan, serta hapus akun dipindahkan ke zona berbahaya dengan reauthentication tetap wajib |
 
 ### Log keputusan
 

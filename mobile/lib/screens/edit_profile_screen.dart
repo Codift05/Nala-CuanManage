@@ -65,10 +65,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           _avatarBase64 = base64Encode(bytes);
         });
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memilih gambar: $e')),
+          const SnackBar(content: Text('Foto belum dapat dipilih. Coba lagi.')),
         );
       }
     }
@@ -107,8 +107,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           'Hapus Akun Permanen',
-          style: GoogleFonts.interTight(
-              fontWeight: FontWeight.bold, color: AppTheme.errorColor),
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            color: AppTheme.errorColor,
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -116,7 +118,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           children: [
             Text(
               'Seluruh data akan dihapus permanen. Masukkan password untuk melanjutkan.',
-              style: GoogleFonts.interTight(),
+              style: GoogleFonts.inter(),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -133,16 +135,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Batal',
-                style: GoogleFonts.interTight(color: Colors.grey)),
+            child: Text(
+              'Batal',
+              style: GoogleFonts.inter(color: AppTheme.textSecondary),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, passwordController.text),
             style:
                 ElevatedButton.styleFrom(backgroundColor: AppTheme.errorColor),
-            child: Text('Hapus Permanen',
-                style: GoogleFonts.interTight(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text(
+              'Hapus permanen',
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -178,7 +186,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Profil & data'),
+        title: Text(
+          'Edit Profil',
+          style: GoogleFonts.inter(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -188,164 +202,183 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 8),
-                Center(
-                  child: Stack(
-                    alignment: Alignment.bottomRight,
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: const Color(0xFFEAEDF2)),
+                  ),
+                  child: Row(
                     children: [
-                      GestureDetector(
-                        onTap: _pickImage,
-                        child: Container(
-                          width: 92,
-                          height: 92,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: avatarImage == null
-                                  ? AppTheme.textPrimary
-                                  : Colors.white,
-                              width: avatarImage == null ? 1.5 : 4,
-                            ),
-                            image: avatarImage != null
-                                ? DecorationImage(
-                                    image: avatarImage,
-                                    fit: BoxFit.cover,
-                                  )
-                                : null,
-                          ),
-                          child: avatarImage == null
-                              ? const Center(
-                                  child: Icon(
-                                    Icons.person_outline_rounded,
-                                    size: 48,
-                                    color: AppTheme.textPrimary,
-                                  ),
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF0DA),
+                          shape: BoxShape.circle,
+                          image: avatarImage != null
+                              ? DecorationImage(
+                                  image: avatarImage,
+                                  fit: BoxFit.cover,
                                 )
                               : null,
                         ),
+                        child: avatarImage == null
+                            ? const Icon(
+                                Icons.person_outline_rounded,
+                                size: 30,
+                                color: AppTheme.textPrimary,
+                              )
+                            : null,
                       ),
-                      GestureDetector(
-                        onTap: _pickImage,
-                        child: Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: AppTheme.borderColor),
-                          ),
-                          child: const Icon(
-                            Icons.camera_alt_rounded,
-                            size: 15,
-                            color: AppTheme.primaryColor,
-                          ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Foto profil',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              'JPG atau PNG, maksimal 1 MB',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: _isLoading ? null : _pickImage,
+                        child: const Text('Ubah'),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: const Color(0xFFEAEDF2)),
+                  ),
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _nameController,
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const [AutofillHints.name],
+                        validator: (value) {
+                          final name = value?.trim() ?? '';
+                          if (name.isEmpty) return 'Nama wajib diisi';
+                          if (name.length < 2) return 'Nama minimal 2 karakter';
+                          if (name.length > 80) {
+                            return 'Nama maksimal 80 karakter';
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Nama lengkap',
+                          prefixIcon: const Icon(Icons.person_outline_rounded),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.done,
+                        autofillHints: const [AutofillHints.email],
+                        onFieldSubmitted: (_) {
+                          if (!_isLoading) _saveProfile();
+                        },
+                        validator: (value) {
+                          final email = value?.trim() ?? '';
+                          if (email.isEmpty) return 'Email wajib diisi';
+                          if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
+                              .hasMatch(email)) {
+                            return 'Format email tidak valid';
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon: const Icon(Icons.email_outlined),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 36),
-                TextFormField(
-                  controller: _nameController,
-                  textInputAction: TextInputAction.next,
-                  autofillHints: const [AutofillHints.name],
-                  validator: (value) {
-                    final name = value?.trim() ?? '';
-                    if (name.isEmpty) return 'Nama wajib diisi';
-                    if (name.length < 2) return 'Nama minimal 2 karakter';
-                    if (name.length > 80) return 'Nama maksimal 80 karakter';
-                    return null;
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'Nama lengkap',
-                    prefixIcon: const Icon(Icons.person_outline_rounded),
-                    fillColor: Colors.white,
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppTheme.borderColor),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(
-                        color: AppTheme.primaryColor,
-                        width: 1.5,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.done,
-                  autofillHints: const [AutofillHints.email],
-                  onFieldSubmitted: (_) {
-                    if (!_isLoading) _saveProfile();
-                  },
-                  validator: (value) {
-                    final email = value?.trim() ?? '';
-                    if (email.isEmpty) return 'Email wajib diisi';
-                    if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
-                        .hasMatch(email)) {
-                      return 'Format email tidak valid';
-                    }
-                    return null;
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    fillColor: Colors.white,
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppTheme.borderColor),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(
-                        color: AppTheme.primaryColor,
-                        width: 1.5,
-                      ),
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _saveProfile,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                              color: Colors.white, strokeWidth: 2),
-                        )
-                      : Text(
-                          'Simpan Perubahan',
-                          style: GoogleFonts.interTight(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                SizedBox(
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _saveProfile,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 2),
+                          )
+                        : Text(
+                            'Simpan Perubahan',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 28),
+                Text(
+                  'Zona berbahaya',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.errorColor,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.errorColor.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppTheme.errorColor.withValues(alpha: 0.18),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Menghapus akun akan menghapus seluruh data secara permanen.',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            height: 1.4,
+                            color: AppTheme.textSecondary,
                           ),
                         ),
-                ),
-                const SizedBox(height: 20),
-                TextButton(
-                  onPressed: _isLoading ? null : _deleteAccount,
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 52),
-                    foregroundColor: AppTheme.errorColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: const BorderSide(color: AppTheme.errorColor),
-                    ),
-                  ),
-                  child: Text(
-                    'Hapus Akun',
-                    style: GoogleFonts.interTight(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.errorColor,
-                    ),
+                      ),
+                      const SizedBox(width: 12),
+                      TextButton(
+                        onPressed: _isLoading ? null : _deleteAccount,
+                        child: const Text(
+                          'Hapus akun',
+                          style: TextStyle(color: AppTheme.errorColor),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
