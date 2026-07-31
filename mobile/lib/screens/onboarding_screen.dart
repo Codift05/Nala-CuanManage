@@ -79,7 +79,7 @@ class _WelcomeHero extends StatelessWidget {
               style: appleStyle(
                 color: Colors.white,
                 fontSize: compact ? 19 : 21,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 3),
@@ -139,7 +139,7 @@ class _WelcomePanel extends StatelessWidget {
               style: appleStyle(
                 color: AppTheme.textPrimary,
                 fontSize: 16,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
               ),
             ),
             SizedBox(height: compact ? 12 : 16),
@@ -161,41 +161,19 @@ class _WelcomePanel extends StatelessWidget {
               ],
             ),
             SizedBox(height: compact ? 17 : 20),
-            Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 54,
-                    child: ElevatedButton(
-                      onPressed: onLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: const Text('Masuk ke Nala'),
-                    ),
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: ElevatedButton(
+                onPressed: onLogin,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                const SizedBox(width: 12),
-                SizedBox(
-                  width: 54,
-                  height: 54,
-                  child: OutlinedButton(
-                    onPressed: onLogin,
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      foregroundColor: AppTheme.primaryColor,
-                      side: const BorderSide(color: AppTheme.primaryColor),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: const Icon(Icons.fingerprint_rounded, size: 23),
-                  ),
-                ),
-              ],
+                child: const Text('Masuk ke Nala'),
+              ),
             ),
           ],
         ),
@@ -223,13 +201,6 @@ class _FeatureItem extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(15),
               border: Border.all(color: const Color(0xFFFFD8A1)),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x0D111318),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-              ],
             ),
             child: Icon(icon, color: AppTheme.primaryColor, size: 21),
           ),
@@ -241,7 +212,7 @@ class _FeatureItem extends StatelessWidget {
               color: AppTheme.textPrimary,
               fontSize: 12,
               height: 1.2,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],

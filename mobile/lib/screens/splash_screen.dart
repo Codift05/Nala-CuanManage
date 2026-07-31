@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
+import '../widgets/auth_visuals.dart';
 
 import '../services/auth_service.dart';
 import '../services/biometric_service.dart';
@@ -81,29 +81,37 @@ class _SplashScreenState extends State<SplashScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                'img/Nala baru2.png',
-                width: 190,
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.high,
-              ),
-              const SizedBox(height: 18),
-              Text(
-                'NALA',
-                style: GoogleFonts.interTight(
-                  fontSize: 38,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                  letterSpacing: 2,
+              Container(
+                width: 112,
+                height: 82,
+                padding: const EdgeInsets.all(17),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Image.asset(
+                  'img/Logo Nala 4.png',
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
+                  semanticLabel: 'Logo Nala',
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 22),
               Text(
-                'Smart Cuan Management',
-                style: GoogleFonts.interTight(
-                  fontSize: 16,
+                'NALA',
+                style: appleStyle(
+                  fontSize: 27,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Kelola uang dengan lebih tenang',
+                style: appleStyle(
+                  fontSize: 14,
                   color: AppTheme.textSecondary,
-                  letterSpacing: 0.5,
                 ),
               ),
             ],
