@@ -36,7 +36,7 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
       _loadError = null;
     });
     try {
-      final wallets = await _walletService.getWallets();
+      final wallets = await _walletService.getWallets(refresh: true);
       if (!mounted) return;
       setState(() => _wallets = wallets);
     } catch (_) {

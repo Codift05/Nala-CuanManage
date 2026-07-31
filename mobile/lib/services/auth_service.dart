@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import '../config/api_config.dart';
 import 'token_storage.dart';
 import 'api_client.dart';
+import 'wallet_service.dart';
 
 class AuthResult {
   const AuthResult({required this.success, required this.message});
@@ -77,6 +78,7 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        WalletService.clearCache();
         await TokenStorage.writePair(data['accessToken'], data['refreshToken']);
         return const AuthResult(success: true, message: 'Login berhasil');
       }
@@ -211,6 +213,7 @@ class AuthService {
       }
     }
     await TokenStorage.clear();
+    WalletService.clearCache();
   }
 
   Future<String?> _refreshAccessToken() async {

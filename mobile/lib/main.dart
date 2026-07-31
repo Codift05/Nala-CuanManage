@@ -8,6 +8,7 @@ import 'screens/reset_password_screen.dart';
 import 'screens/verify_email_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/api_client.dart';
+import 'services/wallet_service.dart';
 
 String? passwordResetTokenFromRoute(String? routeName) {
   if (routeName == null) return null;
@@ -72,6 +73,7 @@ class _NalaAppState extends State<NalaApp> {
   void _handleExpiredSession() {
     if (!ApiSession.expired.value) return;
     ApiSession.expired.value = false;
+    WalletService.clearCache();
     _navigatorKey.currentState?.pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
       (_) => false,

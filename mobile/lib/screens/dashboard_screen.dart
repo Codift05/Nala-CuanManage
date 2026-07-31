@@ -154,7 +154,7 @@ class DashboardScreenState extends State<DashboardScreen>
       final now = DateTime.now();
       final results = await Future.wait<Object?>([
         _safeLoad<List<Wallet>>(
-          _walletService.getWallets(),
+          _walletService.getWallets(refresh: true),
           const <Wallet>[],
         ),
         _safeLoad<List<TransactionItem>>(

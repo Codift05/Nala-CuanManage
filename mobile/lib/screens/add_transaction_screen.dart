@@ -105,7 +105,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       _merchantController.text = draft['merchant'] as String? ?? '';
       _notesController.text = draft['notes'] as String? ?? '';
     }
-    _loadWallets();
+    final cachedWallets = _walletService.cachedWallets;
+    if (cachedWallets != null) {
+      _wallets = cachedWallets;
+      if (_selectedWalletId == null && cachedWallets.isNotEmpty) {
+        _selectedWalletId = cachedWallets.first.id;
+      }
+      _isLoadingWallets = false;
+    } else {
+      _loadWallets();
+    }
   }
 
   Future<void> _loadWallets() async {
