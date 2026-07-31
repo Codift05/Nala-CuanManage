@@ -562,6 +562,7 @@ Pada akhir setiap sesi pengembangan:
 | 31 Juli 2026 | Halaman Budget diselaraskan dengan Home | Ringkasan total dan jumlah kategori ditambahkan, card batas kategori dipadatkan tanpa progress palsu, empty state dan form dibuat konsisten, serta nominal positif divalidasi |
 | 31 Juli 2026 | Halaman Bank & Dompet diselaraskan dengan Home | Total dana dan jumlah akun diringkas, card wallet tanpa icon memakai penanda jenis, label enum dinormalisasi, serta form dan saldo awal opsional dirapikan |
 | 31 Juli 2026 | Halaman Tagihan Berulang diselaraskan dengan Home | Total bulanan dan jadwal tanggal diringkas, card dibuat mudah dipindai, hapus wajib konfirmasi, kategori form diaktifkan, serta loading wallet dan validasi dibenahi |
+| 31 Juli 2026 | Financial Habit Score diselaraskan dengan Home | Skor dan chart dipadatkan, simbol kelulusan dihapus, faktor menjadi daftar progress, disclaimer non-kredit ditambahkan, serta CTA Nala Chat diperhalus |
 
 ### Log keputusan
 

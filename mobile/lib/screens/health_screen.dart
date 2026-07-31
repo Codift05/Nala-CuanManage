@@ -132,32 +132,32 @@ class _HealthScreenState extends State<HealthScreen> {
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(context),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 if (_isLoading)
                   _buildLoadingCard()
                 else if (_errorMessage != null)
                   _buildErrorCard()
                 else ...[
                   _buildSpeedometerCard(),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                   Text(
-                    'Rincian Skor',
-                    style: GoogleFonts.interTight(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                    'Faktor kebiasaan',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                       color: AppTheme.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   _buildScoreGrid(),
                   const SizedBox(height: 24),
                   _buildTrendCard(),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                   _buildAdviceButton(context),
                 ],
                 const SizedBox(height: 32),
@@ -172,10 +172,15 @@ class _HealthScreenState extends State<HealthScreen> {
   Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
-        GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: const Icon(Icons.arrow_back,
-              color: AppTheme.textPrimary, size: 24),
+        IconButton(
+          onPressed: () => Navigator.pop(context),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppTheme.textPrimary,
+            size: 19,
+          ),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -183,16 +188,16 @@ class _HealthScreenState extends State<HealthScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Kesehatan Keuangan',
-                style: GoogleFonts.interTight(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                'Financial Habit Score',
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
                 ),
               ),
               Text(
                 _updatedLabel,
-                style: GoogleFonts.interTight(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   color: AppTheme.textSecondary,
                 ),
@@ -206,12 +211,13 @@ class _HealthScreenState extends State<HealthScreen> {
 
   Widget _buildLoadingCard() {
     return Container(
-      height: 260,
+      height: 220,
       width: double.infinity,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFFEAEDF2)),
       ),
       child: const CircularProgressIndicator(color: AppTheme.primaryColor),
     );
@@ -223,7 +229,8 @@ class _HealthScreenState extends State<HealthScreen> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFFEAEDF2)),
       ),
       child: Column(
         children: [
@@ -236,7 +243,7 @@ class _HealthScreenState extends State<HealthScreen> {
           Text(
             _errorMessage!,
             textAlign: TextAlign.center,
-            style: GoogleFonts.interTight(
+            style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
@@ -256,17 +263,11 @@ class _HealthScreenState extends State<HealthScreen> {
     final color = _colorForScore(_score);
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFFEAEDF2)),
       ),
       child: Column(
         children: [
@@ -278,9 +279,9 @@ class _HealthScreenState extends State<HealthScreen> {
           const SizedBox(height: 8),
           Text(
             _score.toString(),
-            style: GoogleFonts.interTight(
-              fontSize: 56,
-              fontWeight: FontWeight.bold,
+            style: GoogleFonts.inter(
+              fontSize: 38,
+              fontWeight: FontWeight.w600,
               color: color,
             ),
           ),
@@ -288,8 +289,8 @@ class _HealthScreenState extends State<HealthScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFFE2E8FF),
-              borderRadius: BorderRadius.circular(20),
+              color: color.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(18),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -297,16 +298,24 @@ class _HealthScreenState extends State<HealthScreen> {
                 Flexible(
                   child: Text(
                     _status,
-                    style: GoogleFonts.interTight(
-                      fontSize: 14,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: color,
                     ),
                   ),
                 ),
-                const SizedBox(width: 6),
-                Icon(Icons.check_circle, size: 16, color: color),
               ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Indikator kebiasaan finansial, bukan penilaian kredit.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              height: 1.35,
+              color: AppTheme.textSecondary,
             ),
           ),
         ],
@@ -315,19 +324,16 @@ class _HealthScreenState extends State<HealthScreen> {
   }
 
   Widget _buildScoreGrid() {
-    return GridView.count(
-      crossAxisCount: 2,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 1.6,
+    return Column(
       children: _details.map((item) {
         final score = ((item['score'] as num?) ?? 0).round().clamp(0, 100);
-        return _buildScoreGridItem(
-          item['label']?.toString() ?? '-',
-          score,
-          _colorForScore(score),
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: _buildScoreGridItem(
+            item['label']?.toString() ?? '-',
+            score,
+            _colorForScore(score),
+          ),
         );
       }).toList(),
     );
@@ -335,21 +341,14 @@ class _HealthScreenState extends State<HealthScreen> {
 
   Widget _buildScoreGridItem(String title, int score, Color barColor) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFEAEDF2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -358,10 +357,10 @@ class _HealthScreenState extends State<HealthScreen> {
               Expanded(
                 child: Text(
                   title,
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.interTight(
-                    fontSize: 13,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
                     color: AppTheme.textSecondary,
                   ),
                 ),
@@ -369,15 +368,15 @@ class _HealthScreenState extends State<HealthScreen> {
               const SizedBox(width: 8),
               Text(
                 score.toString(),
-                style: GoogleFonts.interTight(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
                   color: barColor,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 9),
           Container(
             height: 6,
             width: double.infinity,
@@ -409,18 +408,12 @@ class _HealthScreenState extends State<HealthScreen> {
 
   Widget _buildTrendCard() {
     return Container(
-      height: 240,
-      padding: const EdgeInsets.all(20),
+      height: 210,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFFEAEDF2)),
       ),
       child: Column(
         children: [
@@ -429,9 +422,9 @@ class _HealthScreenState extends State<HealthScreen> {
               Expanded(
                 child: Text(
                   'Tren 3 Bulan',
-                  style: GoogleFonts.interTight(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
                   ),
                 ),
@@ -458,7 +451,7 @@ class _HealthScreenState extends State<HealthScreen> {
                           _trendMessage,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.interTight(
+                          style: GoogleFonts.inter(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: AppTheme.primaryColor,
@@ -471,7 +464,7 @@ class _HealthScreenState extends State<HealthScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
           Expanded(
             child: TrendLineChart(
               dataPoints: _trendPoints,
@@ -487,7 +480,7 @@ class _HealthScreenState extends State<HealthScreen> {
   Widget _buildAdviceButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: 50,
       child: ElevatedButton.icon(
         onPressed: () {
           Navigator.push(
@@ -498,9 +491,9 @@ class _HealthScreenState extends State<HealthScreen> {
         icon: const Icon(Icons.chat_bubble_outline,
             color: Colors.white, size: 20),
         label: Text(
-          'Minta Saran dari Nala',
-          style: GoogleFonts.interTight(
-            fontSize: 16,
+          'Diskusikan dengan Nala',
+          style: GoogleFonts.inter(
+            fontSize: 14,
             fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
