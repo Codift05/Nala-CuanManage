@@ -46,6 +46,8 @@ const run = async () => {
   let transactionId: string | undefined;
   let auditedTransactionId: string | undefined;
   let temporaryUserId: string | undefined;
+  let idorBudgetId: string | undefined;
+  let idorRecurringId: string | undefined;
 
   try {
     const invalidBody = await fetch(`${apiUrl}/wallets`, {
@@ -135,6 +137,37 @@ const run = async () => {
       assert.equal(secondPage.response.status, 200);
       assert.notEqual(secondPage.body.data[0]?.id, firstPage.body.data[0].id);
     }
+    const adminTransactionId = firstPage.body.data[0].id as string;
+    const adminSessions = await request('/auth/sessions', login.token);
+    assert.equal(adminSessions.response.status, 200);
+    const adminSessionId = adminSessions.body.find(
+      (session: { current: boolean }) => session.current,
+    ).id as string;
+
+    const idorBudget = await request('/budgets', login.token, {
+      method: 'POST',
+      body: JSON.stringify({
+        categoryId: `IDOR-${Date.now()}`,
+        amount: 1234,
+        month: 1,
+        year: 2100,
+      }),
+    });
+    assert.equal(idorBudget.response.status, 201);
+    idorBudgetId = idorBudget.body.budget.id;
+
+    const idorRecurring = await request('/recurring', login.token, {
+      method: 'POST',
+      body: JSON.stringify({
+        title: 'IDOR integration bill',
+        amount: 1234,
+        categoryId: 'Bills',
+        walletId: wallet.id,
+        dueDate: 15,
+      }),
+    });
+    assert.equal(idorRecurring.response.status, 201);
+    idorRecurringId = idorRecurring.body.bill.id;
 
     const temporaryEmail = `ownership-${Date.now()}@nala.test`;
     const registrationResponse = await fetch(`${apiUrl}/auth/register`, {
@@ -206,9 +239,14 @@ const run = async () => {
 
     const profileUpdate = await request('/auth/profile', temporaryToken, {
       method: 'PUT',
-      body: JSON.stringify({ name: 'Ownership Updated', email: temporaryEmail }),
+      body: JSON.stringify({
+        name: 'Ownership Updated',
+        email: temporaryEmail,
+        userId: login.user.id,
+      }),
     });
     assert.equal(profileUpdate.response.status, 200);
+    assert.equal(profileUpdate.body.user.id, temporaryUserId);
     const profileAudit = await prisma.auditLog.findFirst({
       where: { action: 'PROFILE_UPDATED', actorUserId: temporaryUserId },
     });
@@ -227,6 +265,69 @@ const run = async () => {
     });
     assert.equal(walletCreation.response.status, 201);
     assert.equal(walletCreation.body.wallet.balance, 1000);
+
+    const foreignChecks = [
+      request(`/wallets/${wallet.id}`, temporaryToken),
+      request(`/wallets/${wallet.id}`, temporaryToken, {
+        method: 'PUT',
+        body: JSON.stringify({ name: 'Hacked', type: 'CASH' }),
+      }),
+      request(`/wallets/${wallet.id}`, temporaryToken, { method: 'DELETE' }),
+      request(`/transactions/${adminTransactionId}`, temporaryToken),
+      request(`/transactions/${adminTransactionId}`, temporaryToken, {
+        method: 'PUT',
+        body: JSON.stringify({
+          walletId: walletCreation.body.wallet.id,
+          type: 'EXPENSE',
+          amount: 1,
+        }),
+      }),
+      request(`/transactions/${adminTransactionId}`, temporaryToken, {
+        method: 'DELETE',
+      }),
+      request(`/budgets/${idorBudgetId}`, temporaryToken, {
+        method: 'PUT',
+        body: JSON.stringify({ amount: 1 }),
+      }),
+      request(`/budgets/${idorBudgetId}`, temporaryToken, { method: 'DELETE' }),
+      request(`/recurring/${idorRecurringId}`, temporaryToken, {
+        method: 'DELETE',
+      }),
+      request(`/auth/sessions/${adminSessionId}`, temporaryToken, {
+        method: 'DELETE',
+      }),
+    ];
+    for (const check of await Promise.all(foreignChecks)) {
+      assert.equal(check.response.status, 404);
+    }
+
+    const [ownedWallets, ownedTransactions, ownedBudgets, ownedRecurring] =
+        await Promise.all([
+      request('/wallets', temporaryToken),
+      request('/transactions?limit=100', temporaryToken),
+      request('/budgets', temporaryToken),
+      request('/recurring', temporaryToken),
+    ]);
+    assert.ok(!ownedWallets.body.some((item: { id: string }) => item.id === wallet.id));
+    assert.ok(!ownedTransactions.body.data.some(
+      (item: { id: string }) => item.id === adminTransactionId,
+    ));
+    assert.ok(!ownedBudgets.body.some(
+      (item: { id: string }) => item.id === idorBudgetId,
+    ));
+    assert.ok(!ownedRecurring.body.some(
+      (item: { id: string }) => item.id === idorRecurringId,
+    ));
+
+    assert.ok(await prisma.wallet.findUnique({ where: { id: wallet.id } }));
+    assert.ok(await prisma.transaction.findUnique({
+      where: { id: adminTransactionId },
+    }));
+    assert.ok(await prisma.budget.findUnique({ where: { id: idorBudgetId } }));
+    assert.ok(await prisma.recurringBill.findUnique({
+      where: { id: idorRecurringId },
+    }));
+    assert.ok(await prisma.session.findUnique({ where: { id: adminSessionId } }));
 
     const foreignWalletBill = await request('/recurring', temporaryToken, {
       method: 'POST',
@@ -530,6 +631,12 @@ const run = async () => {
       await prisma.auditLog.deleteMany({
         where: { resourceId: auditedTransactionId },
       });
+    }
+    if (idorRecurringId) {
+      await prisma.recurringBill.deleteMany({ where: { id: idorRecurringId } });
+    }
+    if (idorBudgetId) {
+      await prisma.budget.deleteMany({ where: { id: idorBudgetId } });
     }
     const adminIntegrationSessions = await prisma.session.findMany({
       where: {

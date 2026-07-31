@@ -97,7 +97,7 @@ Legenda:
 | PostgreSQL | ✅ | Database utama dan constraint dasar tersedia | Migration terkontrol dan backup |
 | Nilai uang | ✅ | PostgreSQL `BIGINT`, Prisma `BigInt`, dan Flutter `int` | Pertahankan contract test |
 | Authentication | ✅ | Access 15 menit, refresh rotation, revoke, rate limit, reset, dan verifikasi email | Pertahankan integration test |
-| Authorization | 🟡 | Ownership wallet/transaksi/tagihan diuji | Lengkapi test IDOR budget dan seluruh resource |
+| Authorization | ✅ | IDOR wallet, transaksi, budget, recurring, session, dan profil diuji lintas akun | Pertahankan test saat resource baru ditambah |
 | Redis | ✅ | Menyimpan auth rate limit lintas instance | Tambahkan health/monitoring production |
 | Recurring scheduler | 🟡 | Execution record, duplicate protection, dan bulan pendek tersedia | Perlu monitoring dan timezone production |
 | AI safety | 🟡 | Mutasi AI berupa draft terkonfirmasi dan output transaksi/struk divalidasi | Privacy dan evaluasi prompt injection |
@@ -209,7 +209,7 @@ Acceptance criteria:
 
 ### M3 — Keandalan fitur inti
 
-Status: **In progress**
+Status: **Complete**
 
 - [x] Recurring execution record per tagihan dan periode
 - [x] Duplicate protection untuk scheduler
@@ -223,8 +223,8 @@ Status: **In progress**
 Acceptance criteria:
 
 - Restart atau lebih dari satu instance tidak menggandakan tagihan. ✅
-- Semua resource terlindungi ownership check yang diuji.
-- Error aman untuk pengguna dan memiliki request ID untuk diagnosis.
+- Semua resource terlindungi ownership check yang diuji. ✅
+- Error aman untuk pengguna dan memiliki request ID untuk diagnosis. ✅
 
 ### M4 — Tiga inovasi inti
 
@@ -544,6 +544,7 @@ Pada akhir setiap sesi pengembangan:
 | 31 Juli 2026 | Histori transaksi memakai cursor pagination | Unit test cursor, HTTP test dua halaman tanpa duplikat, dashboard limit 20, 15 Flutter test, dan integration suite lulus |
 | 31 Juli 2026 | Audit trail keamanan dan finansial tersedia | Migration terkontrol; integration test request ID untuk profil/transaksi, create-update-delete transaksi, scheduler, dan audit akun terhapus |
 | 31 Juli 2026 | State kegagalan mobile dan session recovery disatukan | Shared authenticated client, refresh rotation lock, global session-expired redirect, retry UI, empty state transaksi, analyzer, dan 17 Flutter test |
+| 31 Juli 2026 | M3 ditutup dengan pengujian IDOR lintas akun | HTTP test read/update/delete wallet dan transaksi, budget, recurring, session, mass-assignment profil, serta verifikasi resource pemilik tetap utuh |
 
 ### Log keputusan
 
@@ -560,9 +561,9 @@ Pada akhir setiap sesi pengembangan:
 
 ## 14. Langkah Berikutnya
 
-Pekerjaan coding berikutnya berada di **M3 — Keandalan fitur inti**:
+Pekerjaan coding berikutnya berada di **M4 — Tiga inovasi inti**:
 
-1. Push workflow lalu verifikasi hasil GitHub Actions.
-2. Lengkapi ownership/IDOR test seluruh resource untuk menutup acceptance criteria M3.
-3. Tetapkan retensi audit log dan akses operasional sebelum production.
-4. Mulai M4 dari frictionless capture dan receipt review setelah M3 ditutup.
+1. Mulai frictionless capture dari receipt review dan koreksi sebelum simpan.
+2. Tambahkan confidence/field warning pada hasil ekstraksi struk.
+3. Revisi formula Explainable Financial Habit Score dan test edge case.
+4. Minimalkan konteks sensitif yang dikirim ke AI Coach.

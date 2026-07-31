@@ -89,9 +89,13 @@ export const deleteRecurringBill = async (req: AuthRequest, res: Response): Prom
       return;
     }
 
-    await prisma.recurringBill.deleteMany({
+    const deleted = await prisma.recurringBill.deleteMany({
       where: { id, userId }
     });
+    if (!deleted.count) {
+      res.status(404).json({ error: 'Recurring bill not found' });
+      return;
+    }
 
     res.json({ message: 'Recurring bill deleted successfully' });
   } catch (error) {
