@@ -817,6 +817,7 @@ class DashboardScreenState extends State<DashboardScreen> {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(22),
+        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
         child: Column(
           children: [
             Container(
