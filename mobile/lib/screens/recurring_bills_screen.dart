@@ -71,6 +71,30 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
     }
   }
 
+  Future<void> _confirmDeleteBill(RecurringBill bill) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus tagihan?'),
+        content: Text('${bill.title} tidak akan diproses lagi setiap bulan.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'Hapus',
+              style: TextStyle(color: AppTheme.errorColor),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) await _deleteBill(bill.id);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,7 +104,13 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Tagihan Rutin'),
+        title: Text(
+          'Tagihan Berulang',
+          style: GoogleFonts.inter(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         actions: [
           IconButton(
             tooltip: 'Tambah tagihan',
@@ -97,43 +127,137 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
                   ? _buildEmptyState()
                   : RefreshIndicator(
                       onRefresh: _loadBills,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(20),
-                        itemCount: _bills.length,
-                        itemBuilder: (context, index) {
-                          final bill = _bills[index];
-                          return _buildBillCard(bill);
-                        },
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+                        children: [
+                          _buildSummaryCard(),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Jadwal bulanan',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ..._bills.map(_buildBillCard),
+                        ],
                       ),
                     ),
     );
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Center(
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFFEAEDF2)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF0DA),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(
+                  Icons.event_repeat_rounded,
+                  size: 26,
+                  color: AppTheme.primaryColor,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Belum ada tagihan rutin',
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 14),
+              ElevatedButton(
+                onPressed: _showAddBillSheet,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: const Text('Buat Tagihan'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard() {
+    final total = _bills.fold<int>(0, (sum, bill) => sum + bill.amount);
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFF8738), Color(0xFFFFA04D)],
+        ),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Row(
         children: [
-          Icon(Icons.autorenew, size: 64, color: Colors.grey[300]),
-          const SizedBox(height: 16),
-          Text(
-            'Belum ada tagihan rutin',
-            style: GoogleFonts.interTight(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textSecondary,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'TOTAL TAGIHAN BULANAN',
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.6,
+                    color: const Color(0xE6FFFFFF),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    _currencyFormat.format(total),
+                    style: GoogleFonts.inter(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: _showAddBillSheet,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Text(
+              '${_bills.length} tagihan',
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF54290B),
               ),
             ),
-            child: const Text('Buat Tagihan'),
           ),
         ],
       ),
@@ -141,55 +265,63 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
   }
 
   Widget _buildBillCard(RecurringBill bill) {
-    IconData icon = Icons.receipt_long;
-    Color color = AppTheme.primaryColor;
-
-    if (bill.categoryId.toLowerCase() == 'bills' ||
-        bill.categoryId.toLowerCase() == 'tagihan') {
-      icon = Icons.receipt;
-      color = AppTheme.primaryColor;
-    } else if (bill.categoryId.toLowerCase() == 'entertainment' ||
-        bill.categoryId.toLowerCase() == 'hiburan') {
-      icon = Icons.movie;
-      color = const Color(0xFFE91E63);
-    }
-
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        border: Border.all(color: AppTheme.borderColor),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFEAEDF2)),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
+              color: const Color(0xFFFFF0DA),
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'TGL',
+                  style: GoogleFonts.inter(
+                    fontSize: 8,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+                Text(
+                  '${bill.dueDate}',
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   bill.title,
-                  style: GoogleFonts.interTight(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Tgl ${bill.dueDate} • ${bill.walletName ?? 'Dompet'}',
-                  style: GoogleFonts.interTight(
-                    fontSize: 13,
+                  '${bill.categoryId} • ${bill.walletName ?? 'Dompet'}',
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
                     color: AppTheme.textSecondary,
                   ),
                 ),
@@ -201,17 +333,24 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
             children: [
               Text(
                 _currencyFormat.format(bill.amount),
-                style: GoogleFonts.interTight(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.errorColor,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimary,
                 ),
               ),
               const SizedBox(height: 4),
-              GestureDetector(
-                onTap: () => _deleteBill(bill.id),
-                child: const Icon(Icons.delete_outline,
-                    size: 20, color: Colors.grey),
+              InkWell(
+                onTap: () => _confirmDeleteBill(bill),
+                borderRadius: BorderRadius.circular(12),
+                child: const Padding(
+                  padding: EdgeInsets.all(4),
+                  child: Icon(
+                    Icons.delete_outline_rounded,
+                    size: 18,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
               ),
             ],
           ),
@@ -243,6 +382,7 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
   String? _selectedWalletId;
   List<Wallet> _wallets = [];
   bool _isLoadingWallets = true;
+  String? _walletLoadError;
   bool _isSaving = false;
 
   final List<String> _categories = [
@@ -260,14 +400,29 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
   }
 
   Future<void> _loadWallets() async {
-    final wallets = await _walletService.getWallets();
-    setState(() {
-      _wallets = wallets;
-      if (_wallets.isNotEmpty) {
-        _selectedWalletId = _wallets.first.id;
-      }
-      _isLoadingWallets = false;
-    });
+    try {
+      final wallets = await _walletService.getWallets();
+      if (!mounted) return;
+      setState(() {
+        _wallets = wallets;
+        if (_wallets.isNotEmpty) _selectedWalletId = _wallets.first.id;
+        _isLoadingWallets = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _walletLoadError = 'Daftar wallet belum dapat dimuat.';
+        _isLoadingWallets = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _amountController.dispose();
+    _dueDateController.dispose();
+    super.dispose();
   }
 
   Future<void> _save() async {
@@ -302,14 +457,21 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoadingWallets) {
+    if (_isLoadingWallets || _walletLoadError != null) {
       return Container(
         height: 200,
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        child: const Center(child: CircularProgressIndicator()),
+        child: Center(
+          child: _isLoadingWallets
+              ? const CircularProgressIndicator()
+              : Text(
+                  _walletLoadError!,
+                  style: GoogleFonts.inter(color: AppTheme.textSecondary),
+                ),
+        ),
       );
     }
 
@@ -331,16 +493,16 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
             children: [
               Text(
                 'Tambah Tagihan Rutin',
-                style: GoogleFonts.interTight(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                style: GoogleFonts.inter(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
                 ),
               ),
               const SizedBox(height: 24),
               TextFormField(
                 controller: _titleController,
-                style: GoogleFonts.interTight(),
+                style: GoogleFonts.inter(),
                 decoration: InputDecoration(
                   labelText: 'Nama Tagihan (Misal: Netflix, Listrik)',
                   border: OutlineInputBorder(
@@ -358,15 +520,20 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
                     child: TextFormField(
                       controller: _amountController,
                       keyboardType: TextInputType.number,
-                      style: GoogleFonts.interTight(),
+                      style: GoogleFonts.inter(),
                       decoration: InputDecoration(
                         labelText: 'Nominal',
                         prefixText: 'Rp ',
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16)),
                       ),
-                      validator: (val) =>
-                          val == null || val.isEmpty ? 'Isi nominal' : null,
+                      validator: (val) {
+                        final amount = int.tryParse(
+                              val?.replaceAll(RegExp(r'[^0-9]'), '') ?? '',
+                            ) ??
+                            0;
+                        return amount > 0 ? null : 'Nominal tidak valid';
+                      },
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -375,7 +542,7 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
                     child: TextFormField(
                       controller: _dueDateController,
                       keyboardType: TextInputType.number,
-                      style: GoogleFonts.interTight(),
+                      style: GoogleFonts.inter(),
                       decoration: InputDecoration(
                         labelText: 'Tgl (1-31)',
                         border: OutlineInputBorder(
@@ -384,8 +551,9 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
                       validator: (val) {
                         if (val == null || val.isEmpty) return 'Isi tgl';
                         final num = int.tryParse(val);
-                        if (num == null || num < 1 || num > 31)
+                        if (num == null || num < 1 || num > 31) {
                           return 'Tgl tidak valid';
+                        }
                         return null;
                       },
                     ),
@@ -394,16 +562,30 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _selectedWalletId,
+                initialValue: _categoryId,
+                decoration: const InputDecoration(labelText: 'Kategori'),
+                items: _categories
+                    .map((category) => DropdownMenuItem(
+                          value: category,
+                          child: Text(category, style: GoogleFonts.inter()),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) setState(() => _categoryId = value);
+                },
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedWalletId,
                 decoration: InputDecoration(
-                  labelText: 'Sumber Dana (Otomatis potong)',
+                  labelText: 'Sumber dana',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16)),
                 ),
                 items: _wallets.map((w) {
                   return DropdownMenuItem(
                       value: w.id,
-                      child: Text(w.name, style: GoogleFonts.interTight()));
+                      child: Text(w.name, style: GoogleFonts.inter()));
                 }).toList(),
                 onChanged: (val) {
                   if (val != null) setState(() => _selectedWalletId = val);
@@ -424,9 +606,9 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
                           'Simpan Tagihan',
-                          style: GoogleFonts.interTight(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
                         ),
