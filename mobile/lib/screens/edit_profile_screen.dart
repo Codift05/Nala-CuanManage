@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -61,8 +62,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           return;
         }
         if (!mounted) return;
+        final encodedImage = await compute(base64Encode, bytes);
+        if (!mounted) return;
         setState(() {
-          _avatarBase64 = base64Encode(bytes);
+          _avatarBase64 = encodedImage;
         });
       }
     } catch (_) {

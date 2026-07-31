@@ -582,6 +582,7 @@ Pada akhir setiap sesi pengembangan:
 | 1 Agustus 2026 | Lompatan tab utama dipangkas menjadi satu halaman | Navigasi non-berurutan tidak lagi menganimasikan dan membangun seluruh halaman perantara; efek geser satu langkah tetap dipertahankan |
 | 1 Agustus 2026 | Query histori dibatasi rentang waktu | Aktivitas hanya mengambil bulan terpilih dan Laporan hanya mengambil tiga bulan yang divisualisasikan; endpoint memvalidasi batas `from`/`to` sebelum query database |
 | 1 Agustus 2026 | Rebuild Aktivitas dan Laporan dikurangi | Hasil filter, total, dan kelompok transaksi diterapkan dalam satu `setState`; perubahan filter, bulan, dan panah laporan tidak lagi memicu rebuild pendahuluan yang redundan |
+| 1 Agustus 2026 | Pemrosesan gambar tidak memblokir UI native | Encoding base64 struk dan avatar memakai `compute`; foto struk diperkecil saat dipilih dan dibatasi sebelum dikirim agar tetap di bawah limit request backend |
 
 ### Log keputusan
 

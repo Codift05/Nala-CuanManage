@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -15,6 +16,8 @@ class ScanScreen extends StatefulWidget {
 }
 
 class _ScanScreenState extends State<ScanScreen> {
+  static const _maxReceiptBytes = 1400000;
+
   final TransactionService _transactionService = TransactionService();
   final WalletService _walletService = WalletService();
   final ImagePicker _picker = ImagePicker();
@@ -79,7 +82,9 @@ class _ScanScreenState extends State<ScanScreen> {
     try {
       final XFile? image = await _picker.pickImage(
         source: source,
-        imageQuality: 80,
+        maxWidth: 1600,
+        maxHeight: 1600,
+        imageQuality: 75,
       );
       if (image == null) return;
 
@@ -89,7 +94,17 @@ class _ScanScreenState extends State<ScanScreen> {
       });
 
       final bytes = await image.readAsBytes();
-      final base64Image = base64Encode(bytes);
+      if (bytes.lengthInBytes > _maxReceiptBytes) {
+        if (!mounted) return;
+        setState(() => _isProcessing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Foto struk terlalu besar. Ambil foto lebih dekat.'),
+          ),
+        );
+        return;
+      }
+      final base64Image = await compute(base64Encode, bytes);
 
       final result = await _transactionService.scanReceipt(base64Image);
 
