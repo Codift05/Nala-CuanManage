@@ -281,47 +281,23 @@ class DashboardScreenState extends State<DashboardScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Container(
-          width: 42,
-          height: 42,
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(13),
-            border: Border.all(color: AppTheme.borderColor),
-          ),
-          child: Image.asset(
-            'img/Logo Nala 4.png',
-            fit: BoxFit.contain,
-          ),
+        const Icon(
+          Icons.account_circle_outlined,
+          size: 34,
+          color: AppTheme.textPrimary,
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 10),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Selamat datang,',
-                style: const TextStyle(
-                  fontFamily: '.SF Pro Text',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                _userName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontFamily: '.SF Pro Display',
-                  fontSize: 19,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-            ],
+          child: Text(
+            'Hai, $_userName!',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 19,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textPrimary,
+              letterSpacing: -0.4,
+            ),
           ),
         ),
         const SizedBox(width: 10),
