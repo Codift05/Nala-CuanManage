@@ -571,6 +571,7 @@ Pada akhir setiap sesi pengembangan:
 | 31 Juli 2026 | Audit navigasi dan responsive layout | Tombol tengah navbar kini membuka Tambah Transaksi sesuai simbol plus, Back dari tab sekunder kembali ke Beranda, dan callback navigasi Laporan yang mati dihapus |
 | 31 Juli 2026 | Hover Pilihan Cepat diperhalus | Overlay abu-abu pada Chrome dihilangkan agar icon tetap flat tanpa bayangan saat pointer berada di atas tombol |
 | 31 Juli 2026 | Identitas Splash diperbarui | Logo utama memakai `Nala baru.png`; identitas NALA, GEMASTIK 2026, Teknik Informatika 2023, Fakultas Teknik, dan Universitas Sam Ratulangi ditempatkan kecil di bagian bawah |
+| 31 Juli 2026 | Komposisi Splash dipusatkan | Logo diperkecil dan seluruh identitas disatukan menjadi satu kelompok center agar hierarki serta jarak antar-elemen lebih rapi |
 
 ### Log keputusan
 

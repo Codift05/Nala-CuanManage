@@ -81,16 +81,16 @@ class _SplashScreenState extends State<SplashScreen>
           child: Padding(
             padding: const EdgeInsets.fromLTRB(28, 24, 28, 26),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Spacer(),
                 Image.asset(
                   'img/Nala baru.png',
-                  width: 168,
+                  width: 118,
                   fit: BoxFit.contain,
                   filterQuality: FilterQuality.high,
                   semanticLabel: 'Logo Nala',
                 ),
-                const Spacer(),
+                const SizedBox(height: 30),
                 Text(
                   'NALA · DANA KELOLA',
                   textAlign: TextAlign.center,
@@ -101,16 +101,19 @@ class _SplashScreenState extends State<SplashScreen>
                     letterSpacing: 1,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Karya mahasiswa Teknik Informatika angkatan 2023\n'
-                  'Fakultas Teknik · Universitas Sam Ratulangi, Manado\n'
-                  'untuk GEMASTIK 2026',
-                  textAlign: TextAlign.center,
-                  style: appleStyle(
-                    fontSize: 11,
-                    height: 1.55,
-                    color: AppTheme.textSecondary,
+                const SizedBox(height: 10),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 290),
+                  child: Text(
+                    'Karya mahasiswa Teknik Informatika angkatan 2023\n'
+                    'Fakultas Teknik · Universitas Sam Ratulangi, Manado\n'
+                    'untuk GEMASTIK 2026',
+                    textAlign: TextAlign.center,
+                    style: appleStyle(
+                      fontSize: 10.5,
+                      height: 1.55,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ),
               ],
