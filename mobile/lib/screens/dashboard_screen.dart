@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -60,18 +62,22 @@ class DashboardScreenState extends State<DashboardScreen>
     symbol: 'Rp ',
     decimalDigits: 0,
   );
-  final Telephony telephony = Telephony.instance;
+  StreamSubscription<Uri?>? _homeWidgetSubscription;
+
+  bool get _isAndroid =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
   @override
   void initState() {
     super.initState();
     _loadData(showFullScreenLoader: true);
-    _initHomeWidget();
-    _initSmsListener();
+    if (!kIsWeb) _initHomeWidget();
+    if (_isAndroid) _initSmsListener();
   }
 
   @override
   void dispose() {
+    _homeWidgetSubscription?.cancel();
     _homePageController.dispose();
     for (final controller in _homeScrollControllers) {
       controller.dispose();
@@ -80,7 +86,7 @@ class DashboardScreenState extends State<DashboardScreen>
   }
 
   void _initHomeWidget() {
-    HomeWidget.widgetClicked.listen((Uri? uri) {
+    _homeWidgetSubscription = HomeWidget.widgetClicked.listen((Uri? uri) {
       if (uri?.host == 'add_transaction' && mounted) {
         Navigator.push(
           context,
@@ -94,6 +100,7 @@ class DashboardScreenState extends State<DashboardScreen>
 
   void _initSmsListener() async {
     try {
+      final telephony = Telephony.instance;
       bool? permissionsGranted = await telephony.requestPhoneAndSmsPermissions;
       if (permissionsGranted ?? false) {
         telephony.listenIncomingSms(
