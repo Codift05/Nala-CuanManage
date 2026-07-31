@@ -8,6 +8,7 @@ import '../services/transaction_service.dart';
 import '../services/wallet_service.dart';
 import '../models/wallet.dart';
 import '../models/transaction.dart';
+import '../widgets/load_error_view.dart';
 
 class RupiahInputFormatter extends TextInputFormatter {
   final NumberFormat _formatter = NumberFormat.decimalPattern('id_ID');
@@ -64,6 +65,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   List<Wallet> _wallets = [];
   bool _isLoading = false;
+  bool _isLoadingWallets = true;
+  String? _walletLoadError;
 
   final List<String> _categories = [
     'Food',
@@ -106,14 +109,27 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   Future<void> _loadWallets() async {
-    final wallets = await _walletService.getWallets();
-    if (!mounted) return;
     setState(() {
-      _wallets = wallets;
-      if (_selectedWalletId == null && _wallets.isNotEmpty) {
-        _selectedWalletId = _wallets.first.id;
-      }
+      _isLoadingWallets = true;
+      _walletLoadError = null;
     });
+    try {
+      final wallets = await _walletService.getWallets();
+      if (!mounted) return;
+      setState(() {
+        _wallets = wallets;
+        if (_selectedWalletId == null && _wallets.isNotEmpty) {
+          _selectedWalletId = _wallets.first.id;
+        }
+        _isLoadingWallets = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _walletLoadError = 'Daftar wallet belum dapat dimuat.';
+        _isLoadingWallets = false;
+      });
+    }
   }
 
   Future<void> _saveTransaction() async {
@@ -203,62 +219,84 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               : widget.transactionDraft != null
                   ? 'Tinjau Draft Nala'
                   : 'Tambah Transaksi',
+          style: GoogleFonts.inter(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
-      body: _wallets.isEmpty && _isLoading
+      body: _isLoadingWallets
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTypeSelector(),
-                    const SizedBox(height: 22),
-                    _buildAmountInput(),
-                    const SizedBox(height: 22),
-                    _buildWalletSelector(),
-                    const SizedBox(height: 22),
-                    _buildCategorySelector(),
-                    const SizedBox(height: 22),
-                    _buildTextField(
-                      label: 'Merchant / Toko',
-                      controller: _merchantController,
-                      hint: 'Misal: Indomaret, Gofood...',
-                    ),
-                    const SizedBox(height: 22),
-                    _buildTextField(
-                      label: 'Catatan',
-                      controller: _notesController,
-                      hint: 'Tambahkan catatan opsional',
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 30),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _saveTransaction,
-                        child: _isLoading
-                            ? const CircularProgressIndicator(
-                                color: Colors.white,
-                              )
-                            : Text(
-                                widget.transactionDraft != null
-                                    ? 'Konfirmasi & Simpan'
-                                    : 'Simpan Transaksi',
-                                style: GoogleFonts.interTight(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
+          : _walletLoadError != null
+              ? LoadErrorView(
+                  message: _walletLoadError,
+                  onRetry: _loadWallets,
+                )
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTypeSelector(),
+                        const SizedBox(height: 16),
+                        _buildAmountInput(),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(22),
+                            border: Border.all(color: const Color(0xFFEAEDF2)),
+                          ),
+                          child: Column(
+                            children: [
+                              _buildWalletSelector(),
+                              const SizedBox(height: 16),
+                              _buildCategorySelector(),
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                label: 'Merchant / toko',
+                                controller: _merchantController,
+                                hint: 'Contoh: Indomaret',
                               ),
-                      ),
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                label: 'Catatan',
+                                controller: _notesController,
+                                hint: 'Opsional',
+                                maxLines: 2,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _saveTransaction,
+                            child: _isLoading
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                : Text(
+                                    widget.transactionDraft != null
+                                        ? 'Konfirmasi & Simpan'
+                                        : 'Simpan Transaksi',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
     );
   }
 
@@ -267,17 +305,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       width: double.infinity,
       child: CupertinoSlidingSegmentedControl<String>(
         groupValue: _type,
-        backgroundColor: const Color(0xFFE9ECF2),
-        thumbColor: Colors.white,
+        backgroundColor: Colors.white,
+        thumbColor: const Color(0xFFDFF45B),
         padding: const EdgeInsets.all(4),
         children: {
           'EXPENSE': _buildSegmentLabel(
             'Pengeluaran',
-            _type == 'EXPENSE' ? AppTheme.errorColor : AppTheme.textSecondary,
+            AppTheme.textPrimary,
           ),
           'INCOME': _buildSegmentLabel(
             'Pemasukan',
-            _type == 'INCOME' ? AppTheme.successColor : AppTheme.textSecondary,
+            AppTheme.textPrimary,
           ),
         },
         onValueChanged: (value) {
@@ -297,10 +335,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: Text(
         label,
         textAlign: TextAlign.center,
-        style: GoogleFonts.interTight(
+        style: GoogleFonts.inter(
           color: color,
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -310,69 +348,61 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Nominal',
-          style: GoogleFonts.interTight(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: AppTheme.textSecondary,
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFFEAEDF2)),
           ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: _amountController,
-          keyboardType: TextInputType.number,
-          inputFormatters: [_rupiahFormatter],
-          style: GoogleFonts.interTight(
-            fontSize: 28,
-            fontWeight: FontWeight.w800,
-            color: AppTheme.textPrimary,
-          ),
-          decoration: InputDecoration(
-            hintText: '0',
-            hintStyle: GoogleFonts.interTight(
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              color: AppTheme.textSecondary.withValues(alpha: 0.55),
+          child: TextFormField(
+            controller: _amountController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [_rupiahFormatter],
+            style: GoogleFonts.inter(
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
             ),
-            fillColor: Colors.white,
-            prefixIconConstraints: const BoxConstraints(
-              minWidth: 58,
-              minHeight: 56,
-            ),
-            prefixIcon: Center(
-              widthFactor: 1,
-              child: Text(
-                'Rp',
-                style: GoogleFonts.interTight(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: AppTheme.textPrimary,
+            decoration: InputDecoration(
+              labelText: 'Nominal',
+              hintText: '0',
+              hintStyle: GoogleFonts.inter(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textSecondary.withValues(alpha: 0.55),
+              ),
+              fillColor: Colors.transparent,
+              prefixIconConstraints: const BoxConstraints(
+                minWidth: 58,
+                minHeight: 56,
+              ),
+              prefixIcon: Center(
+                widthFactor: 1,
+                child: Text(
+                  'Rp',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
               ),
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppTheme.controlRadius),
-              borderSide: const BorderSide(color: AppTheme.borderColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppTheme.controlRadius),
-              borderSide: const BorderSide(
-                color: AppTheme.textSecondary,
-                width: 1,
-              ),
-            ),
+            validator: (value) {
+              final digits = value?.replaceAll(RegExp(r'[^0-9]'), '') ?? '';
+              if (digits.isEmpty) {
+                return 'Nominal tidak boleh kosong';
+              }
+              if (int.tryParse(digits) == null || int.parse(digits) <= 0) {
+                return 'Nominal tidak valid';
+              }
+              return null;
+            },
           ),
-          validator: (value) {
-            final digits = value?.replaceAll(RegExp(r'[^0-9]'), '') ?? '';
-            if (digits.isEmpty) {
-              return 'Nominal tidak boleh kosong';
-            }
-            if (int.tryParse(digits) == null || int.parse(digits) <= 0) {
-              return 'Nominal tidak valid';
-            }
-            return null;
-          },
         ),
       ],
     );
@@ -384,9 +414,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       children: [
         Text(
           'Dompet / Sumber Dana',
-          style: GoogleFonts.interTight(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
             color: AppTheme.textSecondary,
           ),
         ),
@@ -399,7 +429,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           items: _wallets.map((w) {
             return DropdownMenuItem(
               value: w.id,
-              child: Text(w.name, style: GoogleFonts.interTight()),
+              child: Text(w.name, style: GoogleFonts.inter()),
             );
           }).toList(),
           onChanged: (val) {
@@ -418,9 +448,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       children: [
         Text(
           'Kategori',
-          style: GoogleFonts.interTight(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
             color: AppTheme.textSecondary,
           ),
         ),
@@ -433,7 +463,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           items: _categories.map((c) {
             return DropdownMenuItem(
               value: c,
-              child: Text(c, style: GoogleFonts.interTight()),
+              child: Text(c, style: GoogleFonts.inter()),
             );
           }).toList(),
           onChanged: (val) {
@@ -457,9 +487,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.interTight(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
             color: AppTheme.textSecondary,
           ),
         ),
@@ -467,7 +497,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         TextFormField(
           controller: controller,
           maxLines: maxLines,
-          style: GoogleFonts.interTight(),
+          style: GoogleFonts.inter(fontSize: 14),
           decoration: InputDecoration(
             hintText: hint,
           ),
