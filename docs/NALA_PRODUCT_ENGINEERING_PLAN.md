@@ -573,6 +573,7 @@ Pada akhir setiap sesi pengembangan:
 | 31 Juli 2026 | Identitas Splash diperbarui | Logo utama memakai `Nala baru.png`; identitas NALA, GEMASTIK 2026, Teknik Informatika 2023, Fakultas Teknik, dan Universitas Sam Ratulangi ditempatkan kecil di bagian bawah |
 | 31 Juli 2026 | Komposisi Splash dipusatkan | Logo diperkecil dan seluruh identitas disatukan menjadi satu kelompok center agar hierarki serta jarak antar-elemen lebih rapi |
 | 1 Agustus 2026 | Alignment Splash dikunci ke viewport | Logo memakai center absolut berukuran 88 px, sedangkan blok identitas dikunci simetris di bagian bawah agar keduanya tidak saling menggeser |
+| 1 Agustus 2026 | Spacing dan scroll Home disempurnakan | Mengetuk tab aktif mengembalikan konten ke atas, kartu memakai radius/border konsisten tanpa shadow, ruang bawah ditambah, dan nominal panjang diamankan |
 
 ### Log keputusan
 

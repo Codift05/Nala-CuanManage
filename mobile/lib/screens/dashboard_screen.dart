@@ -34,6 +34,10 @@ class DashboardScreenState extends State<DashboardScreen> {
   final BudgetService _budgetService = BudgetService();
   final AuthService _authService = AuthService();
   final PageController _homePageController = PageController();
+  final List<ScrollController> _homeScrollControllers = List.generate(
+    3,
+    (_) => ScrollController(),
+  );
 
   bool _isLoading = true;
   bool _isRefreshing = false;
@@ -68,6 +72,9 @@ class DashboardScreenState extends State<DashboardScreen> {
   @override
   void dispose() {
     _homePageController.dispose();
+    for (final controller in _homeScrollControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -391,7 +398,17 @@ class DashboardScreenState extends State<DashboardScreen> {
     return Expanded(
       child: InkWell(
         onTap: () {
-          if (selected) return;
+          if (selected) {
+            final controller = _homeScrollControllers[index];
+            if (controller.hasClients) {
+              controller.animateTo(
+                0,
+                duration: const Duration(milliseconds: 280),
+                curve: Curves.easeOutCubic,
+              );
+            }
+            return;
+          }
           _homePageController.animateToPage(
             index,
             duration: const Duration(milliseconds: 320),
@@ -420,8 +437,9 @@ class DashboardScreenState extends State<DashboardScreen> {
     return RefreshIndicator(
       onRefresh: _loadData,
       child: SingleChildScrollView(
+        controller: _homeScrollControllers[index],
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 44),
         child: _buildHomeContent(index),
       ),
     );
@@ -560,14 +578,8 @@ class DashboardScreenState extends State<DashboardScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFFEAEDF2)),
       ),
       child: Row(
         children: [
@@ -896,13 +908,7 @@ class DashboardScreenState extends State<DashboardScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        border: Border.all(color: const Color(0xFFEAEDF2)),
       ),
       child: entries.isEmpty
           ? Text(
@@ -1175,12 +1181,19 @@ class DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              Text(
-                amount,
-                style: GoogleFonts.interTight(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 15,
-                  color: const Color(0xFF101217),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 120),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    amount,
+                    style: GoogleFonts.interTight(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      color: const Color(0xFF101217),
+                    ),
+                  ),
                 ),
               ),
             ],
