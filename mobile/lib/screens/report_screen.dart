@@ -8,9 +8,7 @@ import '../widgets/load_error_view.dart';
 import '../services/transaction_service.dart';
 
 class ReportScreen extends StatefulWidget {
-  final VoidCallback? onBack;
-
-  const ReportScreen({super.key, this.onBack});
+  const ReportScreen({super.key});
 
   @override
   State<ReportScreen> createState() => _ReportScreenState();

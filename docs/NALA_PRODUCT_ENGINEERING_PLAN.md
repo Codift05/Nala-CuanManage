@@ -568,6 +568,7 @@ Pada akhir setiap sesi pengembangan:
 | 31 Juli 2026 | Register dan Verifikasi Email diselaraskan dengan Login | Register memakai logo, card, field, dan tipografi auth yang sama; hasil verifikasi menjadi card dan kegagalan dapat dicoba ulang |
 | 31 Juli 2026 | Reset Password diselaraskan dengan Login | Form memakai logo dan card auth yang sama, kedua password dapat diperiksa, autofill didukung, dan submit dari keyboard tetap aman |
 | 31 Juli 2026 | Onboarding dan Splash menutup konsistensi auth | Splash memakai aset dan tipografi auth yang sama; onboarding diperhalus dan tombol biometrik semu dihapus karena aktivasi biometrik hanya tersedia setelah login |
+| 31 Juli 2026 | Audit navigasi dan responsive layout | Tombol tengah navbar kini membuka Tambah Transaksi sesuai simbol plus, Back dari tab sekunder kembali ke Beranda, dan callback navigasi Laporan yang mati dihapus |
 
 ### Log keputusan
 

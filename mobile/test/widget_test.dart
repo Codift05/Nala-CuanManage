@@ -13,6 +13,7 @@ import 'package:nala/services/chat_service.dart';
 import 'package:nala/services/transaction_service.dart';
 import 'package:nala/services/api_client.dart';
 import 'package:nala/widgets/load_error_view.dart';
+import 'package:nala/widgets/main_shell.dart';
 import 'package:nala/models/transaction.dart';
 import 'package:nala/models/wallet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -225,6 +226,27 @@ void main() {
     expect(find.text('Buat password baru'), findsOneWidget);
     expect(find.text('Simpan password baru'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Back from a secondary main tab returns to Beranda',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(const MaterialApp(home: MainShell()));
+    await tester.pump(const Duration(seconds: 9));
+
+    tester
+        .widget<GestureDetector>(find.byKey(const ValueKey('main-nav-3')))
+        .onTap!();
+    await tester.pump();
+    expect(find.byKey(const ValueKey('main-tab-3')), findsOneWidget);
+
+    final popScope = tester.widget<Widget>(
+      find.byWidgetPredicate((widget) => widget is PopScope),
+    ) as dynamic;
+    popScope.onPopInvokedWithResult(false, null);
+    await tester.pump();
+    expect(find.byKey(const ValueKey('main-tab-0')), findsOneWidget);
   });
 
   testWidgets('Edit profile validates name and email before saving',
