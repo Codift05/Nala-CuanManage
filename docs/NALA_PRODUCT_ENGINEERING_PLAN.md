@@ -558,6 +558,7 @@ Pada akhir setiap sesi pengembangan:
 | 31 Juli 2026 | Halaman Laporan diselaraskan dengan Home | Metrik dan grafik dipadatkan, font Inter diterapkan, error/empty state ditambahkan, serta badge palsu dan tombol ekspor nonfungsional dihapus |
 | 31 Juli 2026 | Halaman Profil diselaraskan dengan Home | Identitas pengguna menjadi card horizontal; menu duplikat dihapus dan pengaturan dikelompokkan menjadi Keuangan, Keamanan, serta aksi logout terpisah |
 | 31 Juli 2026 | Form Tambah/Edit Transaksi diselaraskan dengan Home | Nominal menjadi fokus, detail dikelompokkan dalam card, segmented control dan tipografi dipadatkan, serta loading/error wallet diperbaiki |
+| 31 Juli 2026 | Alur Scan Struk diselaraskan dengan Home | Scanner menjadi workspace terang, review OCR dikelompokkan dalam card, validasi nominal ditambahkan, serta loading/error wallet dan pesan gagal diamankan |
 
 ### Log keputusan
 
