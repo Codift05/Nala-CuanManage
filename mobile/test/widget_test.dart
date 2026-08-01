@@ -227,11 +227,14 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(390, 540));
     await tester.pump();
     expect(tester.widget<Text>(headline).style?.fontSize, headlineSize);
-    await tester.binding.setSurfaceSize(const Size(390, 844));
-    await tester.pump();
 
     Navigator.pop(tester.element(find.byType(BottomSheet)));
     await tester.pump(const Duration(milliseconds: 500));
+    await tester.binding.setSurfaceSize(const Size(390, 620));
+    await tester.pump();
+    expect(tester.widget<Text>(headline).style?.fontSize, headlineSize);
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    await tester.pump();
     await tester.tap(find.text('Daftar'));
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Buat akun NALA'), findsOneWidget);

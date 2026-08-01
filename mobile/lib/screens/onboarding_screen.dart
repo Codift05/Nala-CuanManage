@@ -42,10 +42,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final media = MediaQuery.of(context);
-    if (media.viewInsets.bottom == 0 && _motionController.isAnimating) {
-      _welcomeLayoutSize = media.size;
-    }
+    _welcomeLayoutSize ??= MediaQuery.sizeOf(context);
   }
 
   Future<void> _showAuthSheet(Widget screen) async {
