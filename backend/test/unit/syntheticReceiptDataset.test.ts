@@ -3,7 +3,7 @@ import test from 'node:test';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-test('synthetic receipt manifest owns 30 valid labeled PNG fixtures', () => {
+test('synthetic receipt manifest owns 30 valid labeled JPEG fixtures', () => {
   const manifestPath = resolve(
     __dirname,
     '../../../docs/evaluation/synthetic_receipts/manifest.json',
@@ -25,6 +25,6 @@ test('synthetic receipt manifest owns 30 valid labeled PNG fixtures', () => {
     assert.ok(item.groundTruth.amount > 0);
     assert.ok(item.groundTruth.merchant.length > 0);
     const image = readFileSync(resolve(dirname(manifestPath), item.image));
-    assert.deepEqual([...image.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+    assert.deepEqual([...image.subarray(0, 3)], [255, 216, 255]);
   }
 });

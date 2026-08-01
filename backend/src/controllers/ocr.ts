@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { parseBase64Image } from '../utils/resourceInput';
-import { getGeminiTimeoutMs, withTimeout } from '../utils/ai';
+import { getGeminiModel, getGeminiTimeoutMs, withTimeout } from '../utils/ai';
 import { parseReceiptDraftResponse } from '../utils/receiptDraft';
 
 export const scanReceipt = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -22,7 +22,7 @@ export const scanReceipt = async (req: AuthRequest, res: Response): Promise<void
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: getGeminiModel() });
 
     const systemPrompt = `Kamu adalah Nala, asisten keuangan cerdas.
 Tugasmu adalah membaca foto struk/kuitansi ini dan mengekstrak informasi keuangan ke dalam format JSON.

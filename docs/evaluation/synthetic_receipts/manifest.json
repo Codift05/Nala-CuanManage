@@ -2,7 +2,7 @@
   {
     "id": "synthetic-001",
     "synthetic": true,
-    "image": "images/synthetic-001.png",
+    "image": "images/synthetic-001.jpg",
     "condition": "clean",
     "groundTruth": {
       "amount": 12000,
@@ -13,7 +13,7 @@
   {
     "id": "synthetic-002",
     "synthetic": true,
-    "image": "images/synthetic-002.png",
+    "image": "images/synthetic-002.jpg",
     "condition": "rotate-left",
     "groundTruth": {
       "amount": 15750,
@@ -24,7 +24,7 @@
   {
     "id": "synthetic-003",
     "synthetic": true,
-    "image": "images/synthetic-003.png",
+    "image": "images/synthetic-003.jpg",
     "condition": "rotate-right",
     "groundTruth": {
       "amount": 19500,
@@ -35,7 +35,7 @@
   {
     "id": "synthetic-004",
     "synthetic": true,
-    "image": "images/synthetic-004.png",
+    "image": "images/synthetic-004.jpg",
     "condition": "low-contrast",
     "groundTruth": {
       "amount": 23250,
@@ -46,7 +46,7 @@
   {
     "id": "synthetic-005",
     "synthetic": true,
-    "image": "images/synthetic-005.png",
+    "image": "images/synthetic-005.jpg",
     "condition": "blur",
     "groundTruth": {
       "amount": 27000,
@@ -57,7 +57,7 @@
   {
     "id": "synthetic-006",
     "synthetic": true,
-    "image": "images/synthetic-006.png",
+    "image": "images/synthetic-006.jpg",
     "condition": "noise",
     "groundTruth": {
       "amount": 30750,
@@ -68,7 +68,7 @@
   {
     "id": "synthetic-007",
     "synthetic": true,
-    "image": "images/synthetic-007.png",
+    "image": "images/synthetic-007.jpg",
     "condition": "clean",
     "groundTruth": {
       "amount": 34500,
@@ -79,7 +79,7 @@
   {
     "id": "synthetic-008",
     "synthetic": true,
-    "image": "images/synthetic-008.png",
+    "image": "images/synthetic-008.jpg",
     "condition": "rotate-left",
     "groundTruth": {
       "amount": 38250,
@@ -90,7 +90,7 @@
   {
     "id": "synthetic-009",
     "synthetic": true,
-    "image": "images/synthetic-009.png",
+    "image": "images/synthetic-009.jpg",
     "condition": "rotate-right",
     "groundTruth": {
       "amount": 42000,
@@ -101,7 +101,7 @@
   {
     "id": "synthetic-010",
     "synthetic": true,
-    "image": "images/synthetic-010.png",
+    "image": "images/synthetic-010.jpg",
     "condition": "low-contrast",
     "groundTruth": {
       "amount": 45750,
@@ -112,7 +112,7 @@
   {
     "id": "synthetic-011",
     "synthetic": true,
-    "image": "images/synthetic-011.png",
+    "image": "images/synthetic-011.jpg",
     "condition": "blur",
     "groundTruth": {
       "amount": 49500,
@@ -123,7 +123,7 @@
   {
     "id": "synthetic-012",
     "synthetic": true,
-    "image": "images/synthetic-012.png",
+    "image": "images/synthetic-012.jpg",
     "condition": "noise",
     "groundTruth": {
       "amount": 53250,
@@ -134,7 +134,7 @@
   {
     "id": "synthetic-013",
     "synthetic": true,
-    "image": "images/synthetic-013.png",
+    "image": "images/synthetic-013.jpg",
     "condition": "clean",
     "groundTruth": {
       "amount": 57000,
@@ -145,7 +145,7 @@
   {
     "id": "synthetic-014",
     "synthetic": true,
-    "image": "images/synthetic-014.png",
+    "image": "images/synthetic-014.jpg",
     "condition": "rotate-left",
     "groundTruth": {
       "amount": 60750,
@@ -156,7 +156,7 @@
   {
     "id": "synthetic-015",
     "synthetic": true,
-    "image": "images/synthetic-015.png",
+    "image": "images/synthetic-015.jpg",
     "condition": "rotate-right",
     "groundTruth": {
       "amount": 64500,
@@ -167,7 +167,7 @@
   {
     "id": "synthetic-016",
     "synthetic": true,
-    "image": "images/synthetic-016.png",
+    "image": "images/synthetic-016.jpg",
     "condition": "low-contrast",
     "groundTruth": {
       "amount": 68250,
@@ -178,7 +178,7 @@
   {
     "id": "synthetic-017",
     "synthetic": true,
-    "image": "images/synthetic-017.png",
+    "image": "images/synthetic-017.jpg",
     "condition": "blur",
     "groundTruth": {
       "amount": 72000,
@@ -189,7 +189,7 @@
   {
     "id": "synthetic-018",
     "synthetic": true,
-    "image": "images/synthetic-018.png",
+    "image": "images/synthetic-018.jpg",
     "condition": "noise",
     "groundTruth": {
       "amount": 75750,
@@ -200,7 +200,7 @@
   {
     "id": "synthetic-019",
     "synthetic": true,
-    "image": "images/synthetic-019.png",
+    "image": "images/synthetic-019.jpg",
     "condition": "clean",
     "groundTruth": {
       "amount": 79500,
@@ -211,7 +211,7 @@
   {
     "id": "synthetic-020",
     "synthetic": true,
-    "image": "images/synthetic-020.png",
+    "image": "images/synthetic-020.jpg",
     "condition": "rotate-left",
     "groundTruth": {
       "amount": 83250,
@@ -222,7 +222,7 @@
   {
     "id": "synthetic-021",
     "synthetic": true,
-    "image": "images/synthetic-021.png",
+    "image": "images/synthetic-021.jpg",
     "condition": "rotate-right",
     "groundTruth": {
       "amount": 87000,
@@ -233,7 +233,7 @@
   {
     "id": "synthetic-022",
     "synthetic": true,
-    "image": "images/synthetic-022.png",
+    "image": "images/synthetic-022.jpg",
     "condition": "low-contrast",
     "groundTruth": {
       "amount": 90750,
@@ -244,7 +244,7 @@
   {
     "id": "synthetic-023",
     "synthetic": true,
-    "image": "images/synthetic-023.png",
+    "image": "images/synthetic-023.jpg",
     "condition": "blur",
     "groundTruth": {
       "amount": 94500,
@@ -255,7 +255,7 @@
   {
     "id": "synthetic-024",
     "synthetic": true,
-    "image": "images/synthetic-024.png",
+    "image": "images/synthetic-024.jpg",
     "condition": "noise",
     "groundTruth": {
       "amount": 98250,
@@ -266,7 +266,7 @@
   {
     "id": "synthetic-025",
     "synthetic": true,
-    "image": "images/synthetic-025.png",
+    "image": "images/synthetic-025.jpg",
     "condition": "clean",
     "groundTruth": {
       "amount": 102000,
@@ -277,7 +277,7 @@
   {
     "id": "synthetic-026",
     "synthetic": true,
-    "image": "images/synthetic-026.png",
+    "image": "images/synthetic-026.jpg",
     "condition": "rotate-left",
     "groundTruth": {
       "amount": 105750,
@@ -288,7 +288,7 @@
   {
     "id": "synthetic-027",
     "synthetic": true,
-    "image": "images/synthetic-027.png",
+    "image": "images/synthetic-027.jpg",
     "condition": "rotate-right",
     "groundTruth": {
       "amount": 109500,
@@ -299,7 +299,7 @@
   {
     "id": "synthetic-028",
     "synthetic": true,
-    "image": "images/synthetic-028.png",
+    "image": "images/synthetic-028.jpg",
     "condition": "low-contrast",
     "groundTruth": {
       "amount": 113250,
@@ -310,7 +310,7 @@
   {
     "id": "synthetic-029",
     "synthetic": true,
-    "image": "images/synthetic-029.png",
+    "image": "images/synthetic-029.jpg",
     "condition": "blur",
     "groundTruth": {
       "amount": 117000,
@@ -321,7 +321,7 @@
   {
     "id": "synthetic-030",
     "synthetic": true,
-    "image": "images/synthetic-030.png",
+    "image": "images/synthetic-030.jpg",
     "condition": "noise",
     "groundTruth": {
       "amount": 120750,

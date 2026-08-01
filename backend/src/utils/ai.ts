@@ -5,6 +5,9 @@ export const getGeminiTimeoutMs = (value = process.env.GEMINI_TIMEOUT_MS): numbe
     : 8000;
 };
 
+export const getGeminiModel = (value = process.env.GEMINI_MODEL): string =>
+  value?.trim() || 'gemini-3.5-flash-lite';
+
 export const withTimeout = async <T>(
   promise: Promise<T>,
   timeoutMs: number,

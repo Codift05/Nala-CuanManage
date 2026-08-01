@@ -11,7 +11,8 @@ cd backend
 npm run generate:receipt-dataset
 ```
 
-`manifest.json` adalah ground truth. Kondisi visual mencakup clean, rotasi,
+`manifest.json` adalah ground truth. JPEG dipakai agar fixture noise tetap di
+bawah batas payload aplikasi. Kondisi visual mencakup clean, rotasi,
 low contrast, blur ringan, dan noise. Dataset nyata berizin tetap diperlukan
 sebelum klaim akurasi proposal dipublikasikan.
 
@@ -27,3 +28,7 @@ npm run evaluate:receipts -- \
   ../docs/evaluation/synthetic_receipts/manifest.json \
   /tmp/nala-synthetic-receipt-results.json
 ```
+
+Runner juga menerima `NALA_TEST_EMAIL` dan `NALA_TEST_PASSWORD`, lalu login
+tanpa mencetak token. Gunakan `NALA_RECEIPT_LIMIT=1` untuk smoke test hemat
+kuota sebelum menjalankan seluruh dataset.

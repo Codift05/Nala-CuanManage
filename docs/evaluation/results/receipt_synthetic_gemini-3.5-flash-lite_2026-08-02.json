@@ -1,0 +1,362 @@
+[
+  {
+    "id": "synthetic-001",
+    "prediction": {
+      "amount": 12000,
+      "merchant": "Kantin Teknik Unsrat",
+      "categoryId": "Food"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1296,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-002",
+    "prediction": {
+      "amount": 15750,
+      "merchant": "Warung Bahu",
+      "categoryId": "Food"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 2294,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-003",
+    "prediction": {
+      "amount": 19500,
+      "merchant": "Toko Nala Manado",
+      "categoryId": "Shopping"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 2039,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-004",
+    "prediction": {
+      "amount": 23250,
+      "merchant": "Minimarket Kampus",
+      "categoryId": "Shopping"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1386,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-005",
+    "prediction": {
+      "amount": 27000,
+      "merchant": "Ojek Sario",
+      "categoryId": "Transport"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1895,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-006",
+    "prediction": {
+      "amount": 30750,
+      "merchant": "Trans Manado",
+      "categoryId": "Transport"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1974,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-007",
+    "prediction": {
+      "amount": 34500,
+      "merchant": "PLN Manado",
+      "categoryId": "Bills"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1447,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-008",
+    "prediction": {
+      "amount": 38250,
+      "merchant": "Internet Mahasiswa",
+      "categoryId": "Bills"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1882,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-009",
+    "prediction": {
+      "amount": 42000,
+      "merchant": "Apotek Malalayang",
+      "categoryId": "Shopping"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1980,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-010",
+    "prediction": {
+      "amount": 45750,
+      "merchant": "Fotokopi Tikala",
+      "categoryId": "Shopping"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1285,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-011",
+    "prediction": {
+      "amount": 49500,
+      "merchant": "Kantin Teknik Unsrat",
+      "categoryId": "Food"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1786,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-012",
+    "prediction": {
+      "amount": 53250,
+      "merchant": "Warung Bahu",
+      "categoryId": "Food"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1582,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-013",
+    "prediction": {
+      "amount": 57000,
+      "merchant": "Toko Nala Manado",
+      "categoryId": "Shopping"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1505,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-014",
+    "prediction": {
+      "amount": 60750,
+      "merchant": "Minimarket Kampus",
+      "categoryId": "Shopping"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 2258,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-015",
+    "prediction": {
+      "amount": 64500,
+      "merchant": "Ojek Sario",
+      "categoryId": "Transport"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1969,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-016",
+    "prediction": {
+      "amount": 68250,
+      "merchant": "Trans Manado",
+      "categoryId": "Transport"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1385,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-017",
+    "prediction": {
+      "amount": 72000,
+      "merchant": "PLN Manado",
+      "categoryId": "Bills"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1586,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-018",
+    "prediction": {
+      "amount": 75750,
+      "merchant": "Internet Mahasiswa",
+      "categoryId": "Bills"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 2129,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-019",
+    "prediction": {
+      "amount": 79500,
+      "merchant": "Apotek Malalayang",
+      "categoryId": "Shopping"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1384,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-020",
+    "prediction": {
+      "amount": 83250,
+      "merchant": "Fotokopi Tikala",
+      "categoryId": "Others"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1981,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-021",
+    "prediction": {
+      "amount": 87000,
+      "merchant": "Kantin Teknik Unsrat",
+      "categoryId": "Food"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 2079,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-022",
+    "prediction": {
+      "amount": 90750,
+      "merchant": "Warung Bahu",
+      "categoryId": "Food"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1387,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-023",
+    "prediction": {
+      "amount": 94500,
+      "merchant": "Toko Nala Manado",
+      "categoryId": "Shopping"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1780,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-024",
+    "prediction": {
+      "amount": 98250,
+      "merchant": "Minimarket Kampus",
+      "categoryId": "Shopping"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1649,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-025",
+    "prediction": {
+      "amount": 102000,
+      "merchant": "Ojek Sario",
+      "categoryId": "Transport"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1387,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-026",
+    "prediction": {
+      "amount": 105750,
+      "merchant": "Trans Manado",
+      "categoryId": "Transport"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 2272,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-027",
+    "prediction": {
+      "amount": 109500,
+      "merchant": "PLN Manado",
+      "categoryId": "Bills"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 2492,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-028",
+    "prediction": {
+      "amount": 113250,
+      "merchant": "Internet Mahasiswa",
+      "categoryId": "Bills"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1598,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-029",
+    "prediction": {
+      "amount": 117000,
+      "merchant": "Apotek Malalayang",
+      "categoryId": "Shopping"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 2106,
+    "statusCode": 200
+  },
+  {
+    "id": "synthetic-030",
+    "prediction": {
+      "amount": 120750,
+      "merchant": "Fotokopi Tikala",
+      "categoryId": "Shopping"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1535,
+    "statusCode": 200
+  }
+]

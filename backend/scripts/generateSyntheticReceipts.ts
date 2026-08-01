@@ -38,7 +38,7 @@ const main = async () => {
     const amount = 12000 + index * 3750;
     const id = `synthetic-${String(index + 1).padStart(3, '0')}`;
     const svgPath = join(outputDirectory, `${id}.svg`);
-    const imagePath = join(imageDirectory, `${id}.png`);
+    const imagePath = join(imageDirectory, `${id}.jpg`);
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1040">
 <rect width="720" height="1040" fill="#fffdf7"/>
 <g font-family="Source Code Pro" fill="#171717" text-anchor="middle">
@@ -67,6 +67,8 @@ const main = async () => {
       '-font', font,
       svgPath,
       ...effects,
+      '-strip',
+      '-quality', '82',
       imagePath,
     ], { encoding: 'utf8' });
     await unlink(svgPath);
@@ -75,7 +77,7 @@ const main = async () => {
     manifest.push({
       id,
       synthetic: true,
-      image: `images/${id}.png`,
+      image: `images/${id}.jpg`,
       condition,
       groundTruth: { amount, merchant, categoryId },
     });

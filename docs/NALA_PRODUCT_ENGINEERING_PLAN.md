@@ -114,7 +114,7 @@ Legenda:
 | Target pengguna | 🟡 | Persempit ke mahasiswa 18–24 tahun |
 | Riset primer | ⬜ | Survei, wawancara, dan kutipan pengguna asli |
 | Usability testing | ⬜ | SUS, task success, time on task, error rate |
-| Evaluasi receipt extraction | 🟡 | Protokol, evaluator, dan 30 struk sintetis tersedia; dataset nyata berizin serta hasil OCR live belum tersedia |
+| Evaluasi receipt extraction | 🟡 | Baseline sintetis: 30/30 draft, nominal/merchant 100%, kategori 83,33%, p95 2.294 ms; dataset nyata tetap diperlukan |
 | Performance testing | ⬜ | p50/p95, error rate, startup/load time |
 | Security testing | ⬜ | Checklist OWASP API dan test authorization |
 | Klaim dampak | 🟡 | Pisahkan target dari hasil aktual |
@@ -692,7 +692,8 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Receipt review mulai diperkuat | OCR memiliki timeout, parser tervalidasi, confidence per field, review flag, dan UI koreksi; 13 backend unit serta 21 mobile test lulus |
 | 2 Agustus 2026 | Receipt integration flow ditambahkan | Draft deterministik dengan confidence rendah dikoreksi pengguna dan payload transaksi hasil koreksi diverifikasi sebelum status sukses; runner Linux dikonfigurasi di CI |
 | 2 Agustus 2026 | Protokol evaluasi receipt tersedia | Aturan privasi dataset, template raw data, evaluator exact match, review recall, correction rate, dan latency diuji tanpa mengarang hasil |
-| 2 Agustus 2026 | Dataset receipt sintetis tersedia | 30 PNG deterministik mencakup 5 kategori dan 6 kondisi visual; manifest serta integritas aset diuji, runner OCR live menunggu key dan token test |
+| 2 Agustus 2026 | Dataset receipt sintetis tersedia | 30 JPEG deterministik mencakup 5 kategori dan 6 kondisi visual; manifest serta integritas aset diuji, runner OCR live tersedia |
+| 2 Agustus 2026 | OCR baseline sintetis dijalankan | Gemini 3.5 Flash-Lite memproses 30/30; nominal dan merchant tepat, kategori 25/30, confidence gagal menandai 5 kesalahan; raw evidence dan laporan disimpan |
 
 ### Log keputusan
 
@@ -707,6 +708,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Idempotency transaksi dijamin unique constraint PostgreSQL | Perlindungan tetap berlaku pada restart dan banyak instance backend |
 | 30 Juli 2026 | RecurringExecution dipisahkan dari Transaction | Marker periode tetap ada walaupun transaksi hasil scheduler dihapus |
 | 2 Agustus 2026 | Test menjadi gate sebelum perluasan M4 | Setiap inovasi inti harus membawa unit, contract, integration, failure-path, dan bukti yang sesuai risikonya |
+| 2 Agustus 2026 | Gemini 3.5 Flash-Lite menjadi default | Gemini 1.5 Flash sudah tidak tersedia dan 2.5 Flash ditolak untuk project baru; model dapat dioverride melalui `GEMINI_MODEL` |
 
 ## 14. Langkah Berikutnya
 

@@ -3,7 +3,7 @@ import { AuthRequest } from '../middleware/auth';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import prisma from '../utils/prisma';
 import { parseTransactionDraft } from '../utils/transactionDraft';
-import { getGeminiTimeoutMs, withTimeout } from '../utils/ai';
+import { getGeminiModel, getGeminiTimeoutMs, withTimeout } from '../utils/ai';
 import { parseText } from '../utils/resourceInput';
 
 const fallbackReply =
@@ -35,7 +35,7 @@ export const chatWithNala = async (req: AuthRequest, res: Response): Promise<voi
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: getGeminiModel() });
 
     // Fetch user context for better personalized AI response
     const user = await prisma.user.findUnique({ where: { id: userId } });
