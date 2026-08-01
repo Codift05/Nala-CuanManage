@@ -140,7 +140,12 @@ class _LoginScreenState extends State<LoginScreen> {
         builder: (context, constraints) {
           return SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.fromLTRB(24, 10, 24, 28),
+            padding: EdgeInsets.fromLTRB(
+              widget.sheet ? 22 : 24,
+              widget.sheet ? 4 : 10,
+              widget.sheet ? 22 : 24,
+              28,
+            ),
             child: Center(
               child: ConstrainedBox(
                 constraints: BoxConstraints(
@@ -164,8 +169,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               'Masuk ke NALA',
                               style: appleStyle(
                                 color: AppTheme.textPrimary,
-                                fontSize: 21,
+                                fontSize: 20,
                                 fontWeight: FontWeight.w600,
+                                letterSpacing: -.25,
                               ),
                             ),
                           ),
@@ -179,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 22),
+                          const SizedBox(height: 24),
                         ],
                         _buildLoginForm(),
                         if (!widget.sheet) ...[
@@ -199,7 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
     if (widget.sheet) {
-      return Material(color: const Color(0xFFF7F8FA), child: content);
+      return Material(color: Colors.white, child: content);
     }
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7F9),
@@ -263,7 +269,7 @@ class _LoginScreenState extends State<LoginScreen> {
           controller: _emailController,
           label: 'nama@email.com',
           icon: CupertinoIcons.mail,
-          fillColor: const Color(0xFFF7F8FA),
+          fillColor: const Color(0xFFF2F3F5),
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
           autofillHints: const [AutofillHints.email],
@@ -304,7 +310,7 @@ class _LoginScreenState extends State<LoginScreen> {
           controller: _passwordController,
           label: 'Masukkan password',
           icon: CupertinoIcons.lock,
-          fillColor: const Color(0xFFF7F8FA),
+          fillColor: const Color(0xFFF2F3F5),
           obscureText: _obscurePassword,
           textInputAction: TextInputAction.done,
           autofillHints: const [AutofillHints.password],
@@ -406,7 +412,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   TextStyle get _fieldLabelStyle => appleStyle(
         color: AppTheme.textPrimary,
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
+        fontSize: 12.5,
+        fontWeight: FontWeight.w500,
       );
 }

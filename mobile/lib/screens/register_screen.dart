@@ -70,7 +70,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
           constraints: const BoxConstraints(maxWidth: 390),
           child: SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: EdgeInsets.fromLTRB(24, widget.sheet ? 10 : 4, 24, 32),
+            padding: EdgeInsets.fromLTRB(
+              widget.sheet ? 22 : 24,
+              widget.sheet ? 4 : 4,
+              widget.sheet ? 22 : 24,
+              32,
+            ),
             child: AutofillGroup(
               child: Form(
                 key: _formKey,
@@ -82,21 +87,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 20),
                     ],
                     Text(
-                      widget.sheet ? 'Daftar akun NALA' : 'Buat akun',
+                      widget.sheet ? 'Buat akun NALA' : 'Buat akun',
                       textAlign:
                           widget.sheet ? TextAlign.center : TextAlign.start,
                       style: appleStyle(
-                        fontSize: 23,
+                        fontSize: widget.sheet ? 20 : 23,
                         fontWeight: FontWeight.w600,
                         color: AppTheme.textPrimary,
-                        letterSpacing: -.3,
+                        letterSpacing: -.25,
                       ),
                     ),
                     const SizedBox(height: 6),
                     SizedBox(
                       width: double.infinity,
                       child: Text(
-                        'Mulai kelola keuanganmu bersama NALA.',
+                        'Lengkapi data singkat untuk mulai mengelola uangmu.',
                         textAlign:
                             widget.sheet ? TextAlign.center : TextAlign.start,
                         style: appleStyle(
@@ -105,14 +110,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 22),
                     _label('Nama lengkap'),
                     const SizedBox(height: 8),
                     AuthTextField(
                       controller: _nameController,
                       label: 'Nama kamu',
                       icon: Icons.person_outline_rounded,
-                      fillColor: const Color(0xFFF7F8FA),
+                      fillColor: const Color(0xFFF2F3F5),
                       textInputAction: TextInputAction.next,
                       autofillHints: const [AutofillHints.name],
                       validator: (value) {
@@ -129,7 +134,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: _emailController,
                       label: 'nama@email.com',
                       icon: Icons.mail_outline_rounded,
-                      fillColor: const Color(0xFFF7F8FA),
+                      fillColor: const Color(0xFFF2F3F5),
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       autofillHints: const [AutofillHints.email],
@@ -150,7 +155,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: _passwordController,
                       label: 'Minimal 8 karakter',
                       icon: Icons.lock_outline_rounded,
-                      fillColor: const Color(0xFFF7F8FA),
+                      fillColor: const Color(0xFFF2F3F5),
                       obscureText: _obscurePassword,
                       textInputAction: TextInputAction.done,
                       autofillHints: const [AutofillHints.newPassword],
@@ -237,7 +242,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
     if (widget.sheet) {
-      return Material(color: AppTheme.backgroundColor, child: content);
+      return Material(color: Colors.white, child: content);
     }
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -248,6 +253,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _label(String text) => Text(
         text,
-        style: appleStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        style: appleStyle(fontSize: 12.5, fontWeight: FontWeight.w500),
       );
 }

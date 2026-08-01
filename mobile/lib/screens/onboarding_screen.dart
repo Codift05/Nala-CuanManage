@@ -40,14 +40,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   Future<void> _showAuthSheet(Widget screen) async {
     HapticFeedback.lightImpact();
+    _motionController.stop();
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: Colors.white,
+      barrierColor: Colors.black.withValues(alpha: .42),
       builder: (context) => AnimatedPadding(
-        duration: const Duration(milliseconds: 220),
+        duration: const Duration(milliseconds: 180),
         curve: Curves.easeOutCubic,
         padding: EdgeInsets.only(
           bottom: MediaQuery.viewInsetsOf(context).bottom,
@@ -60,6 +62,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         ),
       ),
     );
+    if (mounted) _motionController.repeat(reverse: true);
   }
 
   Future<void> _biometricLogin() async {
@@ -103,9 +106,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             children: [
               Positioned.fill(
                 bottom: panelHeight - 28,
-                child: _WelcomeHero(
-                  compact: compact,
-                  animation: _motionController,
+                child: RepaintBoundary(
+                  child: _WelcomeHero(
+                    compact: compact,
+                    animation: _motionController,
+                  ),
                 ),
               ),
               Positioned(

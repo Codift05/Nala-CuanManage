@@ -222,7 +222,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     await tester.tap(find.text('Daftar'));
     await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('Daftar akun NALA'), findsOneWidget);
+    expect(find.text('Buat akun NALA'), findsOneWidget);
     expect(find.byType(BottomSheet), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

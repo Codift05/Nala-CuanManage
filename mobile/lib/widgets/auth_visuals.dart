@@ -10,7 +10,8 @@ TextStyle appleStyle({
   FontWeight? fontWeight,
 }) {
   return TextStyle(
-    fontFamily: 'Inter',
+    fontFamily: '.SF Pro Text',
+    fontFamilyFallback: const ['Inter', 'Roboto', 'sans-serif'],
     color: color,
     fontSize: fontSize,
     height: height,
@@ -80,7 +81,7 @@ class AuthTextField extends StatelessWidget {
       style: appleStyle(
         color: AppTheme.textPrimary,
         fontSize: 15,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w500,
       ),
       decoration: InputDecoration(
         hintText: label,
@@ -94,7 +95,7 @@ class AuthTextField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppTheme.borderColor),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
