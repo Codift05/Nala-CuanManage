@@ -22,6 +22,15 @@ Dokumen ini menerjemahkan bagian pengujian pada
 | Nightly | mobile integration, security, dependency audit |
 | Release | E2E staging, performance, accessibility, backup/restore |
 
+Mobile integration dijalankan di Linux headless melalui CI. Untuk flow
+transaksi, endpoint test ditetapkan secara eksplisit agar server lokal
+deterministik tidak pernah tercampur dengan backend development atau production:
+
+```bash
+xvfb-run -a flutter test integration_test/transaction_flow_test.dart -d linux \
+  --dart-define=API_BASE_URL=http://127.0.0.1:39091/api
+```
+
 ## Ownership
 
 Setiap fitur membawa acceptance criteria, test pada lapisan yang sesuai,

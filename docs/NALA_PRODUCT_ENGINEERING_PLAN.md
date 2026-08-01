@@ -359,7 +359,7 @@ Hasil hanya ditulis setelah pilot. Kandidat metrik:
 | Backend unit | 12 file test menggunakan runner native `node:test` | Kelompokkan per domain dan tambah coverage score, AI privacy, serta edge case |
 | Backend integration | Recurring 118 baris dan transaction/API 673 baris memakai PostgreSQL serta Redis nyata di CI | Pecah per domain agar kegagalan mudah didiagnosis |
 | Mobile unit/widget | 12 domain/unit test dan 9 widget test telah dipisahkan pada folder tersendiri | Tambah helper, fixture, accessibility, dan golden test terpilih |
-| Mobile integration | Auth shell smoke flow tersedia di `mobile/integration_test`; runner Linux headless dikonfigurasi di CI | Tambahkan transaksi, receipt, budget, dan AI Coach flow |
+| Mobile integration | Auth shell dan alur create transaksi UI-to-HTTP tersedia di `mobile/integration_test`; runner Linux headless dikonfigurasi di CI | Tambahkan receipt, budget, dan AI Coach flow |
 | Contract | Belum menjadi suite tersendiri | Kunci kesesuaian model Flutter dengan request/response backend |
 | Security | Test IDOR, JWT, rate limit, dan input berbahaya tersebar di integration suite | Jadikan suite serta laporan keamanan yang dapat ditelusuri |
 | Performance | Belum ada script dan laporan terukur | Ukur p50/p95, error rate, startup, dashboard, transaksi, dan OCR |
@@ -688,6 +688,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Transisi horizontal diperluas | Budget, Scan, Skor, Profil/Edit, Bank & dompet, Tagihan berulang, dan Nala Chat memakai gerak halaman yang konsisten |
 | 2 Agustus 2026 | Strategi pengujian profesional ditetapkan | Baseline backend/mobile diaudit; struktur unit, widget, integration, contract, security, accessibility, performance, E2E, test gate, dan evidence proposal dicatat |
 | 2 Agustus 2026 | Testing foundation mulai diterapkan | 12 backend unit dan 2 integration suite dikelompokkan; mobile dipecah menjadi 12 unit dan 9 widget test; auth integration smoke serta runner Linux headless ditambahkan |
+| 2 Agustus 2026 | Integration flow transaksi mobile ditambahkan | Form memuat wallet, memformat rupiah, mengirim token dan idempotency key, meneruskan payload, lalu kembali dengan hasil sukses melalui server test deterministik |
 
 ### Log keputusan
 
@@ -707,12 +708,12 @@ Pada akhir setiap sesi pengembangan:
 
 Urutan kerja aktif menjaga M4 tetap terukur dan tidak menumpuk utang test:
 
-1. **Testing foundation gate**
-   - Pecah `mobile/test/widget_test.dart` menjadi unit dan widget suite.
-   - Kelompokkan backend test menjadi unit dan integration tanpa mengubah perilaku.
-   - Tambahkan `mobile/integration_test` dan helper/fixture deterministik.
-   - Perbarui CI agar setiap suite terlihat terpisah dan mudah didiagnosis.
-2. **M4.1 — Frictionless Financial Capture**
+1. **Testing foundation gate — selesai**
+   - Mobile unit/widget, backend unit/integration, serta auth dan transaction
+     integration flow telah dipisahkan dan dikonfigurasi pada CI.
+   - Suite berikutnya ditambahkan bersama fitur yang dilindunginya agar test
+     tidak menjadi pekerjaan terpisah di akhir.
+2. **M4.1 — Frictionless Financial Capture — aktif berikutnya**
    - Mulai dari receipt review dan koreksi sebelum simpan.
    - Tambahkan confidence serta warning per field hasil ekstraksi.
    - Ukur waktu input manual dan scan-to-review tanpa mengarang hasil.
