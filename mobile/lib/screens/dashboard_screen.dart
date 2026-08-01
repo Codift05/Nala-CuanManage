@@ -49,7 +49,7 @@ class DashboardScreenState extends State<DashboardScreen>
   int _totalBalance = 0;
   List<Wallet> _wallets = [];
   List<TransactionItem> _recentTransactions = [];
-  int _healthScore = 0;
+  int? _healthScore;
   String _nudgeMessage = '';
   String _userName = 'Pengguna';
   List<Budget> _budgets = [];
@@ -218,10 +218,10 @@ class DashboardScreenState extends State<DashboardScreen>
             ? user!['name'] as String
             : 'Pengguna';
         if (healthData != null) {
-          _healthScore = (healthData['score'] as num?)?.toInt() ?? 0;
+          _healthScore = (healthData['score'] as num?)?.toInt();
           _nudgeMessage = healthData['nudgeMessage'] ?? '';
         } else {
-          _healthScore = 72; // Fallback
+          _healthScore = null;
         }
         _isLoading = false;
         _isRefreshing = false;
@@ -815,7 +815,7 @@ class DashboardScreenState extends State<DashboardScreen>
         ),
         _buildActionTile(
           Icons.monitor_heart_rounded,
-          'Skor $_healthScore',
+          _healthScore == null ? 'Skor --' : 'Skor $_healthScore',
           const Color(0xFFFFBE73),
           () => Navigator.push(
             context,

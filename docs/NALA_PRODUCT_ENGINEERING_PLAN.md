@@ -75,7 +75,7 @@ Legenda:
 | Multi-wallet | 🟡 | CRUD, loading, empty, error, retry, dan refresh tersedia | Integration test CRUD lengkap |
 | Transaksi manual | 🟡 | CRUD, integer rupiah, idempotency, pagination, dan state UI tersedia | Uji konkurensi wallet |
 | Budget planner | 🟡 | CRUD, progress, loading, empty, error, dan retry tersedia | Edge case dan integration test |
-| Financial score | 🟡 | Skor serta tren tiga bulan tersedia | Formula baru, penjelasan, dan test |
+| Financial score | 🟡 | Formula v2, faktor, alasan, tindakan, tren nullable, dan edge-case test tersedia | Simpan snapshot histori dan validasi bobot melalui pilot |
 | AI Coach | 🟡 | Chat kontekstual dan pembuatan transaksi tersedia | Wajib diubah menjadi draft + konfirmasi |
 | Scan struk | 🟡 | Gemini mengekstrak gambar Base64 | Validasi file, schema output, review, evaluasi |
 | Deteksi SMS | 🟡 | Hanya mendeteksi kata GoPay/BCA dan “berhasil” | Turunkan menjadi eksperimen Android |
@@ -240,11 +240,11 @@ Status: **Planned**
 
 #### Explainable Financial Habit Score
 
-- [ ] Hapus diversifikasi pengeluaran sebagai indikator kesehatan
-- [ ] Tetapkan komponen dan bobot yang dapat dijelaskan
-- [ ] Tangani pemasukan nol, tanpa budget, dan pengguna baru
-- [ ] Jelaskan penyebab perubahan skor
-- [ ] Beri satu hingga tiga tindakan yang relevan
+- [x] Hapus diversifikasi pengeluaran sebagai indikator kesehatan
+- [x] Tetapkan komponen dan bobot yang dapat dijelaskan
+- [x] Tangani pemasukan nol, tanpa budget, dan pengguna baru
+- [x] Jelaskan penyebab perubahan skor
+- [x] Beri satu hingga tiga tindakan yang relevan
 - [ ] Simpan histori skor untuk evaluasi perubahan
 
 #### Context-Aware AI Coach
@@ -356,7 +356,7 @@ Hasil hanya ditulis setelah pilot. Kandidat metrik:
 
 | Area | Kondisi | Gap berikutnya |
 |---|---|---|
-| Backend unit | 15 file test menggunakan runner native `node:test` | Kelompokkan per domain dan tambah coverage score, AI privacy, serta edge case |
+| Backend unit | 16 file test menggunakan runner native `node:test` | Tambah AI privacy serta edge case per domain |
 | Backend integration | Recurring 118 baris dan transaction/API 673 baris memakai PostgreSQL serta Redis nyata di CI | Pecah per domain agar kegagalan mudah didiagnosis |
 | Mobile unit/widget | 12 domain/unit test dan 9 widget test telah dipisahkan pada folder tersendiri | Tambah helper, fixture, accessibility, dan golden test terpilih |
 | Mobile integration | Auth shell, create transaksi, serta receipt review-koreksi-simpan tersedia di `mobile/integration_test`; runner Linux headless dikonfigurasi di CI | Tambahkan budget dan AI Coach flow; validasi hasil runner CI |
@@ -694,6 +694,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Protokol evaluasi receipt tersedia | Aturan privasi dataset, template raw data, evaluator exact match, review recall, correction rate, dan latency diuji tanpa mengarang hasil |
 | 2 Agustus 2026 | Dataset receipt sintetis tersedia | 30 JPEG deterministik mencakup 5 kategori dan 6 kondisi visual; manifest serta integritas aset diuji, runner OCR live tersedia |
 | 2 Agustus 2026 | OCR baseline sintetis dijalankan | Gemini 3.5 Flash-Lite memproses 30/30; nominal dan merchant tepat, kategori 25/30, confidence gagal menandai 5 kesalahan; raw evidence dan laporan disimpan |
+| 2 Agustus 2026 | Explainable Habit Score v2 diterapkan | Diversifikasi dan fallback 72 dihapus; rasio simpan 40%, budget 35%, konsistensi 25% dinormalisasi hanya dari data tersedia; alasan, tindakan, nullable trend, dan 4 edge case diuji |
 
 ### Log keputusan
 
@@ -723,8 +724,9 @@ Urutan kerja aktif menjaga M4 tetap terukur dan tidak menumpuk utang test:
    - Receipt review, koreksi, confidence, warning per field, dan integration
      flow sudah tersedia.
    - Ukur waktu input manual dan scan-to-review tanpa mengarang hasil.
-3. **M4.2 — Explainable Financial Habit Score**
-   - Revisi formula, edge case, alasan perubahan, tindakan, dan histori skor.
+3. **M4.2 — Explainable Financial Habit Score — aktif**
+   - Formula, edge case, alasan perubahan, tindakan, dan UI explainability
+     selesai; berikutnya snapshot histori dan validasi bobot.
 4. **M4.3 — Context-Aware AI Coach**
    - Minimalkan konteks, redaksi PII, batasi input, uji prompt injection, dan
      pertahankan draft + konfirmasi.

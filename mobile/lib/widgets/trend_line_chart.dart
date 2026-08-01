@@ -72,7 +72,8 @@ class _TrendLinePainter extends CustomPainter {
       ..color = lineColor
       ..style = PaintingStyle.fill;
 
-    final double stepX = size.width / (dataPoints.length - 1);
+    final double stepX =
+        dataPoints.length > 1 ? size.width / (dataPoints.length - 1) : 0;
 
     final path = Path();
     final List<Offset> points = [];

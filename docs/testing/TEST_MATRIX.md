@@ -10,7 +10,7 @@ Status: `planned`, `partial`, `covered`, atau `validated`.
 | Budget | validator/progress | list/form/state | CRUD dan ownership | budget schema | IDOR | buat dan pantau | partial |
 | Recurring | period/date logic | list/form/state | scheduler dan duplicate | recurring schema | ownership | buat-eksekusi-nonaktif | partial |
 | Receipt/OCR | parser dan review flag | picker/review/error | AI timeout, draft, review-koreksi-simpan | confidence per field | payload/prompt injection | scan pada perangkat nyata | partial |
-| Habit Score | formula/edge case | reason/action/history | histori dan data sumber | score schema | data leakage | pahami perubahan | planned |
+| Habit Score | formula dan edge case | reason/action/nullable | histori dan data sumber | score schema | data leakage | pahami perubahan | partial |
 | AI Coach | redaction/schema | chat/draft/fallback | timeout dan konfirmasi | structured output | injection/PII/rate limit | saran-konfirmasi | partial |
 | Profile | validator/avatar | form/error | backend update/delete | profile schema | reauth/mass assignment | edit/hapus akun | partial |
 

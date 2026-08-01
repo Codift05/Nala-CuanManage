@@ -42,8 +42,7 @@ class _HealthScreenState extends State<HealthScreen> {
     });
   }
 
-  int get _score =>
-      ((_healthData?['score'] as num?) ?? 0).round().clamp(0, 100);
+  int? get _score => (_healthData?['score'] as num?)?.round().clamp(0, 100);
   String get _status => (_healthData?['status'] as String?) ?? 'Belum tersedia';
 
   List<dynamic> get _details {
@@ -53,7 +52,23 @@ class _HealthScreenState extends State<HealthScreen> {
       {'label': 'Rasio Tabungan', 'score': 0},
       {'label': 'Kepatuhan Budget', 'score': 0},
       {'label': 'Konsistensi Catat', 'score': 0},
-      {'label': 'Diversifikasi', 'score': 0},
+    ];
+  }
+
+  List<String> get _actions {
+    final actions = _healthData?['actions'];
+    return actions is List
+        ? actions.whereType<String>().take(3).toList()
+        : const [];
+  }
+
+  List<int> get _validTrendIndexes {
+    final trend = _healthData?['trend'];
+    final normalized = trend is Map ? trend['normalized'] : null;
+    if (normalized is! List) return const [];
+    return [
+      for (var index = 0; index < normalized.length; index++)
+        if (normalized[index] is num) index,
     ];
   }
 
@@ -61,8 +76,8 @@ class _HealthScreenState extends State<HealthScreen> {
     final trend = _healthData?['trend'];
     final normalized = trend is Map ? trend['normalized'] : null;
     if (normalized is List && normalized.isNotEmpty) {
-      return normalized
-          .map((value) => ((value as num?)?.toDouble() ?? 0).clamp(0.0, 1.0))
+      return _validTrendIndexes
+          .map((index) => (normalized[index] as num).toDouble().clamp(0.0, 1.0))
           .toList();
     }
     final scores = trend is Map ? trend['scores'] : null;
@@ -79,7 +94,10 @@ class _HealthScreenState extends State<HealthScreen> {
     final trend = _healthData?['trend'];
     final labels = trend is Map ? trend['labels'] : null;
     if (labels is List && labels.isNotEmpty) {
-      return labels.map((label) => label.toString()).toList();
+      return _validTrendIndexes
+          .where((index) => index < labels.length)
+          .map((index) => labels[index].toString())
+          .toList();
     }
     return const ['-', '-', '-'];
   }
@@ -155,6 +173,10 @@ class _HealthScreenState extends State<HealthScreen> {
                   ),
                   const SizedBox(height: 12),
                   _buildScoreGrid(),
+                  if (_actions.isNotEmpty) ...[
+                    const SizedBox(height: 14),
+                    _buildActionsCard(),
+                  ],
                   const SizedBox(height: 24),
                   _buildTrendCard(),
                   const SizedBox(height: 24),
@@ -260,7 +282,8 @@ class _HealthScreenState extends State<HealthScreen> {
   }
 
   Widget _buildSpeedometerCard() {
-    final color = _colorForScore(_score);
+    final score = _score;
+    final color = _colorForScore(score ?? 0);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
@@ -271,14 +294,21 @@ class _HealthScreenState extends State<HealthScreen> {
       ),
       child: Column(
         children: [
-          SpeedometerChart(
-            score: _score.toDouble(),
-            activeColor: color,
-            backgroundColor: const Color(0xFFE2E8FF),
-          ),
+          if (score != null)
+            SpeedometerChart(
+              score: score.toDouble(),
+              activeColor: color,
+              backgroundColor: const Color(0xFFE2E8FF),
+            )
+          else
+            const Icon(
+              Icons.insights_outlined,
+              size: 48,
+              color: AppTheme.textSecondary,
+            ),
           const SizedBox(height: 8),
           Text(
-            _score.toString(),
+            score?.toString() ?? '--',
             style: TextStyle(
               fontSize: 38,
               fontWeight: FontWeight.w600,
@@ -326,20 +356,26 @@ class _HealthScreenState extends State<HealthScreen> {
   Widget _buildScoreGrid() {
     return Column(
       children: _details.map((item) {
-        final score = ((item['score'] as num?) ?? 0).round().clamp(0, 100);
+        final score = (item['score'] as num?)?.round().clamp(0, 100);
         return Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: _buildScoreGridItem(
             item['label']?.toString() ?? '-',
             score,
-            _colorForScore(score),
+            item['reason']?.toString(),
+            _colorForScore(score ?? 0),
           ),
         );
       }).toList(),
     );
   }
 
-  Widget _buildScoreGridItem(String title, int score, Color barColor) {
+  Widget _buildScoreGridItem(
+    String title,
+    int? score,
+    String? reason,
+    Color barColor,
+  ) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -367,7 +403,7 @@ class _HealthScreenState extends State<HealthScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                score.toString(),
+                score?.toString() ?? '--',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -389,7 +425,7 @@ class _HealthScreenState extends State<HealthScreen> {
                 return Stack(
                   children: [
                     Container(
-                      width: constraints.maxWidth * (score / 100),
+                      width: constraints.maxWidth * ((score ?? 0) / 100),
                       height: 6,
                       decoration: BoxDecoration(
                         color: barColor,
@@ -401,6 +437,55 @@ class _HealthScreenState extends State<HealthScreen> {
               },
             ),
           ),
+          if (reason != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              reason,
+              style: TextStyle(
+                fontSize: 11,
+                height: 1.35,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionsCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFEAEDF2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Langkah yang bisa dilakukan',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 10),
+          for (final action in _actions)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                '• $action',
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1.4,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ),
         ],
       ),
     );
