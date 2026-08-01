@@ -8,7 +8,9 @@ import '../services/wallet_service.dart';
 import '../models/wallet.dart';
 
 class ScanScreen extends StatefulWidget {
-  const ScanScreen({super.key});
+  final Map<String, dynamic>? initialDraft;
+
+  const ScanScreen({super.key, this.initialDraft});
 
   @override
   State<ScanScreen> createState() => _ScanScreenState();
@@ -45,6 +47,7 @@ class _ScanScreenState extends State<ScanScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialDraft case final draft?) _applyScannedData(draft);
     final cachedWallets = _walletService.cachedWallets;
     if (cachedWallets != null) {
       _wallets = cachedWallets;
@@ -53,6 +56,26 @@ class _ScanScreenState extends State<ScanScreen> {
     } else {
       _loadWallets();
     }
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _merchantController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  void _applyScannedData(Map<String, dynamic> result) {
+    _scannedData = result;
+    _amountController.text = (result['amount'] ?? 0).toString();
+    _merchantController.text = result['merchant'] ?? '';
+    _notesController.text = result['notes'] ?? '';
+    final category = result['categoryId'];
+    _selectedCategory = category is String && _categories.contains(category)
+        ? category
+        : 'Others';
+    _isProcessing = false;
   }
 
   Future<void> _loadWallets() async {
@@ -110,19 +133,7 @@ class _ScanScreenState extends State<ScanScreen> {
       if (!mounted) return;
 
       if (result != null) {
-        setState(() {
-          _scannedData = result;
-          _amountController.text = (result['amount'] ?? 0).toString();
-          _merchantController.text = result['merchant'] ?? '';
-          _notesController.text = result['notes'] ?? '';
-
-          String cat = result['categoryId'] ?? 'Shopping';
-          if (!_categories.contains(cat)) {
-            cat = 'Others';
-          }
-          _selectedCategory = cat;
-          _isProcessing = false;
-        });
+        setState(() => _applyScannedData(result));
       } else {
         setState(() => _isProcessing = false);
         ScaffoldMessenger.of(context).showSnackBar(

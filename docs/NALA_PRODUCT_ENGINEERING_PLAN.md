@@ -359,7 +359,7 @@ Hasil hanya ditulis setelah pilot. Kandidat metrik:
 | Backend unit | 13 file test menggunakan runner native `node:test` | Kelompokkan per domain dan tambah coverage score, AI privacy, serta edge case |
 | Backend integration | Recurring 118 baris dan transaction/API 673 baris memakai PostgreSQL serta Redis nyata di CI | Pecah per domain agar kegagalan mudah didiagnosis |
 | Mobile unit/widget | 12 domain/unit test dan 9 widget test telah dipisahkan pada folder tersendiri | Tambah helper, fixture, accessibility, dan golden test terpilih |
-| Mobile integration | Auth shell dan alur create transaksi UI-to-HTTP tersedia di `mobile/integration_test`; runner Linux headless dikonfigurasi di CI | Tambahkan receipt, budget, dan AI Coach flow |
+| Mobile integration | Auth shell, create transaksi, serta receipt review-koreksi-simpan tersedia di `mobile/integration_test`; runner Linux headless dikonfigurasi di CI | Tambahkan budget dan AI Coach flow; validasi hasil runner CI |
 | Contract | Belum menjadi suite tersendiri | Kunci kesesuaian model Flutter dengan request/response backend |
 | Security | Test IDOR, JWT, rate limit, dan input berbahaya tersebar di integration suite | Jadikan suite serta laporan keamanan yang dapat ditelusuri |
 | Performance | Belum ada script dan laporan terukur | Ukur p50/p95, error rate, startup, dashboard, transaksi, dan OCR |
@@ -690,6 +690,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Testing foundation mulai diterapkan | 12 backend unit dan 2 integration suite dikelompokkan; mobile dipecah menjadi 12 unit dan 9 widget test; auth integration smoke serta runner Linux headless ditambahkan |
 | 2 Agustus 2026 | Integration flow transaksi mobile ditambahkan | Form memuat wallet, memformat rupiah, mengirim token dan idempotency key, meneruskan payload, lalu kembali dengan hasil sukses melalui server test deterministik |
 | 2 Agustus 2026 | Receipt review mulai diperkuat | OCR memiliki timeout, parser tervalidasi, confidence per field, review flag, dan UI koreksi; 13 backend unit serta 21 mobile test lulus |
+| 2 Agustus 2026 | Receipt integration flow ditambahkan | Draft deterministik dengan confidence rendah dikoreksi pengguna dan payload transaksi hasil koreksi diverifikasi sebelum status sukses; runner Linux dikonfigurasi di CI |
 
 ### Log keputusan
 
@@ -714,9 +715,9 @@ Urutan kerja aktif menjaga M4 tetap terukur dan tidak menumpuk utang test:
      integration flow telah dipisahkan dan dikonfigurasi pada CI.
    - Suite berikutnya ditambahkan bersama fitur yang dilindunginya agar test
      tidak menjadi pekerjaan terpisah di akhir.
-2. **M4.1 — Frictionless Financial Capture — aktif berikutnya**
-   - Mulai dari receipt review dan koreksi sebelum simpan.
-   - Tambahkan confidence serta warning per field hasil ekstraksi.
+2. **M4.1 — Frictionless Financial Capture — aktif**
+   - Receipt review, koreksi, confidence, warning per field, dan integration
+     flow sudah tersedia.
    - Ukur waktu input manual dan scan-to-review tanpa mengarang hasil.
 3. **M4.2 — Explainable Financial Habit Score**
    - Revisi formula, edge case, alasan perubahan, tindakan, dan histori skor.
@@ -727,6 +728,6 @@ Urutan kerja aktif menjaga M4 tetap terukur dan tidak menumpuk utang test:
    - Jalankan usability, receipt evaluation, security, performance, dan pilot
      setelah ketiga alur M4 dapat didemonstrasikan end-to-end.
 
-Pekerjaan coding berikutnya adalah melengkapi **M4.1 receipt flow integration**
-dan menyusun dataset evaluasi struk representatif. Confidence model hanya
-dipakai sebagai sinyal review, bukan sebagai bukti akurasi extraction.
+Pekerjaan berikutnya adalah menyusun dataset evaluasi struk representatif dan
+protokol pengukuran M4.1. Confidence model hanya dipakai sebagai sinyal review,
+bukan sebagai bukti akurasi extraction.

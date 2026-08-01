@@ -29,6 +29,8 @@ deterministik tidak pernah tercampur dengan backend development atau production:
 ```bash
 xvfb-run -a flutter test integration_test/transaction_flow_test.dart -d linux \
   --dart-define=API_BASE_URL=http://127.0.0.1:39091/api
+xvfb-run -a flutter test integration_test/receipt_flow_test.dart -d linux \
+  --dart-define=API_BASE_URL=http://127.0.0.1:39092/api
 ```
 
 ## Ownership
