@@ -1,0 +1,13 @@
+[
+  {
+    "id": "receipt-001",
+    "prediction": {
+      "amount": 25000,
+      "merchant": "Toko Nala",
+      "categoryId": "Food"
+    },
+    "reviewRequired": [],
+    "correctedFields": [],
+    "latencyMs": 1200
+  }
+]

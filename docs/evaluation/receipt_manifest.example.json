@@ -1,0 +1,10 @@
+[
+  {
+    "id": "receipt-001",
+    "groundTruth": {
+      "amount": 25000,
+      "merchant": "Toko Nala",
+      "categoryId": "Food"
+    }
+  }
+]
