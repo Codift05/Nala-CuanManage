@@ -3,7 +3,7 @@
 Dokumen ini adalah sumber acuan utama untuk menyelaraskan proposal GEMASTIK,
 pengembangan produk, pengujian, dan validasi pengguna NALA.
 
-Terakhir diperbarui: 31 Juli 2026
+Terakhir diperbarui: 2 Agustus 2026
 Status produk: Beta internal / belum siap untuk pengguna publik
 
 ## 1. Arah Produk
@@ -102,7 +102,7 @@ Legenda:
 | Recurring scheduler | 🟡 | Execution record, duplicate protection, dan bulan pendek tersedia | Perlu monitoring dan timezone production |
 | AI safety | 🟡 | Mutasi AI berupa draft terkonfirmasi dan output transaksi/struk divalidasi | Privacy dan evaluasi prompt injection |
 | Audit trail | ✅ | Auth, profil, session, akun, dan mutasi transaksi tercatat atomik | Tetapkan retensi dan akses admin sebelum production |
-| Backend test | 🟡 | Unit test dan recurring integration test tersedia | Perluas ke auth dan seluruh perubahan saldo |
+| Backend test | 🟡 | 12 unit test serta integration test recurring dan transaksi tersedia; database, Redis, auth, IDOR, saldo, idempotency, dan scheduler telah dicakup | Pisahkan suite unit, integration, contract, security, dan performance serta terbitkan laporan |
 | Observability | 🟡 | Request ID dan access log JSON tersedia | Error tracking dan metrik production |
 | Production deployment | ⬜ | Docker Compose development tersedia | Image production, TLS, secrets, migration |
 
@@ -133,12 +133,12 @@ Legenda:
 | Clean Architecture | Struktur belum mengikuti dependency rule | Sebut feature-oriented layered architecture |
 | API Gateway | Tidak ada gateway terpisah | Sebut HTTPS REST API |
 | Multer untuk struk | Gambar dikirim dalam Base64 JSON | Dokumentasikan fakta atau ubah implementasi |
-| Email verification | Belum tersedia | Implementasikan sebelum menulis panduan final |
+| Email verification | Token sekali pakai, delivery email, resend, dan deep link sudah tersedia | Pertahankan test delivery pada staging |
 | Setup wallet wizard | Backend membuat dompet utama otomatis | Sesuaikan panduan atau implementasikan wizard |
 | SMS mengisi transaksi otomatis | Baru deteksi kata sederhana | Jadikan eksperimen, bukan fitur inti |
 | Laporan PDF | Belum tersedia | Pertahankan status “planned” |
 | Push notification | Belum tersedia | Pertahankan status “planned” |
-| AI mencatat transaksi aman | AI langsung menulis transaksi | Ubah menjadi draft + konfirmasi |
+| AI mencatat transaksi aman | AI menghasilkan draft terstruktur dan pengguna mengonfirmasi sebelum penyimpanan | Pertahankan contract, prompt-injection, dan integration test |
 | Mode offline partial | Belum ada antrean lokal | Ubah status menjadi “planned” |
 
 ## 5. Roadmap Implementasi
@@ -352,6 +352,87 @@ Hasil hanya ditulis setelah pilot. Kandidat metrik:
 
 ## 7. Rencana Pengujian
 
+### Baseline aktual per 2 Agustus 2026
+
+| Area | Kondisi | Gap berikutnya |
+|---|---|---|
+| Backend unit | 12 file test menggunakan runner native `node:test` | Kelompokkan per domain dan tambah coverage score, AI privacy, serta edge case |
+| Backend integration | Recurring 118 baris dan transaction/API 673 baris memakai PostgreSQL serta Redis nyata di CI | Pecah per domain agar kegagalan mudah didiagnosis |
+| Mobile unit/widget | 21 test berada dalam satu `mobile/test/widget_test.dart` berukuran 339 baris | Pisahkan unit, widget, helper, fixture, accessibility, dan golden test terpilih |
+| Mobile integration | Belum ada `mobile/integration_test` | Tambahkan auth, transaksi, receipt, budget, dan AI Coach flow |
+| Contract | Belum menjadi suite tersendiri | Kunci kesesuaian model Flutter dengan request/response backend |
+| Security | Test IDOR, JWT, rate limit, dan input berbahaya tersebar di integration suite | Jadikan suite serta laporan keamanan yang dapat ditelusuri |
+| Performance | Belum ada script dan laporan terukur | Ukur p50/p95, error rate, startup, dashboard, transaksi, dan OCR |
+| Evidence | Output CI tersedia tetapi belum menjadi artefak proposal | Simpan laporan aktual tanpa mengubah target menjadi hasil |
+
+### Struktur test target
+
+```text
+backend/test/
+├── unit/            # fungsi murni, validator, formula, parser, redaksi
+├── integration/     # API + PostgreSQL + Redis + scheduler
+├── contract/        # schema request/response dan kompatibilitas mobile
+├── security/        # auth, IDOR, injection, rate limit, sensitive logging
+├── performance/     # load scenario; tidak dijalankan pada setiap commit
+├── fixtures/        # data deterministik tanpa data pengguna nyata
+└── helpers/         # bootstrap server, database reset, login test user
+
+mobile/test/
+├── unit/            # formatter, model, service mapping, state logic
+├── widget/          # komponen, halaman, state dan responsive layout
+├── golden/          # visual regression hanya untuk layar kritis
+├── accessibility/   # semantics, text scale dan target sentuh
+├── fixtures/
+└── helpers/
+
+mobile/integration_test/
+├── auth_flow_test.dart
+├── transaction_flow_test.dart
+├── receipt_flow_test.dart
+├── budget_flow_test.dart
+└── ai_coach_flow_test.dart
+
+docs/testing/
+├── TEST_STRATEGY.md
+├── TEST_MATRIX.md
+├── SECURITY_TEST_PLAN.md
+├── PERFORMANCE_TEST_PLAN.md
+└── TEST_REPORT_TEMPLATE.md
+```
+
+### Lapisan dan metode
+
+Pengujian NALA tidak boleh hanya mengandalkan black-box testing.
+
+| Lapisan | Pendekatan | Contoh bukti |
+|---|---|---|
+| Unit | White-box pada cabang dan aturan domain | saldo, formatter rupiah, score, validator, parser AI |
+| Widget/component | Gray-box pada UI dan state | loading, empty, error, retry, responsive, keyboard |
+| Integration backend | Gray-box dengan dependency nyata | API, PostgreSQL, Redis, scheduler, audit trail |
+| Integration mobile | Alur UI dengan backend/service terkendali | auth, CRUD transaksi, receipt review, budget |
+| Contract | Consumer/provider contract | tipe integer rupiah, enum, pagination, error envelope |
+| End-to-end | Black-box pada staging | registrasi sampai transaksi dan laporan tampil |
+| Security | Abuse-case dan authorization testing | IDOR, JWT, rate limit, injection, PII pada log |
+| Concurrency | Race dan replay testing | request paralel dan idempotency wallet |
+| Resilience | Failure-injection | timeout AI, Redis down, malformed JSON, session expiry |
+| Accessibility | Semantics dan usability teknis | screen reader label, text scaling, target sentuh |
+| Performance | Load dan profiling terukur | p50/p95, error rate, frame time, startup, OCR latency |
+
+### Test gate dan frekuensi
+
+| Gate | Waktu jalan | Kewajiban |
+|---|---|---|
+| Pull request | Setiap perubahan | typecheck/analyze, unit, widget, contract, backend integration kritis |
+| Main branch | Setelah merge | seluruh PR gate dan artefak hasil test |
+| Nightly | Terjadwal | mobile integration, security scan, dependency audit |
+| Kandidat release | Sebelum demo/pilot | full E2E staging, performance, security, accessibility, backup/restore |
+| Perangkat nyata | Sebelum beta Android | biometrik, kamera, widget, SMS eksperimen, startup dan frame rendering |
+
+Test dinyatakan profesional apabila deterministik, terisolasi, memiliki nama
+skenario yang menjelaskan risiko, dapat dijalankan ulang, dan menghasilkan
+bukti. Coverage adalah indikator celah, bukan target yang boleh menggantikan
+pengujian perilaku kritis.
+
 ### Functional
 
 - Auth: register, login, expiry, refresh, logout, reset password.
@@ -436,6 +517,12 @@ Sebuah fitur hanya boleh ditandai **Implemented** apabila:
 - [ ] Acceptance criteria diverifikasi.
 - [ ] Screenshot/video aktual tersedia untuk fitur proposal.
 - [ ] Dokumentasi dan status proposal diperbarui.
+
+Untuk perubahan berisiko tinggi—auth, saldo, transaksi, AI/OCR, dan
+authorization—satu test umum tidak cukup. Minimal harus ada happy path,
+validasi gagal, authorization/ownership, failure dependency, dan regression
+test untuk bug yang pernah terjadi. Test UI tidak menggantikan test domain dan
+integration; masing-masing membuktikan risiko yang berbeda.
 
 Selain itu:
 
@@ -599,6 +686,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Animasi ganda keyboard dihapus | Sheet mengikuti inset keyboard secara langsung melalui transform komposit; tween yang terus mengejar target inset dihapus |
 | 2 Agustus 2026 | Transisi halaman Catat disatukan | Semua pintu transaksi memakai slide kanan-ke-kiri 360 ms berbasis compositor dan kembali 300 ms tanpa efek berat |
 | 2 Agustus 2026 | Transisi horizontal diperluas | Budget, Scan, Skor, Profil/Edit, Bank & dompet, Tagihan berulang, dan Nala Chat memakai gerak halaman yang konsisten |
+| 2 Agustus 2026 | Strategi pengujian profesional ditetapkan | Baseline backend/mobile diaudit; struktur unit, widget, integration, contract, security, accessibility, performance, E2E, test gate, dan evidence proposal dicatat |
 
 ### Log keputusan
 
@@ -612,12 +700,29 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | Nominal disimpan sebagai BIGINT dan dikirim sebagai integer JSON | Rupiah tidak membutuhkan pecahan dan batasnya melampaui PostgreSQL INT |
 | 30 Juli 2026 | Idempotency transaksi dijamin unique constraint PostgreSQL | Perlindungan tetap berlaku pada restart dan banyak instance backend |
 | 30 Juli 2026 | RecurringExecution dipisahkan dari Transaction | Marker periode tetap ada walaupun transaksi hasil scheduler dihapus |
+| 2 Agustus 2026 | Test menjadi gate sebelum perluasan M4 | Setiap inovasi inti harus membawa unit, contract, integration, failure-path, dan bukti yang sesuai risikonya |
 
 ## 14. Langkah Berikutnya
 
-Pekerjaan coding berikutnya berada di **M4 — Tiga inovasi inti**:
+Urutan kerja aktif menjaga M4 tetap terukur dan tidak menumpuk utang test:
 
-1. Mulai frictionless capture dari receipt review dan koreksi sebelum simpan.
-2. Tambahkan confidence/field warning pada hasil ekstraksi struk.
-3. Revisi formula Explainable Financial Habit Score dan test edge case.
-4. Minimalkan konteks sensitif yang dikirim ke AI Coach.
+1. **Testing foundation gate**
+   - Pecah `mobile/test/widget_test.dart` menjadi unit dan widget suite.
+   - Kelompokkan backend test menjadi unit dan integration tanpa mengubah perilaku.
+   - Tambahkan `mobile/integration_test` dan helper/fixture deterministik.
+   - Perbarui CI agar setiap suite terlihat terpisah dan mudah didiagnosis.
+2. **M4.1 — Frictionless Financial Capture**
+   - Mulai dari receipt review dan koreksi sebelum simpan.
+   - Tambahkan confidence serta warning per field hasil ekstraksi.
+   - Ukur waktu input manual dan scan-to-review tanpa mengarang hasil.
+3. **M4.2 — Explainable Financial Habit Score**
+   - Revisi formula, edge case, alasan perubahan, tindakan, dan histori skor.
+4. **M4.3 — Context-Aware AI Coach**
+   - Minimalkan konteks, redaksi PII, batasi input, uji prompt injection, dan
+     pertahankan draft + konfirmasi.
+5. **M5 — Validasi nasional**
+   - Jalankan usability, receipt evaluation, security, performance, dan pilot
+     setelah ketiga alur M4 dapat didemonstrasikan end-to-end.
+
+Pekerjaan coding berikutnya adalah **testing foundation gate**, lalu receipt
+review sebagai inovasi M4 pertama.
