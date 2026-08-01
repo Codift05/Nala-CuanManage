@@ -32,10 +32,10 @@ class _ScanScreenState extends State<ScanScreen> {
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _merchantController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
-  String _selectedCategory = 'Belanja';
+  String _selectedCategory = 'Shopping';
 
   final List<String> _categories = [
-    'Belanja',
+    'Shopping',
     'Food',
     'Transport',
     'Bills',
@@ -116,7 +116,7 @@ class _ScanScreenState extends State<ScanScreen> {
           _merchantController.text = result['merchant'] ?? '';
           _notesController.text = result['notes'] ?? '';
 
-          String cat = result['categoryId'] ?? 'Belanja';
+          String cat = result['categoryId'] ?? 'Shopping';
           if (!_categories.contains(cat)) {
             cat = 'Others';
           }
@@ -398,6 +398,8 @@ class _ScanScreenState extends State<ScanScreen> {
             ],
           ),
           const SizedBox(height: 20),
+          _buildReviewNotice(),
+          const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -408,10 +410,18 @@ class _ScanScreenState extends State<ScanScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildTextField('Nominal (Rp)', _amountController,
-                    isNumber: true),
+                _buildTextField(
+                  'Nominal (Rp)',
+                  _amountController,
+                  confidenceField: 'amount',
+                  isNumber: true,
+                ),
                 const SizedBox(height: 16),
-                _buildTextField('Merchant', _merchantController),
+                _buildTextField(
+                  'Merchant',
+                  _merchantController,
+                  confidenceField: 'merchant',
+                ),
                 const SizedBox(height: 16),
                 _buildTextField('Catatan', _notesController),
                 const SizedBox(height: 16),
@@ -431,6 +441,7 @@ class _ScanScreenState extends State<ScanScreen> {
                       .toList(),
                   onChanged: (v) => setState(() => _selectedCategory = v!),
                 ),
+                _buildConfidenceLabel('categoryId'),
                 const SizedBox(height: 16),
                 Text(
                   'Sumber Dana',
@@ -577,6 +588,7 @@ class _ScanScreenState extends State<ScanScreen> {
   Widget _buildTextField(
     String label,
     TextEditingController controller, {
+    String? confidenceField,
     bool isNumber = false,
   }) {
     return Column(
@@ -596,7 +608,56 @@ class _ScanScreenState extends State<ScanScreen> {
           keyboardType: isNumber ? TextInputType.number : TextInputType.text,
           decoration: _inputDecoration(),
         ),
+        if (confidenceField != null) _buildConfidenceLabel(confidenceField),
       ],
+    );
+  }
+
+  Widget _buildReviewNotice() {
+    final fields = (_scannedData?['reviewRequired'] as List<dynamic>? ?? [])
+        .map((field) => switch (field) {
+              'amount' => 'nominal',
+              'merchant' => 'merchant',
+              'categoryId' => 'kategori',
+              _ => null,
+            })
+        .whereType<String>()
+        .toList();
+    final needsReview = fields.isNotEmpty;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: needsReview ? const Color(0xFFFFF4E5) : const Color(0xFFEAF8F3),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        needsReview
+            ? 'AI kurang yakin pada ${fields.join(', ')}. Periksa sebelum menyimpan.'
+            : 'Semua field terbaca jelas. Tetap periksa sebelum menyimpan.',
+        style: TextStyle(
+          color: AppTheme.textPrimary,
+          fontSize: 12,
+          height: 1.4,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConfidenceLabel(String field) {
+    final confidence = _scannedData?['confidence'];
+    final score = confidence is Map<String, dynamic> ? confidence[field] : null;
+    if (score is! num) return const SizedBox.shrink();
+    final percentage = (score * 100).round();
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Text(
+        'Estimasi keyakinan AI $percentage%',
+        style: TextStyle(
+          color: score < 0.8 ? AppTheme.warningColor : AppTheme.textSecondary,
+          fontSize: 11,
+        ),
+      ),
     );
   }
 }

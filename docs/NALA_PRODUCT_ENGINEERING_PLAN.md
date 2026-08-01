@@ -356,7 +356,7 @@ Hasil hanya ditulis setelah pilot. Kandidat metrik:
 
 | Area | Kondisi | Gap berikutnya |
 |---|---|---|
-| Backend unit | 12 file test menggunakan runner native `node:test` | Kelompokkan per domain dan tambah coverage score, AI privacy, serta edge case |
+| Backend unit | 13 file test menggunakan runner native `node:test` | Kelompokkan per domain dan tambah coverage score, AI privacy, serta edge case |
 | Backend integration | Recurring 118 baris dan transaction/API 673 baris memakai PostgreSQL serta Redis nyata di CI | Pecah per domain agar kegagalan mudah didiagnosis |
 | Mobile unit/widget | 12 domain/unit test dan 9 widget test telah dipisahkan pada folder tersendiri | Tambah helper, fixture, accessibility, dan golden test terpilih |
 | Mobile integration | Auth shell dan alur create transaksi UI-to-HTTP tersedia di `mobile/integration_test`; runner Linux headless dikonfigurasi di CI | Tambahkan receipt, budget, dan AI Coach flow |
@@ -689,6 +689,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Strategi pengujian profesional ditetapkan | Baseline backend/mobile diaudit; struktur unit, widget, integration, contract, security, accessibility, performance, E2E, test gate, dan evidence proposal dicatat |
 | 2 Agustus 2026 | Testing foundation mulai diterapkan | 12 backend unit dan 2 integration suite dikelompokkan; mobile dipecah menjadi 12 unit dan 9 widget test; auth integration smoke serta runner Linux headless ditambahkan |
 | 2 Agustus 2026 | Integration flow transaksi mobile ditambahkan | Form memuat wallet, memformat rupiah, mengirim token dan idempotency key, meneruskan payload, lalu kembali dengan hasil sukses melalui server test deterministik |
+| 2 Agustus 2026 | Receipt review mulai diperkuat | OCR memiliki timeout, parser tervalidasi, confidence per field, review flag, dan UI koreksi; 13 backend unit serta 21 mobile test lulus |
 
 ### Log keputusan
 
@@ -726,5 +727,6 @@ Urutan kerja aktif menjaga M4 tetap terukur dan tidak menumpuk utang test:
    - Jalankan usability, receipt evaluation, security, performance, dan pilot
      setelah ketiga alur M4 dapat didemonstrasikan end-to-end.
 
-Pekerjaan coding berikutnya adalah **testing foundation gate**, lalu receipt
-review sebagai inovasi M4 pertama.
+Pekerjaan coding berikutnya adalah melengkapi **M4.1 receipt flow integration**
+dan menyusun dataset evaluasi struk representatif. Confidence model hanya
+dipakai sebagai sinyal review, bukan sebagai bukti akurasi extraction.
