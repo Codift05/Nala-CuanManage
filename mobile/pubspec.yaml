@@ -79,6 +79,7 @@ flutter:
     - img/Nala baru.png
     - img/Nala baru2.png
     - assets/illustrations/nala-welcome.png
+    - assets/illustrations/nala-city.png
 
   fonts:
     - family: Inter

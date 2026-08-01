@@ -1,3 +1,5 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,32 +7,55 @@ import 'package:flutter/services.dart';
 import '../theme/app_theme.dart';
 import '../widgets/auth_visuals.dart';
 import 'login_screen.dart';
+import 'register_screen.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
-  void _openLogin(BuildContext context) {
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _motionController;
+
+  @override
+  void initState() {
+    super.initState();
+    _motionController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _motionController.dispose();
+    super.dispose();
+  }
+
+  void _open(Widget screen) {
     HapticFeedback.lightImpact();
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFF9816),
+      backgroundColor: const Color(0xFFF7F8FA),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final compact = constraints.maxHeight < 720;
-          final panelHeight = compact ? 260.0 : 270.0;
-
+          final panelHeight = compact ? 298.0 : 292.0;
           return Stack(
             children: [
               Positioned.fill(
-                bottom: panelHeight - 32,
-                child: _WelcomeHero(compact: compact),
+                bottom: panelHeight - 28,
+                child: _WelcomeHero(
+                  compact: compact,
+                  animation: _motionController,
+                ),
               ),
               Positioned(
                 left: 0,
@@ -39,7 +64,8 @@ class OnboardingScreen extends StatelessWidget {
                 height: panelHeight,
                 child: _WelcomePanel(
                   compact: compact,
-                  onLogin: () => _openLogin(context),
+                  onLogin: () => _open(const LoginScreen()),
+                  onRegister: () => _open(const RegisterScreen()),
                 ),
               ),
             ],
@@ -51,62 +77,147 @@ class OnboardingScreen extends StatelessWidget {
 }
 
 class _WelcomeHero extends StatelessWidget {
-  const _WelcomeHero({required this.compact});
+  const _WelcomeHero({required this.compact, required this.animation});
 
   final bool compact;
+  final Animation<double> animation;
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-        child: Column(
-          children: [
-            Center(
-              child: Image.asset(
-                'img/Logo Nala 4.png',
-                width: compact ? 76 : 86,
-                height: compact ? 40 : 45,
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.high,
-                semanticLabel: 'Logo Nala',
-              ),
-            ),
-            SizedBox(height: compact ? 6 : 10),
-            Text(
-              'Halo, selamat datang!',
-              style: appleStyle(
-                color: Colors.white,
-                fontSize: compact ? 19 : 21,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 3),
-            Text(
-              'Kelola uangmu tanpa terasa rumit.',
-              style: appleStyle(
-                color: Colors.white.withValues(alpha: .88),
-                fontSize: compact ? 12 : 13,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-            Expanded(
-              child: Image.asset(
-                'assets/illustrations/nala-welcome.png',
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.high,
-                semanticLabel: 'Dua anak muda mengelola keuangan bersama Nala',
-                errorBuilder: (context, error, stackTrace) => const Center(
-                  child: Icon(
-                    CupertinoIcons.person_2_fill,
-                    color: Colors.white,
-                    size: 72,
-                  ),
+    return ColoredBox(
+      color: AppTheme.primaryColor,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+          child: Column(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Image.asset(
+                  'img/Nala baru.png',
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
+                  semanticLabel: 'Logo Nala',
                 ),
               ),
-            ),
-          ],
+              SizedBox(height: compact ? 12 : 16),
+              Text(
+                'Uang lebih tertata,\nhidup terasa ringan.',
+                textAlign: TextAlign.center,
+                style: appleStyle(
+                  color: Colors.white,
+                  fontSize: compact ? 22 : 25,
+                  height: 1.13,
+                  letterSpacing: -.35,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Catat, atur, dan pahami keuanganmu bersama NALA.',
+                textAlign: TextAlign.center,
+                style: appleStyle(
+                  color: Colors.white.withValues(alpha: .88),
+                  fontSize: 12,
+                  height: 1.35,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              Expanded(
+                child: AnimatedBuilder(
+                  animation: animation,
+                  builder: (context, child) {
+                    final cityY = lerpDouble(3, -3, animation.value)!;
+                    return Stack(
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        Positioned(
+                          left: 8,
+                          right: 8,
+                          bottom: compact ? 2 : 6,
+                          child: Container(
+                            height: compact ? 145 : 170,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFFFE8C5),
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(160),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Transform.translate(
+                          offset: Offset(0, cityY),
+                          child: Image.asset(
+                            'assets/illustrations/nala-city.png',
+                            height: compact ? 170 : 198,
+                            width: double.infinity,
+                            fit: BoxFit.contain,
+                            filterQuality: FilterQuality.medium,
+                            semanticLabel:
+                                'Ilustrasi kota pesisir dan pengelolaan uang',
+                          ),
+                        ),
+                        _FloatingCoin(
+                          alignment: const Alignment(-.84, -.58),
+                          offset: lerpDouble(-5, 5, animation.value)!,
+                          size: 29,
+                        ),
+                        _FloatingCoin(
+                          alignment: const Alignment(.82, -.36),
+                          offset: lerpDouble(5, -5, animation.value)!,
+                          size: 24,
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FloatingCoin extends StatelessWidget {
+  const _FloatingCoin({
+    required this.alignment,
+    required this.offset,
+    required this.size,
+  });
+
+  final Alignment alignment;
+  final double offset;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: alignment,
+      child: Transform.translate(
+        offset: Offset(0, offset),
+        child: Container(
+          width: size,
+          height: size,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFD48C),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 2),
+          ),
+          child: Icon(
+            CupertinoIcons.money_dollar,
+            size: size * .5,
+            color: const Color(0xFFB95608),
+          ),
         ),
       ),
     );
@@ -117,25 +228,27 @@ class _WelcomePanel extends StatelessWidget {
   const _WelcomePanel({
     required this.compact,
     required this.onLogin,
+    required this.onRegister,
   });
 
   final bool compact;
   final VoidCallback onLogin;
+  final VoidCallback onRegister;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(24, compact ? 17 : 20, 24, 14),
+      padding: EdgeInsets.fromLTRB(24, compact ? 18 : 22, 24, 12),
       decoration: const BoxDecoration(
         color: Color(0xFFF7F8FA),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(34)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
       child: SafeArea(
         top: false,
         child: Column(
           children: [
             Text(
-              'Semua yang kamu butuhkan',
+              'Mulai dari yang penting',
               style: appleStyle(
                 color: AppTheme.textPrimary,
                 fontSize: 16,
@@ -147,33 +260,58 @@ class _WelcomePanel extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _FeatureItem(
-                  icon: CupertinoIcons.doc_text,
-                  label: 'Catat\ntransaksi',
+                  icon: CupertinoIcons.pencil,
+                  label: 'Catat cepat',
+                  color: Color(0xFF5ED3C7),
                 ),
                 _FeatureItem(
                   icon: CupertinoIcons.chart_pie,
-                  label: 'Atur\nbudget',
+                  label: 'Atur budget',
+                  color: Color(0xFF90AAF4),
                 ),
                 _FeatureItem(
                   icon: CupertinoIcons.sparkles,
-                  label: 'Insight\nNala',
+                  label: 'Insight NALA',
+                  color: Color(0xFFB69BEA),
                 ),
               ],
             ),
-            SizedBox(height: compact ? 17 : 20),
+            SizedBox(height: compact ? 16 : 20),
             SizedBox(
               width: double.infinity,
-              height: 54,
+              height: 52,
               child: ElevatedButton(
                 onPressed: onLogin,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryColor,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: const Text('Masuk ke Nala'),
+                child: const Text('Masuk ke NALA'),
               ),
+            ),
+            const SizedBox(height: 4),
+            Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  'Belum punya akun?',
+                  style: appleStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 13,
+                  ),
+                ),
+                TextButton(
+                  onPressed: onRegister,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(0, 40),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                  child: const Text('Daftar'),
+                ),
+              ],
             ),
           ],
         ),
@@ -183,35 +321,39 @@ class _WelcomePanel extends StatelessWidget {
 }
 
 class _FeatureItem extends StatelessWidget {
-  const _FeatureItem({required this.icon, required this.label});
+  const _FeatureItem({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
 
   final IconData icon;
   final String label;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 82,
+      width: 86,
       child: Column(
         children: [
           Container(
-            width: 45,
-            height: 45,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: color,
               borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: const Color(0xFFFFD8A1)),
             ),
-            child: Icon(icon, color: AppTheme.primaryColor, size: 21),
+            child: Icon(icon, color: const Color(0xFF171A1F), size: 21),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 7),
           Text(
             label,
+            maxLines: 1,
             textAlign: TextAlign.center,
             style: appleStyle(
               color: AppTheme.textPrimary,
-              fontSize: 12,
-              height: 1.2,
+              fontSize: 11,
               fontWeight: FontWeight.w500,
             ),
           ),

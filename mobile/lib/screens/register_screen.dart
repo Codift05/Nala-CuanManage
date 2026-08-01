@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../widgets/auth_visuals.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -64,59 +65,53 @@ class _RegisterScreenState extends State<RegisterScreen> {
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 86,
-                    height: 62,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryColor,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Image.asset('img/Logo Nala 4.png'),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Buat akun',
-                  style: appleStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Mulai kelola keuanganmu bersama Nala.',
-                  style: appleStyle(
-                    fontSize: 14,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFFEAEDF2)),
-                  ),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 390),
+            child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.fromLTRB(24, 4, 24, 32),
+              child: AutofillGroup(
+                child: Form(
+                  key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Image.asset(
+                        'img/Nala baru.png',
+                        width: 52,
+                        height: 52,
+                        fit: BoxFit.contain,
+                        alignment: Alignment.centerLeft,
+                        filterQuality: FilterQuality.high,
+                        semanticLabel: 'Logo Nala',
+                      ),
+                      const SizedBox(height: 22),
+                      Text(
+                        'Buat akun',
+                        style: appleStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                          letterSpacing: -.3,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Mulai kelola keuanganmu bersama Nala.',
+                        style: appleStyle(
+                          fontSize: 13,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 26),
                       _label('Nama lengkap'),
                       const SizedBox(height: 8),
                       AuthTextField(
                         controller: _nameController,
                         label: 'Nama kamu',
                         icon: Icons.person_outline_rounded,
+                        fillColor: const Color(0xFFF7F8FA),
                         textInputAction: TextInputAction.next,
                         autofillHints: const [AutofillHints.name],
                         validator: (value) {
@@ -133,6 +128,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         controller: _emailController,
                         label: 'nama@email.com',
                         icon: Icons.mail_outline_rounded,
+                        fillColor: const Color(0xFFF7F8FA),
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         autofillHints: const [AutofillHints.email],
@@ -153,6 +149,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         controller: _passwordController,
                         label: 'Minimal 8 karakter',
                         icon: Icons.lock_outline_rounded,
+                        fillColor: const Color(0xFFF7F8FA),
                         obscureText: _obscurePassword,
                         textInputAction: TextInputAction.done,
                         autofillHints: const [AutofillHints.newPassword],
@@ -179,8 +176,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 20),
                       SizedBox(
                         width: double.infinity,
+                        height: 52,
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _register,
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
                           child: _isLoading
                               ? const SizedBox(
                                   width: 20,
@@ -193,10 +196,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               : const Text('Buat akun'),
                         ),
                       ),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            'Sudah punya akun?',
+                            style: appleStyle(
+                              color: AppTheme.textSecondary,
+                              fontSize: 13,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const LoginScreen(),
+                              ),
+                            ),
+                            style: TextButton.styleFrom(
+                              minimumSize: const Size(0, 40),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                            ),
+                            child: const Text('Masuk'),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ),

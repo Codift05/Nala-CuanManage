@@ -7,6 +7,7 @@ import 'package:nala/screens/edit_profile_screen.dart';
 import 'package:nala/screens/login_screen.dart';
 import 'package:nala/screens/reset_password_screen.dart';
 import 'package:nala/screens/onboarding_screen.dart';
+import 'package:nala/screens/register_screen.dart';
 import 'package:nala/services/token_storage.dart';
 import 'package:nala/services/biometric_service.dart';
 import 'package:nala/services/chat_service.dart';
@@ -197,8 +198,22 @@ void main() {
       const MaterialApp(home: OnboardingScreen()),
     );
 
-    expect(find.text('Halo, selamat datang!'), findsOneWidget);
-    expect(find.text('Masuk ke Nala'), findsOneWidget);
+    expect(
+        find.text('Uang lebih tertata,\nhidup terasa ringan.'), findsOneWidget);
+    expect(find.text('Masuk ke NALA'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Register screen fits a narrow phone', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(360, 640));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      const MaterialApp(home: RegisterScreen()),
+    );
+
+    expect(find.text('Buat akun'), findsWidgets);
+    expect(find.text('Sudah punya akun?'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
