@@ -8,6 +8,8 @@ sebagai akurasi tanpa pembanding ground truth.
 
 ## Dataset
 
+- Dataset sintetis 30 gambar di `synthetic_receipts/` digunakan hanya untuk
+  regression test deterministik dan tidak menggantikan validasi dunia nyata.
 - Baseline awal minimal 30 struk; target 100 sebelum pilot.
 - Gunakan struk milik tim/responden yang memberi persetujuan.
 - Seimbangkan merchant lokal/nasional, cetak/tulisan tangan, pencahayaan,
@@ -26,6 +28,9 @@ sebagai akurasi tanpa pembanding ground truth.
    sampai draft tampil, dan field yang dikoreksi pengguna.
 5. Simpan raw result memakai bentuk `receipt_results.example.json`.
 6. Jalankan evaluator dan salin output aktual ke laporan bertanggal.
+
+Laporkan dataset sintetis dan nyata secara terpisah; jangan menggabungkan
+keduanya menjadi satu angka akurasi.
 
 ```bash
 cd backend

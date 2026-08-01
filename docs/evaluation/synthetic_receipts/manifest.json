@@ -1,0 +1,332 @@
+[
+  {
+    "id": "synthetic-001",
+    "synthetic": true,
+    "image": "images/synthetic-001.png",
+    "condition": "clean",
+    "groundTruth": {
+      "amount": 12000,
+      "merchant": "Kantin Teknik Unsrat",
+      "categoryId": "Food"
+    }
+  },
+  {
+    "id": "synthetic-002",
+    "synthetic": true,
+    "image": "images/synthetic-002.png",
+    "condition": "rotate-left",
+    "groundTruth": {
+      "amount": 15750,
+      "merchant": "Warung Bahu",
+      "categoryId": "Food"
+    }
+  },
+  {
+    "id": "synthetic-003",
+    "synthetic": true,
+    "image": "images/synthetic-003.png",
+    "condition": "rotate-right",
+    "groundTruth": {
+      "amount": 19500,
+      "merchant": "Toko Nala Manado",
+      "categoryId": "Shopping"
+    }
+  },
+  {
+    "id": "synthetic-004",
+    "synthetic": true,
+    "image": "images/synthetic-004.png",
+    "condition": "low-contrast",
+    "groundTruth": {
+      "amount": 23250,
+      "merchant": "Minimarket Kampus",
+      "categoryId": "Shopping"
+    }
+  },
+  {
+    "id": "synthetic-005",
+    "synthetic": true,
+    "image": "images/synthetic-005.png",
+    "condition": "blur",
+    "groundTruth": {
+      "amount": 27000,
+      "merchant": "Ojek Sario",
+      "categoryId": "Transport"
+    }
+  },
+  {
+    "id": "synthetic-006",
+    "synthetic": true,
+    "image": "images/synthetic-006.png",
+    "condition": "noise",
+    "groundTruth": {
+      "amount": 30750,
+      "merchant": "Trans Manado",
+      "categoryId": "Transport"
+    }
+  },
+  {
+    "id": "synthetic-007",
+    "synthetic": true,
+    "image": "images/synthetic-007.png",
+    "condition": "clean",
+    "groundTruth": {
+      "amount": 34500,
+      "merchant": "PLN Manado",
+      "categoryId": "Bills"
+    }
+  },
+  {
+    "id": "synthetic-008",
+    "synthetic": true,
+    "image": "images/synthetic-008.png",
+    "condition": "rotate-left",
+    "groundTruth": {
+      "amount": 38250,
+      "merchant": "Internet Mahasiswa",
+      "categoryId": "Bills"
+    }
+  },
+  {
+    "id": "synthetic-009",
+    "synthetic": true,
+    "image": "images/synthetic-009.png",
+    "condition": "rotate-right",
+    "groundTruth": {
+      "amount": 42000,
+      "merchant": "Apotek Malalayang",
+      "categoryId": "Others"
+    }
+  },
+  {
+    "id": "synthetic-010",
+    "synthetic": true,
+    "image": "images/synthetic-010.png",
+    "condition": "low-contrast",
+    "groundTruth": {
+      "amount": 45750,
+      "merchant": "Fotokopi Tikala",
+      "categoryId": "Others"
+    }
+  },
+  {
+    "id": "synthetic-011",
+    "synthetic": true,
+    "image": "images/synthetic-011.png",
+    "condition": "blur",
+    "groundTruth": {
+      "amount": 49500,
+      "merchant": "Kantin Teknik Unsrat",
+      "categoryId": "Food"
+    }
+  },
+  {
+    "id": "synthetic-012",
+    "synthetic": true,
+    "image": "images/synthetic-012.png",
+    "condition": "noise",
+    "groundTruth": {
+      "amount": 53250,
+      "merchant": "Warung Bahu",
+      "categoryId": "Food"
+    }
+  },
+  {
+    "id": "synthetic-013",
+    "synthetic": true,
+    "image": "images/synthetic-013.png",
+    "condition": "clean",
+    "groundTruth": {
+      "amount": 57000,
+      "merchant": "Toko Nala Manado",
+      "categoryId": "Shopping"
+    }
+  },
+  {
+    "id": "synthetic-014",
+    "synthetic": true,
+    "image": "images/synthetic-014.png",
+    "condition": "rotate-left",
+    "groundTruth": {
+      "amount": 60750,
+      "merchant": "Minimarket Kampus",
+      "categoryId": "Shopping"
+    }
+  },
+  {
+    "id": "synthetic-015",
+    "synthetic": true,
+    "image": "images/synthetic-015.png",
+    "condition": "rotate-right",
+    "groundTruth": {
+      "amount": 64500,
+      "merchant": "Ojek Sario",
+      "categoryId": "Transport"
+    }
+  },
+  {
+    "id": "synthetic-016",
+    "synthetic": true,
+    "image": "images/synthetic-016.png",
+    "condition": "low-contrast",
+    "groundTruth": {
+      "amount": 68250,
+      "merchant": "Trans Manado",
+      "categoryId": "Transport"
+    }
+  },
+  {
+    "id": "synthetic-017",
+    "synthetic": true,
+    "image": "images/synthetic-017.png",
+    "condition": "blur",
+    "groundTruth": {
+      "amount": 72000,
+      "merchant": "PLN Manado",
+      "categoryId": "Bills"
+    }
+  },
+  {
+    "id": "synthetic-018",
+    "synthetic": true,
+    "image": "images/synthetic-018.png",
+    "condition": "noise",
+    "groundTruth": {
+      "amount": 75750,
+      "merchant": "Internet Mahasiswa",
+      "categoryId": "Bills"
+    }
+  },
+  {
+    "id": "synthetic-019",
+    "synthetic": true,
+    "image": "images/synthetic-019.png",
+    "condition": "clean",
+    "groundTruth": {
+      "amount": 79500,
+      "merchant": "Apotek Malalayang",
+      "categoryId": "Others"
+    }
+  },
+  {
+    "id": "synthetic-020",
+    "synthetic": true,
+    "image": "images/synthetic-020.png",
+    "condition": "rotate-left",
+    "groundTruth": {
+      "amount": 83250,
+      "merchant": "Fotokopi Tikala",
+      "categoryId": "Others"
+    }
+  },
+  {
+    "id": "synthetic-021",
+    "synthetic": true,
+    "image": "images/synthetic-021.png",
+    "condition": "rotate-right",
+    "groundTruth": {
+      "amount": 87000,
+      "merchant": "Kantin Teknik Unsrat",
+      "categoryId": "Food"
+    }
+  },
+  {
+    "id": "synthetic-022",
+    "synthetic": true,
+    "image": "images/synthetic-022.png",
+    "condition": "low-contrast",
+    "groundTruth": {
+      "amount": 90750,
+      "merchant": "Warung Bahu",
+      "categoryId": "Food"
+    }
+  },
+  {
+    "id": "synthetic-023",
+    "synthetic": true,
+    "image": "images/synthetic-023.png",
+    "condition": "blur",
+    "groundTruth": {
+      "amount": 94500,
+      "merchant": "Toko Nala Manado",
+      "categoryId": "Shopping"
+    }
+  },
+  {
+    "id": "synthetic-024",
+    "synthetic": true,
+    "image": "images/synthetic-024.png",
+    "condition": "noise",
+    "groundTruth": {
+      "amount": 98250,
+      "merchant": "Minimarket Kampus",
+      "categoryId": "Shopping"
+    }
+  },
+  {
+    "id": "synthetic-025",
+    "synthetic": true,
+    "image": "images/synthetic-025.png",
+    "condition": "clean",
+    "groundTruth": {
+      "amount": 102000,
+      "merchant": "Ojek Sario",
+      "categoryId": "Transport"
+    }
+  },
+  {
+    "id": "synthetic-026",
+    "synthetic": true,
+    "image": "images/synthetic-026.png",
+    "condition": "rotate-left",
+    "groundTruth": {
+      "amount": 105750,
+      "merchant": "Trans Manado",
+      "categoryId": "Transport"
+    }
+  },
+  {
+    "id": "synthetic-027",
+    "synthetic": true,
+    "image": "images/synthetic-027.png",
+    "condition": "rotate-right",
+    "groundTruth": {
+      "amount": 109500,
+      "merchant": "PLN Manado",
+      "categoryId": "Bills"
+    }
+  },
+  {
+    "id": "synthetic-028",
+    "synthetic": true,
+    "image": "images/synthetic-028.png",
+    "condition": "low-contrast",
+    "groundTruth": {
+      "amount": 113250,
+      "merchant": "Internet Mahasiswa",
+      "categoryId": "Bills"
+    }
+  },
+  {
+    "id": "synthetic-029",
+    "synthetic": true,
+    "image": "images/synthetic-029.png",
+    "condition": "blur",
+    "groundTruth": {
+      "amount": 117000,
+      "merchant": "Apotek Malalayang",
+      "categoryId": "Others"
+    }
+  },
+  {
+    "id": "synthetic-030",
+    "synthetic": true,
+    "image": "images/synthetic-030.png",
+    "condition": "noise",
+    "groundTruth": {
+      "amount": 120750,
+      "merchant": "Fotokopi Tikala",
+      "categoryId": "Others"
+    }
+  }
+]
