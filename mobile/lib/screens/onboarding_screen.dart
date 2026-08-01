@@ -92,20 +92,13 @@ class _WelcomeHero extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
           child: Column(
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                padding: const EdgeInsets.all(7),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Image.asset(
-                  'img/Nala baru.png',
-                  fit: BoxFit.contain,
-                  filterQuality: FilterQuality.high,
-                  semanticLabel: 'Logo Nala',
-                ),
+              Image.asset(
+                'img/Logo Nala 4.png',
+                width: 40,
+                height: 40,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.high,
+                semanticLabel: 'Logo Nala',
               ),
               SizedBox(height: compact ? 12 : 16),
               Text(
