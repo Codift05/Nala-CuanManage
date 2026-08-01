@@ -48,17 +48,21 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       showDragHandle: true,
       backgroundColor: Colors.white,
       barrierColor: Colors.black.withValues(alpha: .42),
-      builder: (context) => AnimatedPadding(
-        duration: const Duration(milliseconds: 180),
+      builder: (context) => TweenAnimationBuilder<double>(
+        tween: Tween(end: MediaQuery.viewInsetsOf(context).bottom),
+        duration: const Duration(milliseconds: 260),
         curve: Curves.easeOutCubic,
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.sizeOf(context).height * .88,
+        child: RepaintBoundary(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(context).height * .88,
+            ),
+            child: screen,
           ),
-          child: screen,
+        ),
+        builder: (context, keyboardInset, child) => Transform.translate(
+          offset: Offset(0, -keyboardInset),
+          child: child,
         ),
       ),
     );
