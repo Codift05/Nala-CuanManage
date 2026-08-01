@@ -56,10 +56,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       showDragHandle: true,
       backgroundColor: Colors.white,
       barrierColor: Colors.black.withValues(alpha: .42),
-      builder: (context) => TweenAnimationBuilder<double>(
-        tween: Tween(end: MediaQuery.viewInsetsOf(context).bottom),
-        duration: const Duration(milliseconds: 340),
-        curve: Curves.easeInOutCubic,
+      builder: (context) => Transform.translate(
+        offset: Offset(0, -MediaQuery.viewInsetsOf(context).bottom),
         child: MediaQuery.removeViewInsets(
           context: context,
           removeBottom: true,
@@ -69,10 +67,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               child: screen,
             ),
           ),
-        ),
-        builder: (context, keyboardInset, child) => Transform.translate(
-          offset: Offset(0, -keyboardInset),
-          child: child,
         ),
       ),
     );

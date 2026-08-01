@@ -596,6 +596,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Background Welcome dilepas dari keyboard | Scaffold Welcome tidak lagi mengecil saat keyboard muncul; hanya sheet autentikasi yang bergerak dan hero tetap diam |
 | 2 Agustus 2026 | Kanvas Welcome dikunci selama autentikasi | Ukuran layout sebelum keyboard disimpan agar breakpoint compact, headline, dan ilustrasi tidak berubah ketika viewport web menyusut |
 | 2 Agustus 2026 | Pemulihan viewport keyboard dibuat stabil | Ukuran kanvas Welcome hanya diambil sekali agar frame perantara ketika keyboard turun tidak mengganti ukuran headline atau ilustrasi |
+| 2 Agustus 2026 | Animasi ganda keyboard dihapus | Sheet mengikuti inset keyboard secara langsung melalui transform komposit; tween yang terus mengejar target inset dihapus |
 
 ### Log keputusan
 
