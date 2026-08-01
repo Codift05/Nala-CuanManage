@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../services/health_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/speedometer_chart.dart';
@@ -147,7 +146,7 @@ class _HealthScreenState extends State<HealthScreen> {
                   const SizedBox(height: 24),
                   Text(
                     'Faktor kebiasaan',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: AppTheme.textPrimary,
@@ -189,7 +188,7 @@ class _HealthScreenState extends State<HealthScreen> {
             children: [
               Text(
                 'Financial Habit Score',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
@@ -197,7 +196,7 @@ class _HealthScreenState extends State<HealthScreen> {
               ),
               Text(
                 _updatedLabel,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 12,
                   color: AppTheme.textSecondary,
                 ),
@@ -243,7 +242,7 @@ class _HealthScreenState extends State<HealthScreen> {
           Text(
             _errorMessage!,
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
@@ -279,7 +278,7 @@ class _HealthScreenState extends State<HealthScreen> {
           const SizedBox(height: 8),
           Text(
             _score.toString(),
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 38,
               fontWeight: FontWeight.w600,
               color: color,
@@ -298,7 +297,7 @@ class _HealthScreenState extends State<HealthScreen> {
                 Flexible(
                   child: Text(
                     _status,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: color,
@@ -312,7 +311,7 @@ class _HealthScreenState extends State<HealthScreen> {
           Text(
             'Indikator kebiasaan finansial, bukan penilaian kredit.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 11,
               height: 1.35,
               color: AppTheme.textSecondary,
@@ -359,7 +358,7 @@ class _HealthScreenState extends State<HealthScreen> {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 12,
                     color: AppTheme.textSecondary,
                   ),
@@ -368,7 +367,7 @@ class _HealthScreenState extends State<HealthScreen> {
               const SizedBox(width: 8),
               Text(
                 score.toString(),
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: barColor,
@@ -422,7 +421,7 @@ class _HealthScreenState extends State<HealthScreen> {
               Expanded(
                 child: Text(
                   'Tren 3 Bulan',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
@@ -451,7 +450,7 @@ class _HealthScreenState extends State<HealthScreen> {
                           _trendMessage,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: AppTheme.primaryColor,
@@ -492,7 +491,7 @@ class _HealthScreenState extends State<HealthScreen> {
             color: Colors.white, size: 20),
         label: Text(
           'Diskusikan dengan Nala',
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: Colors.white,

@@ -139,12 +139,12 @@ class _LoginScreenState extends State<LoginScreen> {
           builder: (context, constraints) {
             return SingleChildScrollView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 28),
+              padding: const EdgeInsets.fromLTRB(24, 10, 24, 28),
               child: Center(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
                     minHeight: constraints.maxHeight - 38,
-                    maxWidth: 440,
+                    maxWidth: 390,
                   ),
                   child: AutofillGroup(
                     child: Form(
@@ -153,11 +153,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildBackButton(),
-                          const SizedBox(height: 18),
+                          const SizedBox(height: 24),
                           _buildHeader(),
-                          const SizedBox(height: 30),
-                          _buildLoginCard(),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 28),
+                          _buildLoginForm(),
+                          const SizedBox(height: 18),
                           _buildBiometricButton(),
                           const SizedBox(height: 12),
                           _buildRegisterLink(),
@@ -176,8 +176,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildBackButton() {
     return SizedBox(
-      width: 42,
-      height: 42,
+      width: 38,
+      height: 38,
       child: IconButton(
         tooltip: 'Kembali',
         onPressed: () => Navigator.maybePop(context),
@@ -185,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
           backgroundColor: Colors.white,
           side: const BorderSide(color: AppTheme.borderColor),
         ),
-        icon: const Icon(CupertinoIcons.back, size: 18),
+        icon: const Icon(CupertinoIcons.back, size: 17),
       ),
     );
   }
@@ -194,32 +194,24 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Center(
-          child: Container(
-            width: 96,
-            height: 54,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryColor,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Image.asset(
-              'img/Logo Nala 4.png',
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
-              semanticLabel: 'Logo Nala',
-            ),
-          ),
+        Image.asset(
+          'img/Nala baru.png',
+          width: 56,
+          height: 56,
+          fit: BoxFit.contain,
+          alignment: Alignment.centerLeft,
+          filterQuality: FilterQuality.high,
+          semanticLabel: 'Logo Nala',
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 24),
         Text(
           'Selamat datang kembali.',
           style: appleStyle(
             color: AppTheme.textPrimary,
-            fontSize: 28,
-            height: 1.12,
-            letterSpacing: -.4,
-            fontWeight: FontWeight.w700,
+            fontSize: 24,
+            height: 1.18,
+            letterSpacing: -.3,
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 7),
@@ -227,7 +219,7 @@ class _LoginScreenState extends State<LoginScreen> {
           'Masuk untuk melanjutkan perjalanan finansialmu.',
           style: appleStyle(
             color: AppTheme.textSecondary,
-            fontSize: 14,
+            fontSize: 13,
             height: 1.4,
             fontWeight: FontWeight.w400,
           ),
@@ -236,133 +228,123 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildLoginCard() {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE8E9ED)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Email', style: _fieldLabelStyle),
-          const SizedBox(height: 8),
-          AuthTextField(
-            controller: _emailController,
-            label: 'nama@email.com',
-            icon: CupertinoIcons.mail,
-            fillColor: const Color(0xFFF7F8FA),
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.next,
-            autofillHints: const [AutofillHints.email],
-            validator: (value) {
-              final email = value?.trim() ?? '';
-              if (email.isEmpty) return 'Email wajib diisi';
-              if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)) {
-                return 'Format email tidak valid';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 17),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(child: Text('Password', style: _fieldLabelStyle)),
-              Flexible(
-                child: GestureDetector(
-                  onTap: _forgotPassword,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      'Lupa password?',
-                      style: appleStyle(
-                        color: AppTheme.primaryColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
+  Widget _buildLoginForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Email', style: _fieldLabelStyle),
+        const SizedBox(height: 8),
+        AuthTextField(
+          controller: _emailController,
+          label: 'nama@email.com',
+          icon: CupertinoIcons.mail,
+          fillColor: const Color(0xFFF7F8FA),
+          keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.next,
+          autofillHints: const [AutofillHints.email],
+          validator: (value) {
+            final email = value?.trim() ?? '';
+            if (email.isEmpty) return 'Email wajib diisi';
+            if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)) {
+              return 'Format email tidak valid';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(child: Text('Password', style: _fieldLabelStyle)),
+            Flexible(
+              child: GestureDetector(
+                onTap: _forgotPassword,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'Lupa password?',
+                    style: appleStyle(
+                      color: AppTheme.primaryColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
               ),
-            ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        AuthTextField(
+          controller: _passwordController,
+          label: 'Masukkan password',
+          icon: CupertinoIcons.lock,
+          fillColor: const Color(0xFFF7F8FA),
+          obscureText: _obscurePassword,
+          textInputAction: TextInputAction.done,
+          autofillHints: const [AutofillHints.password],
+          onFieldSubmitted: (_) {
+            if (!_isLoading) _login();
+          },
+          suffixIcon: IconButton(
+            tooltip: _obscurePassword
+                ? 'Tampilkan password'
+                : 'Sembunyikan password',
+            onPressed: () => setState(
+              () => _obscurePassword = !_obscurePassword,
+            ),
+            icon: Icon(
+              _obscurePassword ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
+              size: 19,
+            ),
           ),
-          const SizedBox(height: 8),
-          AuthTextField(
-            controller: _passwordController,
-            label: 'Masukkan password',
-            icon: CupertinoIcons.lock,
-            fillColor: const Color(0xFFF7F8FA),
-            obscureText: _obscurePassword,
-            textInputAction: TextInputAction.done,
-            autofillHints: const [AutofillHints.password],
-            onFieldSubmitted: (_) {
-              if (!_isLoading) _login();
-            },
-            suffixIcon: IconButton(
-              tooltip: _obscurePassword
-                  ? 'Tampilkan password'
-                  : 'Sembunyikan password',
-              onPressed: () => setState(
-                () => _obscurePassword = !_obscurePassword,
-              ),
-              icon: Icon(
-                _obscurePassword
-                    ? CupertinoIcons.eye
-                    : CupertinoIcons.eye_slash,
-                size: 19,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Password wajib diisi';
+            }
+            if (value.length < 8) return 'Password minimal 8 karakter';
+            return null;
+          },
+        ),
+        const SizedBox(height: 20),
+        SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: ElevatedButton(
+            onPressed: _isLoading ? null : _login,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
               ),
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Password wajib diisi';
-              }
-              if (value.length < 8) return 'Password minimal 8 karakter';
-              return null;
-            },
-          ),
-          const SizedBox(height: 22),
-          SizedBox(
-            width: double.infinity,
-            height: 54,
-            child: ElevatedButton(
-              onPressed: _isLoading ? null : _login,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2.4,
-                      ),
-                    )
-                  : const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Masuk'),
-                        SizedBox(width: 8),
-                        Icon(CupertinoIcons.arrow_right, size: 17),
-                      ],
+            child: _isLoading
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2.4,
                     ),
-            ),
+                  )
+                : const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Masuk'),
+                      SizedBox(width: 8),
+                      Icon(CupertinoIcons.arrow_right, size: 17),
+                    ],
+                  ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildBiometricButton() {
     return SizedBox(
       width: double.infinity,
-      height: 50,
+      height: 46,
       child: TextButton.icon(
         onPressed: _biometricLogin,
         icon: const Icon(Icons.fingerprint_rounded, size: 22),
@@ -399,7 +381,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   TextStyle get _fieldLabelStyle => appleStyle(
         color: AppTheme.textPrimary,
-        fontSize: 14,
-        fontWeight: FontWeight.w700,
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
       );
 }

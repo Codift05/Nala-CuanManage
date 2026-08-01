@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
@@ -110,7 +109,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           'Hapus Akun Permanen',
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontWeight: FontWeight.w600,
             color: AppTheme.errorColor,
           ),
@@ -121,7 +120,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           children: [
             Text(
               'Seluruh data akan dihapus permanen. Masukkan password untuk melanjutkan.',
-              style: GoogleFonts.inter(),
+              style: TextStyle(),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -140,7 +139,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Batal',
-              style: GoogleFonts.inter(color: AppTheme.textSecondary),
+              style: TextStyle(color: AppTheme.textSecondary),
             ),
           ),
           ElevatedButton(
@@ -149,7 +148,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ElevatedButton.styleFrom(backgroundColor: AppTheme.errorColor),
             child: Text(
               'Hapus permanen',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
               ),
@@ -191,7 +190,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
         title: Text(
           'Edit Profil',
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
@@ -242,7 +241,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           children: [
                             Text(
                               'Foto profil',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: AppTheme.textPrimary,
@@ -251,7 +250,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             const SizedBox(height: 3),
                             Text(
                               'JPG atau PNG, maksimal 1 MB',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 11,
                                 color: AppTheme.textSecondary,
                               ),
@@ -334,7 +333,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           )
                         : Text(
                             'Simpan Perubahan',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
@@ -345,7 +344,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 const SizedBox(height: 28),
                 Text(
                   'Zona berbahaya',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.errorColor,
@@ -366,7 +365,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       Expanded(
                         child: Text(
                           'Menghapus akun akan menghapus seluruh data secara permanen.',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 12,
                             height: 1.4,
                             color: AppTheme.textSecondary,

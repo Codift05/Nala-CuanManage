@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../theme/app_theme.dart';
 import '../services/transaction_service.dart';
@@ -223,7 +222,7 @@ class _ScanScreenState extends State<ScanScreen> {
       appBar: AppBar(
         title: Text(
           'Scan Struk',
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
@@ -243,7 +242,7 @@ class _ScanScreenState extends State<ScanScreen> {
         children: [
           Text(
             'Catat dari struk',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 19,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
@@ -252,7 +251,7 @@ class _ScanScreenState extends State<ScanScreen> {
           const SizedBox(height: 6),
           Text(
             'Ambil foto yang jelas. NALA akan menyiapkan draft untuk kamu periksa.',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 13,
               height: 1.4,
               color: AppTheme.textSecondary,
@@ -290,7 +289,7 @@ class _ScanScreenState extends State<ScanScreen> {
                     _isProcessing
                         ? 'Menganalisis struk dengan AI...'
                         : 'Pilih sumber struk',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       color: AppTheme.textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -342,7 +341,7 @@ class _ScanScreenState extends State<ScanScreen> {
             const SizedBox(width: 8),
             Text(
               label,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 color: AppTheme.textPrimary,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -381,14 +380,14 @@ class _ScanScreenState extends State<ScanScreen> {
                   children: [
                     Text(
                       'Draft struk siap',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     Text(
                       'Periksa kembali data di bawah ini',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 12,
                         color: AppTheme.textSecondary,
                       ),
@@ -418,7 +417,7 @@ class _ScanScreenState extends State<ScanScreen> {
                 const SizedBox(height: 16),
                 Text(
                   'Kategori',
-                  style: GoogleFonts.interTight(
+                  style: TextStyle(
                     fontSize: 12,
                     color: AppTheme.textSecondary,
                   ),
@@ -435,7 +434,7 @@ class _ScanScreenState extends State<ScanScreen> {
                 const SizedBox(height: 16),
                 Text(
                   'Sumber Dana',
-                  style: GoogleFonts.interTight(
+                  style: TextStyle(
                     fontSize: 12,
                     color: AppTheme.textSecondary,
                   ),
@@ -462,7 +461,7 @@ class _ScanScreenState extends State<ScanScreen> {
                   ),
                   child: Text(
                     'Scan Ulang',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       color: AppTheme.primaryColor,
                     ),
@@ -496,7 +495,7 @@ class _ScanScreenState extends State<ScanScreen> {
                         )
                       : Text(
                           'Simpan',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
@@ -585,7 +584,7 @@ class _ScanScreenState extends State<ScanScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: AppTheme.textSecondary,

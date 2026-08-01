@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 abstract final class AppTheme {
   static const Color primaryColor = Color(0xFFF5961A);
@@ -28,11 +27,13 @@ abstract final class AppTheme {
       surface: surfaceColor,
       error: errorColor,
     );
-    final baseTextTheme = GoogleFonts.interTightTextTheme();
+    final baseTextTheme =
+        ThemeData.light().textTheme.apply(fontFamily: 'Inter');
 
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
+      fontFamily: 'Inter',
       primaryColor: primaryColor,
       scaffoldBackgroundColor: backgroundColor,
       canvasColor: backgroundColor,
@@ -41,39 +42,39 @@ abstract final class AppTheme {
       highlightColor: Colors.transparent,
       dividerColor: borderColor,
       textTheme: baseTextTheme.copyWith(
-        headlineLarge: GoogleFonts.interTight(
+        headlineLarge: TextStyle(
           color: textPrimary,
           fontSize: 28,
           height: 1.15,
           fontWeight: FontWeight.w800,
         ),
-        headlineMedium: GoogleFonts.interTight(
+        headlineMedium: TextStyle(
           color: textPrimary,
           fontSize: 24,
           height: 1.2,
           fontWeight: FontWeight.w800,
         ),
-        titleLarge: GoogleFonts.interTight(
+        titleLarge: TextStyle(
           color: textPrimary,
           fontSize: 18,
           fontWeight: FontWeight.w700,
         ),
-        titleMedium: GoogleFonts.interTight(
+        titleMedium: TextStyle(
           color: textPrimary,
           fontSize: 15,
           fontWeight: FontWeight.w700,
         ),
-        bodyLarge: GoogleFonts.interTight(
+        bodyLarge: TextStyle(
           color: textPrimary,
           fontSize: 16,
           height: 1.45,
         ),
-        bodyMedium: GoogleFonts.interTight(
+        bodyMedium: TextStyle(
           color: textSecondary,
           fontSize: 14,
           height: 1.4,
         ),
-        labelLarge: GoogleFonts.interTight(
+        labelLarge: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w700,
         ),
@@ -88,7 +89,7 @@ abstract final class AppTheme {
         centerTitle: false,
         toolbarHeight: 60,
         iconTheme: const IconThemeData(color: textPrimary, size: 23),
-        titleTextStyle: GoogleFonts.interTight(
+        titleTextStyle: TextStyle(
           color: textPrimary,
           fontSize: 18,
           fontWeight: FontWeight.w700,
@@ -97,17 +98,17 @@ abstract final class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surfaceColor,
-        hintStyle: GoogleFonts.interTight(
+        hintStyle: TextStyle(
           color: const Color(0xFF9AA0AA),
           fontSize: 15,
           fontWeight: FontWeight.w500,
         ),
-        labelStyle: GoogleFonts.interTight(
+        labelStyle: TextStyle(
           color: textSecondary,
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),
-        floatingLabelStyle: GoogleFonts.interTight(
+        floatingLabelStyle: TextStyle(
           color: textPrimary,
           fontSize: 13,
           fontWeight: FontWeight.w600,
@@ -150,7 +151,7 @@ abstract final class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(controlRadius),
           ),
-          textStyle: GoogleFonts.interTight(
+          textStyle: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
           ),
@@ -166,7 +167,7 @@ abstract final class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(controlRadius),
           ),
-          textStyle: GoogleFonts.interTight(
+          textStyle: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
           ),
@@ -175,7 +176,7 @@ abstract final class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: primaryColor,
-          textStyle: GoogleFonts.interTight(
+          textStyle: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
           ),
@@ -227,12 +228,12 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: borderColor),
         ),
-        titleTextStyle: GoogleFonts.interTight(
+        titleTextStyle: TextStyle(
           color: textPrimary,
           fontSize: 19,
           fontWeight: FontWeight.w800,
         ),
-        contentTextStyle: GoogleFonts.interTight(
+        contentTextStyle: TextStyle(
           color: textSecondary,
           fontSize: 14,
           height: 1.45,
@@ -245,7 +246,7 @@ abstract final class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
         ),
-        contentTextStyle: GoogleFonts.interTight(
+        contentTextStyle: TextStyle(
           color: Colors.white,
           fontSize: 14,
           fontWeight: FontWeight.w600,
@@ -263,7 +264,7 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
         indicatorColor: const Color(0xFFEAF2FF),
         labelTextStyle: WidgetStatePropertyAll(
-          GoogleFonts.interTight(fontSize: 11, fontWeight: FontWeight.w700),
+          TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
         ),
       ),
     );

@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../services/transaction_service.dart';
@@ -228,7 +227,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               : widget.transactionDraft != null
                   ? 'Tinjau Draft Nala'
                   : 'Tambah Transaksi',
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
@@ -294,7 +293,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                     widget.transactionDraft != null
                                         ? 'Konfirmasi & Simpan'
                                         : 'Simpan Transaksi',
-                                    style: GoogleFonts.inter(
+                                    style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
                                       color: Colors.white,
@@ -344,7 +343,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: Text(
         label,
         textAlign: TextAlign.center,
-        style: GoogleFonts.inter(
+        style: TextStyle(
           color: color,
           fontSize: 13,
           fontWeight: FontWeight.w600,
@@ -368,7 +367,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             controller: _amountController,
             keyboardType: TextInputType.number,
             inputFormatters: [_rupiahFormatter],
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
@@ -376,7 +375,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             decoration: InputDecoration(
               labelText: 'Nominal',
               hintText: '0',
-              hintStyle: GoogleFonts.inter(
+              hintStyle: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textSecondary.withValues(alpha: 0.55),
@@ -390,7 +389,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 widthFactor: 1,
                 child: Text(
                   'Rp',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
@@ -423,7 +422,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       children: [
         Text(
           'Dompet / Sumber Dana',
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: AppTheme.textSecondary,
@@ -438,7 +437,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           items: _wallets.map((w) {
             return DropdownMenuItem(
               value: w.id,
-              child: Text(w.name, style: GoogleFonts.inter()),
+              child: Text(w.name, style: TextStyle()),
             );
           }).toList(),
           onChanged: (val) {
@@ -457,7 +456,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       children: [
         Text(
           'Kategori',
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: AppTheme.textSecondary,
@@ -472,7 +471,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           items: _categories.map((c) {
             return DropdownMenuItem(
               value: c,
-              child: Text(c, style: GoogleFonts.inter()),
+              child: Text(c, style: TextStyle()),
             );
           }).toList(),
           onChanged: (val) {
@@ -496,7 +495,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: AppTheme.textSecondary,
@@ -506,7 +505,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         TextFormField(
           controller: controller,
           maxLines: maxLines,
-          style: GoogleFonts.inter(fontSize: 14),
+          style: TextStyle(fontSize: 14),
           decoration: InputDecoration(
             hintText: hint,
           ),

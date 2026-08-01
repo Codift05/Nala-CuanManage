@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 
 class ExpenseItemCard extends StatelessWidget {
@@ -60,7 +59,7 @@ class ExpenseItemCard extends StatelessWidget {
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.interTight(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: AppTheme.textPrimary,
@@ -70,7 +69,7 @@ class ExpenseItemCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       amount,
-                      style: GoogleFonts.interTight(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.textPrimary,
@@ -110,7 +109,7 @@ class ExpenseItemCard extends StatelessWidget {
                     const SizedBox(width: 12),
                     Text(
                       '${percentage.toInt()}%',
-                      style: GoogleFonts.interTight(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: AppTheme.textSecondary,

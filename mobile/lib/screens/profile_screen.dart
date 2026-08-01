@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/biometric_service.dart';
@@ -97,7 +96,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   Text(
                     'Profil belum dapat dimuat',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: AppTheme.textPrimary,
@@ -107,7 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   Text(
                     _loadError ?? 'Silakan coba beberapa saat lagi.',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       color: AppTheme.textSecondary,
                       height: 1.4,
                     ),
@@ -136,7 +135,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             children: [
               Text(
                 'Profil',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
@@ -265,7 +264,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                       _user?['name'] ?? 'Pengguna',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
                         color: AppTheme.textPrimary,
@@ -276,7 +275,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                       _user?['email'] ?? 'Kelola data akun',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 12,
                         color: AppTheme.textSecondary,
                       ),
@@ -300,7 +299,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   Widget _buildSectionLabel(String label) {
     return Text(
       label,
-      style: GoogleFonts.inter(
+      style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
         color: AppTheme.textSecondary,
@@ -364,7 +363,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               Expanded(
                 child: Text(
                   title,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: textColor ?? AppTheme.textPrimary,

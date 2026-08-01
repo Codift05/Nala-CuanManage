@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class BudgetProgressBar extends StatelessWidget {
   final String label;
@@ -29,7 +28,7 @@ class BudgetProgressBar extends StatelessWidget {
           children: [
             Text(
               label,
-              style: GoogleFonts.interTight(
+              style: TextStyle(
                 fontSize: 14,
                 color: const Color(0xFF1A1A1A),
                 fontWeight:
@@ -38,7 +37,7 @@ class BudgetProgressBar extends StatelessWidget {
             ),
             Text(
               '${percentage.toInt()}%',
-              style: GoogleFonts.interTight(
+              style: TextStyle(
                 fontSize: 14,
                 color: percentage > 100 ? activeColor : const Color(0xFF1A1A1A),
                 fontWeight: FontWeight.bold,

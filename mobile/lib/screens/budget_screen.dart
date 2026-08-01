@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../services/budget_service.dart';
@@ -76,7 +75,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
         ),
         title: Text(
           'Budget',
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
@@ -104,7 +103,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           const SizedBox(height: 24),
                           Text(
                             'Batas per kategori',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.textPrimary,
@@ -150,7 +149,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
               Text(
                 'Belum ada anggaran bulan ini',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textSecondary,
@@ -192,7 +191,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
               children: [
                 Text(
                   'TOTAL BUDGET BULAN INI',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.6,
@@ -205,7 +204,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     _currencyFormat.format(total),
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
@@ -223,7 +222,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
             ),
             child: Text(
               '${_budgets.length} kategori',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF54290B),
@@ -270,7 +269,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
               children: [
                 Text(
                   budget.categoryId,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
@@ -279,7 +278,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 const SizedBox(height: 4),
                 Text(
                   'Batas bulanan',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 11,
                     color: AppTheme.textSecondary,
                   ),
@@ -290,7 +289,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
           const SizedBox(width: 12),
           Text(
             _currencyFormat.format(budget.amount),
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
@@ -388,7 +387,7 @@ class _AddBudgetSheetState extends State<_AddBudgetSheet> {
             children: [
               Text(
                 'Buat Anggaran Baru',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
@@ -404,7 +403,7 @@ class _AddBudgetSheetState extends State<_AddBudgetSheet> {
                 ),
                 items: _categories.map((c) {
                   return DropdownMenuItem(
-                      value: c, child: Text(c, style: GoogleFonts.inter()));
+                      value: c, child: Text(c, style: TextStyle()));
                 }).toList(),
                 onChanged: (val) {
                   if (val != null) setState(() => _categoryId = val);
@@ -414,7 +413,7 @@ class _AddBudgetSheetState extends State<_AddBudgetSheet> {
               TextFormField(
                 controller: _amountController,
                 keyboardType: TextInputType.number,
-                style: GoogleFonts.inter(),
+                style: TextStyle(),
                 decoration: InputDecoration(
                   labelText: 'Batas Anggaran Bulanan',
                   prefixText: 'Rp ',
@@ -444,7 +443,7 @@ class _AddBudgetSheetState extends State<_AddBudgetSheet> {
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
                           'Simpan Anggaran',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,

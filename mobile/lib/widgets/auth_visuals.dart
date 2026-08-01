@@ -10,14 +10,7 @@ TextStyle appleStyle({
   FontWeight? fontWeight,
 }) {
   return TextStyle(
-    fontFamily: '.SF Pro Display',
-    fontFamilyFallback: const [
-      'SF Pro Text',
-      'Helvetica Neue',
-      'Helvetica',
-      'Arial',
-      'sans-serif',
-    ],
+    fontFamily: 'Inter',
     color: color,
     fontSize: fontSize,
     height: height,
@@ -76,26 +69,26 @@ class AuthTextField extends StatelessWidget {
         filled: true,
         fillColor: fillColor,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 17,
-          vertical: 18,
+          horizontal: 16,
+          vertical: 16,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppTheme.borderColor),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(
             color: AppTheme.primaryColor,
             width: 1.5,
           ),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppTheme.errorColor),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(
             color: AppTheme.errorColor,
             width: 1.5,

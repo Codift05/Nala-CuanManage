@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../services/recurring_service.dart';
@@ -106,7 +105,7 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
         ),
         title: Text(
           'Tagihan Berulang',
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
@@ -134,7 +133,7 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
                           const SizedBox(height: 24),
                           Text(
                             'Jadwal bulanan',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.textPrimary,
@@ -179,7 +178,7 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
               const SizedBox(height: 14),
               Text(
                 'Belum ada tagihan rutin',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textSecondary,
@@ -221,7 +220,7 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
               children: [
                 Text(
                   'TOTAL TAGIHAN BULANAN',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.6,
@@ -234,7 +233,7 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     _currencyFormat.format(total),
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
@@ -252,7 +251,7 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
             ),
             child: Text(
               '${_bills.length} tagihan',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF54290B),
@@ -287,7 +286,7 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
               children: [
                 Text(
                   'TGL',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 8,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textSecondary,
@@ -295,7 +294,7 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
                 ),
                 Text(
                   '${bill.dueDate}',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: AppTheme.textPrimary,
@@ -311,7 +310,7 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
               children: [
                 Text(
                   bill.title,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
@@ -320,7 +319,7 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
                 const SizedBox(height: 4),
                 Text(
                   '${bill.categoryId} • ${bill.walletName ?? 'Dompet'}',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 11,
                     color: AppTheme.textSecondary,
                   ),
@@ -333,7 +332,7 @@ class _RecurringBillsScreenState extends State<RecurringBillsScreen> {
             children: [
               Text(
                 _currencyFormat.format(bill.amount),
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
@@ -488,7 +487,7 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
             children: [
               Text(
                 'Tambah Tagihan Rutin',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
@@ -497,7 +496,7 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
               const SizedBox(height: 24),
               TextFormField(
                 controller: _titleController,
-                style: GoogleFonts.inter(),
+                style: TextStyle(),
                 decoration: InputDecoration(
                   labelText: 'Nama Tagihan (Misal: Netflix, Listrik)',
                   border: OutlineInputBorder(
@@ -515,7 +514,7 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
                     child: TextFormField(
                       controller: _amountController,
                       keyboardType: TextInputType.number,
-                      style: GoogleFonts.inter(),
+                      style: TextStyle(),
                       decoration: InputDecoration(
                         labelText: 'Nominal',
                         prefixText: 'Rp ',
@@ -537,7 +536,7 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
                     child: TextFormField(
                       controller: _dueDateController,
                       keyboardType: TextInputType.number,
-                      style: GoogleFonts.inter(),
+                      style: TextStyle(),
                       decoration: InputDecoration(
                         labelText: 'Tgl (1-31)',
                         border: OutlineInputBorder(
@@ -562,7 +561,7 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
                 items: _categories
                     .map((category) => DropdownMenuItem(
                           value: category,
-                          child: Text(category, style: GoogleFonts.inter()),
+                          child: Text(category, style: TextStyle()),
                         ))
                     .toList(),
                 onChanged: (value) {
@@ -591,7 +590,7 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
                           'Simpan Tagihan',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
@@ -648,7 +647,7 @@ class _AddRecurringBillSheetState extends State<_AddRecurringBillSheet> {
       items: _wallets
           .map((wallet) => DropdownMenuItem(
                 value: wallet.id,
-                child: Text(wallet.name, style: GoogleFonts.inter()),
+                child: Text(wallet.name, style: TextStyle()),
               ))
           .toList(),
       onChanged: (walletId) => setState(() => _selectedWalletId = walletId),

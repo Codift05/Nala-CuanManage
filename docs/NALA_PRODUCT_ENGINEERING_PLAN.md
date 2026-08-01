@@ -584,6 +584,8 @@ Pada akhir setiap sesi pengembangan:
 | 1 Agustus 2026 | Rebuild Aktivitas dan Laporan dikurangi | Hasil filter, total, dan kelompok transaksi diterapkan dalam satu `setState`; perubahan filter, bulan, dan panah laporan tidak lagi memicu rebuild pendahuluan yang redundan |
 | 1 Agustus 2026 | Pemrosesan gambar tidak memblokir UI native | Encoding base64 struk dan avatar memakai `compute`; foto struk diperkecil saat dipilih dan dibatasi sebelum dikirim agar tetap di bawah limit request backend |
 | 1 Agustus 2026 | Integrasi native dibatasi per platform | Chrome tidak lagi membuat Telephony atau subscription Home Widget; listener SMS hanya aktif di Android dan subscription widget dibatalkan saat Dashboard dilepas |
+| 1 Agustus 2026 | Tipografi dipusatkan dan dibundel | 171 pemanggilan Google Fonts diganti `TextStyle` native yang mewarisi Inter dari `ThemeData`; satu variable font resmi dan lisensi OFL dibundel sehingga runtime fetch serta dependency `google_fonts` dihapus |
+| 1 Agustus 2026 | Login diselaraskan dengan Splash dan Home | Logo memakai `Nala baru.png` berukuran 56 px tanpa container dekoratif; heading, field, CTA, radius, dan spacing dipadatkan serta card form generik dihapus |
 
 ### Log keputusan
 

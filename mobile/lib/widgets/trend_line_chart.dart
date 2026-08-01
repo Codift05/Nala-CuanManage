@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 
 class TrendLineChart extends StatelessWidget {
@@ -37,7 +36,7 @@ class TrendLineChart extends StatelessWidget {
           children: labels.map((label) {
             return Text(
               label,
-              style: GoogleFonts.interTight(
+              style: TextStyle(
                 fontSize: 12,
                 color: AppTheme.textSecondary,
               ),

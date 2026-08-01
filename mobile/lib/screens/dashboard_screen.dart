@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../widgets/budget_progress_bar.dart';
@@ -311,7 +310,7 @@ class DashboardScreenState extends State<DashboardScreen>
             'Hai, $_userName!',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
@@ -434,7 +433,7 @@ class DashboardScreenState extends State<DashboardScreen>
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
               color: AppTheme.textPrimary,
@@ -566,7 +565,7 @@ class DashboardScreenState extends State<DashboardScreen>
               Expanded(
                 child: Text(
                   'Belum ada notifikasi baru',
-                  style: GoogleFonts.interTight(
+                  style: TextStyle(
                     color: const Color(0xFF101217),
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -612,7 +611,7 @@ class DashboardScreenState extends State<DashboardScreen>
           Expanded(
             child: Text(
               _nudgeMessage,
-              style: GoogleFonts.interTight(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF4B5563),
@@ -858,7 +857,7 @@ class DashboardScreenState extends State<DashboardScreen>
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
@@ -925,7 +924,7 @@ class DashboardScreenState extends State<DashboardScreen>
       child: entries.isEmpty
           ? Text(
               'Belum ada pengeluaran bulan ini.',
-              style: GoogleFonts.interTight(
+              style: TextStyle(
                 color: const Color(0xFF7D8794),
                 fontWeight: FontWeight.w600,
               ),
@@ -977,7 +976,7 @@ class DashboardScreenState extends State<DashboardScreen>
                       children: [
                         TextSpan(
                           text: 'Total ',
-                          style: GoogleFonts.interTight(
+                          style: TextStyle(
                             color: const Color(0xFF7D8794),
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -985,7 +984,7 @@ class DashboardScreenState extends State<DashboardScreen>
                         ),
                         TextSpan(
                           text: _currencyFormat.format(_monthlyExpense),
-                          style: GoogleFonts.interTight(
+                          style: TextStyle(
                             color: const Color(0xFF101217),
                             fontSize: 14,
                             fontWeight: FontWeight.w800,
@@ -995,7 +994,7 @@ class DashboardScreenState extends State<DashboardScreen>
                           text: _monthlyBudget > 0
                               ? ' dari ${_currencyFormat.format(_monthlyBudget)} budget'
                               : ' • belum ada budget',
-                          style: GoogleFonts.interTight(
+                          style: TextStyle(
                             color: const Color(0xFF7D8794),
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -1024,7 +1023,7 @@ class DashboardScreenState extends State<DashboardScreen>
             label,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.interTight(
+            style: TextStyle(
               color: const Color(0xFF7D8794),
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -1052,7 +1051,7 @@ class DashboardScreenState extends State<DashboardScreen>
       child: _budgets.isEmpty
           ? Text(
               'Belum ada budget bulan ini.',
-              style: GoogleFonts.interTight(
+              style: TextStyle(
                 color: const Color(0xFF7D8794),
                 fontWeight: FontWeight.w600,
               ),
@@ -1093,7 +1092,7 @@ class DashboardScreenState extends State<DashboardScreen>
         ),
         child: Text(
           'Belum ada transaksi.',
-          style: GoogleFonts.interTight(
+          style: TextStyle(
             color: const Color(0xFF7D8794),
             fontWeight: FontWeight.w600,
           ),
@@ -1172,7 +1171,7 @@ class DashboardScreenState extends State<DashboardScreen>
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.interTight(
+                      style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 16,
                         color: const Color(0xFF101217),
@@ -1183,7 +1182,7 @@ class DashboardScreenState extends State<DashboardScreen>
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.interTight(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFF7D8794),
@@ -1200,7 +1199,7 @@ class DashboardScreenState extends State<DashboardScreen>
                   alignment: Alignment.centerRight,
                   child: Text(
                     amount,
-                    style: GoogleFonts.interTight(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
                       color: const Color(0xFF101217),

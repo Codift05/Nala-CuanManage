@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../services/transaction_service.dart';
@@ -285,7 +284,7 @@ class _TransactionScreenState extends State<TransactionScreen>
                                 child: Text(
                                   'Belum ada aktivitas pada bulan ini.',
                                   textAlign: TextAlign.center,
-                                  style: GoogleFonts.inter(
+                                  style: TextStyle(
                                     color: AppTheme.textSecondary,
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
@@ -321,10 +320,10 @@ class _TransactionScreenState extends State<TransactionScreen>
               child: TextField(
                 controller: _searchController,
                 autofocus: true,
-                style: GoogleFonts.inter(fontSize: 14),
+                style: TextStyle(fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Cari transaksi...',
-                  hintStyle: GoogleFonts.inter(
+                  hintStyle: TextStyle(
                     color: AppTheme.textSecondary,
                     fontSize: 14,
                   ),
@@ -372,7 +371,7 @@ class _TransactionScreenState extends State<TransactionScreen>
             children: [
               Text(
                 'Aktivitas',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
@@ -386,7 +385,7 @@ class _TransactionScreenState extends State<TransactionScreen>
                   children: [
                     Text(
                       _formatMonthYear(_selectedMonth),
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: AppTheme.textSecondary,
@@ -487,7 +486,7 @@ class _TransactionScreenState extends State<TransactionScreen>
         children: [
           Text(
             'Ringkasan arus kas',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
               color: AppTheme.textSecondary,
@@ -499,7 +498,7 @@ class _TransactionScreenState extends State<TransactionScreen>
             children: [
               Text(
                 _formatMonthYear(_selectedMonth),
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                   color: AppTheme.textSecondary,
@@ -507,7 +506,7 @@ class _TransactionScreenState extends State<TransactionScreen>
               ),
               Text(
                 'Selisih ${_formatCurrency(difference)}',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
@@ -571,7 +570,7 @@ class _TransactionScreenState extends State<TransactionScreen>
               const SizedBox(width: 8),
               Text(
                 label,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 11,
                   color: AppTheme.textSecondary,
                 ),
@@ -584,7 +583,7 @@ class _TransactionScreenState extends State<TransactionScreen>
             alignment: Alignment.centerLeft,
             child: Text(
               _currencyFormat.format(amount),
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
@@ -643,7 +642,7 @@ class _TransactionScreenState extends State<TransactionScreen>
           alignment: Alignment.center,
           child: Text(
             label,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               color: isSelected ? AppTheme.textPrimary : AppTheme.textSecondary,
@@ -665,7 +664,7 @@ class _TransactionScreenState extends State<TransactionScreen>
         children: [
           Text(
             date,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
@@ -735,7 +734,7 @@ class _TransactionScreenState extends State<TransactionScreen>
                     children: [
                       Text(
                         tx['title'] as String,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: AppTheme.textPrimary,
@@ -744,7 +743,7 @@ class _TransactionScreenState extends State<TransactionScreen>
                       const SizedBox(height: 4),
                       Text(
                         tx['account'] as String,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 12,
                           color: AppTheme.textSecondary,
                         ),
@@ -754,7 +753,7 @@ class _TransactionScreenState extends State<TransactionScreen>
                 ),
                 Text(
                   _formatCurrency(amount),
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color:
@@ -811,7 +810,7 @@ class _TransactionScreenState extends State<TransactionScreen>
               const SizedBox(height: 16),
               Text(
                 'Pilih Bulan',
-                style: GoogleFonts.interTight(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
@@ -828,7 +827,7 @@ class _TransactionScreenState extends State<TransactionScreen>
                     return ListTile(
                       title: Text(
                         _formatMonthYear(month),
-                        style: GoogleFonts.interTight(
+                        style: TextStyle(
                           fontWeight:
                               isSelected ? FontWeight.bold : FontWeight.normal,
                           color: isSelected

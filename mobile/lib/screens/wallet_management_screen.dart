@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../services/wallet_service.dart';
@@ -70,7 +69,7 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
         ),
         title: Text(
           'Bank & Dompet',
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
@@ -98,7 +97,7 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
                           const SizedBox(height: 24),
                           Text(
                             'Sumber dana',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.textPrimary,
@@ -143,7 +142,7 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
               const SizedBox(height: 14),
               Text(
                 'Belum ada dompet',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textSecondary,
@@ -185,7 +184,7 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
               children: [
                 Text(
                   'TOTAL DANA',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.6,
@@ -198,7 +197,7 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     _currencyFormat.format(total),
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
@@ -216,7 +215,7 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
             ),
             child: Text(
               '${_wallets.length} akun',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF54290B),
@@ -266,7 +265,7 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
               children: [
                 Text(
                   wallet.name,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
@@ -275,7 +274,7 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
                 const SizedBox(height: 4),
                 Text(
                   typeLabel,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 11,
                     color: AppTheme.textSecondary,
                   ),
@@ -285,7 +284,7 @@ class _WalletManagementScreenState extends State<WalletManagementScreen> {
           ),
           Text(
             _currencyFormat.format(wallet.balance),
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
@@ -369,7 +368,7 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
             children: [
               Text(
                 'Tambah Dompet Baru',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
@@ -378,7 +377,7 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
               const SizedBox(height: 24),
               TextFormField(
                 controller: _nameController,
-                style: GoogleFonts.inter(),
+                style: TextStyle(),
                 decoration: InputDecoration(
                   labelText: 'Nama Dompet (Misal: BCA, GoPay)',
                   border: OutlineInputBorder(
@@ -398,7 +397,7 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
                 ),
                 items: _types.map((t) {
                   return DropdownMenuItem(
-                      value: t, child: Text(t, style: GoogleFonts.inter()));
+                      value: t, child: Text(t, style: TextStyle()));
                 }).toList(),
                 onChanged: (val) {
                   if (val != null) setState(() => _type = val);
@@ -408,7 +407,7 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
               TextFormField(
                 controller: _balanceController,
                 keyboardType: TextInputType.number,
-                style: GoogleFonts.inter(),
+                style: TextStyle(),
                 decoration: InputDecoration(
                   labelText: 'Saldo awal (opsional)',
                   prefixText: 'Rp ',
@@ -438,7 +437,7 @@ class _AddWalletSheetState extends State<_AddWalletSheet> {
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
                           'Simpan Dompet',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../services/chat_service.dart';
 import '../theme/app_theme.dart';
 import 'add_transaction_screen.dart';
@@ -165,7 +164,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
             children: [
               Text(
                 'Nala',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Colors.black,
@@ -173,7 +172,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
               ),
               Text(
                 'Asisten finansial • AI',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 11,
                   color: AppTheme.textSecondary,
                 ),
@@ -221,7 +220,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
               const SizedBox(width: 9),
               Text(
                 'Nala sedang menyusun...',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 12,
                   color: AppTheme.textSecondary,
                 ),
@@ -270,7 +269,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
                 ),
                 child: Text(
                   text,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 13,
                     color: AppTheme.textPrimary,
                     height: 1.45,
@@ -299,7 +298,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
             ),
             child: Text(
               text,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 13,
                 color: Colors.white,
                 height: 1.45,
@@ -339,7 +338,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
                       controller: _textController,
                       decoration: InputDecoration(
                         hintText: 'Tanya Nala...',
-                        hintStyle: GoogleFonts.inter(
+                        hintStyle: TextStyle(
                           color: AppTheme.textSecondary,
                           fontSize: 13,
                         ),
@@ -392,7 +391,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
         itemBuilder: (context, index) => ActionChip(
           label: Text(
             prompts[index],
-            style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
           ),
           onPressed: () {
             _textController.text = prompts[index];

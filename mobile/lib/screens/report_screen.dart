@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -210,7 +209,7 @@ class _ReportScreenState extends State<ReportScreen>
                           const SizedBox(height: 24),
                           Text(
                             'Pengeluaran terbesar',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.textPrimary,
@@ -233,7 +232,7 @@ class _ReportScreenState extends State<ReportScreen>
   Widget _buildHeader() {
     return Text(
       'Laporan',
-      style: GoogleFonts.inter(
+      style: TextStyle(
         fontSize: 19,
         fontWeight: FontWeight.w600,
         color: AppTheme.textPrimary,
@@ -272,7 +271,7 @@ class _ReportScreenState extends State<ReportScreen>
             child: Text(
               _formatMonthYear(_selectedDate),
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
@@ -352,7 +351,7 @@ class _ReportScreenState extends State<ReportScreen>
               const SizedBox(width: 12),
               Text(
                 title,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 11,
                   color: AppTheme.textSecondary,
                 ),
@@ -365,7 +364,7 @@ class _ReportScreenState extends State<ReportScreen>
             alignment: Alignment.centerLeft,
             child: Text(
               amount,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
@@ -386,7 +385,7 @@ class _ReportScreenState extends State<ReportScreen>
           children: [
             Text(
               'Tren 3 Bulan',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
@@ -448,7 +447,7 @@ class _ReportScreenState extends State<ReportScreen>
                                       padding: const EdgeInsets.only(top: 8.0),
                                       child: Text(
                                         _trendData[index]['month'],
-                                        style: GoogleFonts.inter(
+                                        style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: index == 2
                                               ? FontWeight.bold
@@ -523,7 +522,7 @@ class _ReportScreenState extends State<ReportScreen>
         const SizedBox(width: 6),
         Text(
           label,
-          style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+          style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
         ),
       ],
     );
@@ -542,7 +541,7 @@ class _ReportScreenState extends State<ReportScreen>
         child: Text(
           'Belum ada pengeluaran bulan ini.',
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             color: AppTheme.textSecondary,
             fontSize: 13,
           ),
