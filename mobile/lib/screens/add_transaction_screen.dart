@@ -8,25 +8,16 @@ import '../services/wallet_service.dart';
 import '../models/wallet.dart';
 import '../models/transaction.dart';
 import '../widgets/load_error_view.dart';
+import '../widgets/horizontal_page_route.dart';
 
 PageRouteBuilder<T> addTransactionRoute<T>({
   TransactionItem? transactionToEdit,
   Map<String, dynamic>? transactionDraft,
 }) {
-  return PageRouteBuilder<T>(
-    transitionDuration: const Duration(milliseconds: 360),
-    reverseTransitionDuration: const Duration(milliseconds: 300),
-    pageBuilder: (_, __, ___) => AddTransactionScreen(
+  return horizontalPageRoute<T>(
+    AddTransactionScreen(
       transactionToEdit: transactionToEdit,
       transactionDraft: transactionDraft,
-    ),
-    transitionsBuilder: (_, animation, __, child) => SlideTransition(
-      position: animation.drive(
-        Tween(begin: const Offset(1, 0), end: Offset.zero).chain(
-          CurveTween(curve: Curves.easeOutCubic),
-        ),
-      ),
-      child: child,
     ),
   );
 }

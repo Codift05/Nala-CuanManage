@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../widgets/budget_progress_bar.dart';
 import '../widgets/donut_chart.dart';
+import '../widgets/horizontal_page_route.dart';
 import 'health_screen.dart';
 import '../services/wallet_service.dart';
 import '../services/transaction_service.dart';
@@ -482,7 +483,7 @@ class DashboardScreenState extends State<DashboardScreen>
           _buildSectionTitle('Rencana budget', () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const BudgetScreen()),
+              horizontalPageRoute(const BudgetScreen()),
             );
           }),
           const SizedBox(height: 12),
@@ -800,7 +801,7 @@ class DashboardScreenState extends State<DashboardScreen>
           const Color(0xFF93AEF4),
           () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const BudgetScreen()),
+            horizontalPageRoute(const BudgetScreen()),
           ),
         ),
         _buildActionTile(
@@ -809,7 +810,7 @@ class DashboardScreenState extends State<DashboardScreen>
           const Color(0xFFB8A0E8),
           () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const ScanScreen()),
+            horizontalPageRoute(const ScanScreen()),
           ),
         ),
         _buildActionTile(
@@ -818,7 +819,7 @@ class DashboardScreenState extends State<DashboardScreen>
           const Color(0xFFFFBE73),
           () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const HealthScreen()),
+            horizontalPageRoute(const HealthScreen()),
           ),
         ),
       ],

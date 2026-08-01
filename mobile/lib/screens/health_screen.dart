@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../widgets/speedometer_chart.dart';
 import '../widgets/trend_line_chart.dart';
 import 'nala_chat_screen.dart';
+import '../widgets/horizontal_page_route.dart';
 
 class HealthScreen extends StatefulWidget {
   const HealthScreen({super.key});
@@ -484,7 +485,7 @@ class _HealthScreenState extends State<HealthScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const NalaChatScreen()),
+            horizontalPageRoute(const NalaChatScreen()),
           );
         },
         icon: const Icon(Icons.chat_bubble_outline,

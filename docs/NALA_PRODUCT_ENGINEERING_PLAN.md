@@ -598,6 +598,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Pemulihan viewport keyboard dibuat stabil | Ukuran kanvas Welcome hanya diambil sekali agar frame perantara ketika keyboard turun tidak mengganti ukuran headline atau ilustrasi |
 | 2 Agustus 2026 | Animasi ganda keyboard dihapus | Sheet mengikuti inset keyboard secara langsung melalui transform komposit; tween yang terus mengejar target inset dihapus |
 | 2 Agustus 2026 | Transisi halaman Catat disatukan | Semua pintu transaksi memakai slide kanan-ke-kiri 360 ms berbasis compositor dan kembali 300 ms tanpa efek berat |
+| 2 Agustus 2026 | Transisi horizontal diperluas | Budget, Scan, Skor, Profil/Edit, Bank & dompet, Tagihan berulang, dan Nala Chat memakai gerak halaman yang konsisten |
 
 ### Log keputusan
 

@@ -7,6 +7,7 @@ import 'login_screen.dart';
 import 'wallet_management_screen.dart';
 import 'recurring_bills_screen.dart';
 import 'edit_profile_screen.dart';
+import '../widgets/horizontal_page_route.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -58,9 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     if (_user == null) return;
     final updated = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => EditProfileScreen(user: _user!),
-      ),
+      horizontalPageRoute(EditProfileScreen(user: _user!)),
     );
     if (updated == true) {
       _loadUser();
@@ -154,9 +153,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => const WalletManagementScreen(),
-                        ),
+                        horizontalPageRoute(const WalletManagementScreen()),
                       );
                     },
                   ),
@@ -167,9 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => const RecurringBillsScreen(),
-                        ),
+                        horizontalPageRoute(const RecurringBillsScreen()),
                       );
                     },
                   ),
