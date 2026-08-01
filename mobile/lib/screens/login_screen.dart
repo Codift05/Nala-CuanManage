@@ -153,9 +153,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildBackButton(),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 18),
                           _buildHeader(),
-                          const SizedBox(height: 28),
+                          const SizedBox(height: 26),
                           _buildLoginForm(),
                           const SizedBox(height: 18),
                           _buildBiometricButton(),
@@ -194,21 +194,13 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Image.asset(
-          'img/Nala baru.png',
-          width: 56,
-          height: 56,
-          fit: BoxFit.contain,
-          alignment: Alignment.centerLeft,
-          filterQuality: FilterQuality.high,
-          semanticLabel: 'Logo Nala',
-        ),
-        const SizedBox(height: 24),
+        const AuthBrandMark(size: 44),
+        const SizedBox(height: 20),
         Text(
           'Selamat datang kembali.',
           style: appleStyle(
             color: AppTheme.textPrimary,
-            fontSize: 24,
+            fontSize: 23,
             height: 1.18,
             letterSpacing: -.3,
             fontWeight: FontWeight.w600,

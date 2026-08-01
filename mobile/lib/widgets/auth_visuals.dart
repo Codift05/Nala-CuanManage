@@ -19,6 +19,26 @@ TextStyle appleStyle({
   );
 }
 
+class AuthBrandMark extends StatelessWidget {
+  const AuthBrandMark({super.key, this.size = 44});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Image.asset(
+        'img/Logo Nala 4.png',
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+        semanticLabel: 'Logo Nala',
+      ),
+    );
+  }
+}
+
 class AuthTextField extends StatelessWidget {
   const AuthTextField({
     super.key,

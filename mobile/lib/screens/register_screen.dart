@@ -77,20 +77,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Image.asset(
-                        'img/Nala baru.png',
-                        width: 52,
-                        height: 52,
-                        fit: BoxFit.contain,
-                        alignment: Alignment.centerLeft,
-                        filterQuality: FilterQuality.high,
-                        semanticLabel: 'Logo Nala',
-                      ),
-                      const SizedBox(height: 22),
+                      const AuthBrandMark(size: 44),
+                      const SizedBox(height: 20),
                       Text(
                         'Buat akun',
                         style: appleStyle(
-                          fontSize: 24,
+                          fontSize: 23,
                           fontWeight: FontWeight.w600,
                           color: AppTheme.textPrimary,
                           letterSpacing: -.3,
@@ -104,7 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: AppTheme.textSecondary,
                         ),
                       ),
-                      const SizedBox(height: 26),
+                      const SizedBox(height: 24),
                       _label('Nama lengkap'),
                       const SizedBox(height: 8),
                       AuthTextField(

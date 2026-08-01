@@ -588,6 +588,7 @@ Pada akhir setiap sesi pengembangan:
 | 1 Agustus 2026 | Login diselaraskan dengan Splash dan Home | Logo memakai `Nala baru.png` berukuran 56 px tanpa container dekoratif; heading, field, CTA, radius, dan spacing dipadatkan serta card form generik dihapus |
 | 1 Agustus 2026 | Welcome auth memakai identitas visual NALA | Hero kota pesisir orisinal dan koin bergerak memakai animasi native 4 detik; shortcut fitur, CTA Masuk, dan Daftar disusun ulang tanpa menyalin identitas aplikasi referensi |
 | 1 Agustus 2026 | Logo hero Welcome diperhalus | Hero orange memakai `Logo Nala 4.png` berukuran 40 px tanpa container tambahan agar kontras dan tidak mendominasi headline |
+| 1 Agustus 2026 | Header Login dan Register disatukan | Keduanya memakai brand mark `Logo Nala 4.png` terpusat 44 px, heading 23 px, dan spacing vertikal yang sama agar form mengikuti grid yang rapi |
 
 ### Log keputusan
 
