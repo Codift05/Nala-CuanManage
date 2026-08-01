@@ -201,6 +201,10 @@ void main() {
     expect(
         find.text('Uang lebih tertata,\nhidup terasa ringan.'), findsOneWidget);
     expect(find.text('Masuk ke NALA'), findsOneWidget);
+    expect(
+      tester.widget<Scaffold>(find.byType(Scaffold)).resizeToAvoidBottomInset,
+      isFalse,
+    );
     expect(tester.takeException(), isNull);
   });
 

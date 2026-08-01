@@ -104,6 +104,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xFFF7F8FA),
       body: LayoutBuilder(
         builder: (context, constraints) {

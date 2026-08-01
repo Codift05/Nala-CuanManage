@@ -593,6 +593,7 @@ Pada akhir setiap sesi pengembangan:
 | 1 Agustus 2026 | Bottom sheet autentikasi dioptimalkan | Animasi hero dijeda selama modal aktif, repaint dipisahkan, dan Login/Register memakai tipografi sistem serta field yang lebih ringan |
 | 2 Agustus 2026 | Pergerakan form saat keyboard dioptimalkan | Pergeseran Login/Register memakai transform terkomposisi sehingga keyboard tidak memicu layout ulang seluruh form pada setiap frame |
 | 2 Agustus 2026 | Frame awal animasi keyboard distabilkan | Tinggi sheet dikunci, inset keyboard tidak diteruskan ke subtree form, dan kurva ease-in-out menghilangkan lonjakan gerak pada frame awal |
+| 2 Agustus 2026 | Background Welcome dilepas dari keyboard | Scaffold Welcome tidak lagi mengecil saat keyboard muncul; hanya sheet autentikasi yang bergerak dan hero tetap diam |
 
 ### Log keputusan
 
