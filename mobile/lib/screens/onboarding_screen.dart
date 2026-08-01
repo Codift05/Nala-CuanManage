@@ -22,6 +22,7 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _motionController;
+  Size? _welcomeLayoutSize;
 
   @override
   void initState() {
@@ -36,6 +37,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   void dispose() {
     _motionController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final media = MediaQuery.of(context);
+    if (media.viewInsets.bottom == 0 && _motionController.isAnimating) {
+      _welcomeLayoutSize = media.size;
+    }
   }
 
   Future<void> _showAuthSheet(Widget screen) async {
@@ -103,43 +113,51 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   @override
   Widget build(BuildContext context) {
+    final welcomeSize = _welcomeLayoutSize ?? MediaQuery.sizeOf(context);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xFFF7F8FA),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final compact = constraints.maxHeight < 720;
-          final panelHeight = compact ? 298.0 : 292.0;
-          return Stack(
-            children: [
-              Positioned.fill(
-                bottom: panelHeight - 28,
-                child: RepaintBoundary(
-                  child: _WelcomeHero(
+      body: OverflowBox(
+        alignment: Alignment.topCenter,
+        minWidth: welcomeSize.width,
+        maxWidth: welcomeSize.width,
+        minHeight: welcomeSize.height,
+        maxHeight: welcomeSize.height,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxHeight < 720;
+            final panelHeight = compact ? 298.0 : 292.0;
+            return Stack(
+              children: [
+                Positioned.fill(
+                  bottom: panelHeight - 28,
+                  child: RepaintBoundary(
+                    child: _WelcomeHero(
+                      compact: compact,
+                      animation: _motionController,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: panelHeight,
+                  child: _WelcomePanel(
                     compact: compact,
-                    animation: _motionController,
+                    onLogin: () => _showAuthSheet(
+                      const LoginScreen(sheet: true),
+                    ),
+                    onRegister: () => _showAuthSheet(
+                      const RegisterScreen(sheet: true),
+                    ),
+                    onBiometric: _biometricLogin,
                   ),
                 ),
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                height: panelHeight,
-                child: _WelcomePanel(
-                  compact: compact,
-                  onLogin: () => _showAuthSheet(
-                    const LoginScreen(sheet: true),
-                  ),
-                  onRegister: () => _showAuthSheet(
-                    const RegisterScreen(sheet: true),
-                  ),
-                  onBiometric: _biometricLogin,
-                ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

@@ -216,11 +216,19 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(home: OnboardingScreen()),
     );
+    final headline = find.text('Uang lebih tertata,\nhidup terasa ringan.');
+    final headlineSize = tester.widget<Text>(headline).style?.fontSize;
 
     await tester.tap(find.text('Masuk ke NALA'));
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Gunakan akun yang sudah terdaftar.'), findsOneWidget);
     expect(find.byType(BottomSheet), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(const Size(390, 540));
+    await tester.pump();
+    expect(tester.widget<Text>(headline).style?.fontSize, headlineSize);
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    await tester.pump();
 
     Navigator.pop(tester.element(find.byType(BottomSheet)));
     await tester.pump(const Duration(milliseconds: 500));
