@@ -204,6 +204,29 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Welcome opens Login and Register as bottom sheets',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      const MaterialApp(home: OnboardingScreen()),
+    );
+
+    await tester.tap(find.text('Masuk ke NALA'));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Gunakan akun yang sudah terdaftar.'), findsOneWidget);
+    expect(find.byType(BottomSheet), findsOneWidget);
+
+    Navigator.pop(tester.element(find.byType(BottomSheet)));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tap(find.text('Daftar'));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Daftar akun NALA'), findsOneWidget);
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Register screen fits a narrow phone', (tester) async {
     await tester.binding.setSurfaceSize(const Size(360, 640));
     addTearDown(() => tester.binding.setSurfaceSize(null));

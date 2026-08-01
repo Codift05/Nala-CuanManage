@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/app_theme.dart';
+import '../services/auth_service.dart';
+import '../services/biometric_service.dart';
 import '../widgets/auth_visuals.dart';
+import '../widgets/main_shell.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
 
@@ -35,9 +38,57 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     super.dispose();
   }
 
-  void _open(Widget screen) {
+  Future<void> _showAuthSheet(Widget screen) async {
     HapticFeedback.lightImpact();
-    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      backgroundColor: const Color(0xFFF7F8FA),
+      builder: (context) => AnimatedPadding(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * .88,
+          ),
+          child: screen,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _biometricLogin() async {
+    HapticFeedback.lightImpact();
+    final biometrics = BiometricService();
+    if (!await biometrics.isEnabled()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aktifkan biometrik dari pengaturan akun.'),
+          ),
+        );
+      }
+      return;
+    }
+    final unlocked = await biometrics.unlockSavedSession();
+    final sessionValid = unlocked && await AuthService().isLoggedIn();
+    if (!mounted) return;
+    if (sessionValid) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const MainShell()),
+        (_) => false,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Biometrik gagal atau sesi berakhir.')),
+      );
+    }
   }
 
   @override
@@ -64,8 +115,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 height: panelHeight,
                 child: _WelcomePanel(
                   compact: compact,
-                  onLogin: () => _open(const LoginScreen()),
-                  onRegister: () => _open(const RegisterScreen()),
+                  onLogin: () => _showAuthSheet(
+                    const LoginScreen(sheet: true),
+                  ),
+                  onRegister: () => _showAuthSheet(
+                    const RegisterScreen(sheet: true),
+                  ),
+                  onBiometric: _biometricLogin,
                 ),
               ),
             ],
@@ -222,11 +278,13 @@ class _WelcomePanel extends StatelessWidget {
     required this.compact,
     required this.onLogin,
     required this.onRegister,
+    required this.onBiometric,
   });
 
   final bool compact;
   final VoidCallback onLogin;
   final VoidCallback onRegister;
+  final VoidCallback onBiometric;
 
   @override
   Widget build(BuildContext context) {
@@ -270,19 +328,40 @@ class _WelcomePanel extends StatelessWidget {
               ],
             ),
             SizedBox(height: compact ? 16 : 20),
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: onLogin,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: onLogin,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: const Text('Masuk ke NALA'),
+                    ),
                   ),
                 ),
-                child: const Text('Masuk ke NALA'),
-              ),
+                const SizedBox(width: 10),
+                SizedBox(
+                  width: 52,
+                  height: 52,
+                  child: OutlinedButton(
+                    onPressed: onBiometric,
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      side: const BorderSide(color: AppTheme.primaryColor),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: const Icon(Icons.fingerprint_rounded, size: 24),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 4),
             Wrap(

@@ -11,7 +11,9 @@ import 'register_screen.dart';
 import 'reset_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({super.key, this.sheet = false});
+
+  final bool sheet;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -132,45 +134,76 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF6F7F9),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.fromLTRB(24, 10, 24, 28),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight - 38,
-                    maxWidth: 390,
-                  ),
-                  child: AutofillGroup(
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+    final content = SafeArea(
+      top: !widget.sheet,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: const EdgeInsets.fromLTRB(24, 10, 24, 28),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: widget.sheet ? 0 : constraints.maxHeight - 38,
+                  maxWidth: 390,
+                ),
+                child: AutofillGroup(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (!widget.sheet) ...[
                           _buildBackButton(),
                           const SizedBox(height: 18),
                           _buildHeader(),
                           const SizedBox(height: 26),
-                          _buildLoginForm(),
+                        ] else ...[
+                          Center(
+                            child: Text(
+                              'Masuk ke NALA',
+                              style: appleStyle(
+                                color: AppTheme.textPrimary,
+                                fontSize: 21,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Center(
+                            child: Text(
+                              'Gunakan akun yang sudah terdaftar.',
+                              style: appleStyle(
+                                color: AppTheme.textSecondary,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 22),
+                        ],
+                        _buildLoginForm(),
+                        if (!widget.sheet) ...[
                           const SizedBox(height: 18),
                           _buildBiometricButton(),
                           const SizedBox(height: 12),
                           _buildRegisterLink(),
                         ],
-                      ),
+                      ],
                     ),
                   ),
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
+    );
+    if (widget.sheet) {
+      return Material(color: const Color(0xFFF7F8FA), child: content);
+    }
+    return Scaffold(
+      backgroundColor: const Color(0xFFF6F7F9),
+      body: content,
     );
   }
 
