@@ -597,6 +597,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Kanvas Welcome dikunci selama autentikasi | Ukuran layout sebelum keyboard disimpan agar breakpoint compact, headline, dan ilustrasi tidak berubah ketika viewport web menyusut |
 | 2 Agustus 2026 | Pemulihan viewport keyboard dibuat stabil | Ukuran kanvas Welcome hanya diambil sekali agar frame perantara ketika keyboard turun tidak mengganti ukuran headline atau ilustrasi |
 | 2 Agustus 2026 | Animasi ganda keyboard dihapus | Sheet mengikuti inset keyboard secara langsung melalui transform komposit; tween yang terus mengejar target inset dihapus |
+| 2 Agustus 2026 | Transisi halaman Catat disatukan | Semua pintu transaksi memakai slide kanan-ke-kiri 360 ms berbasis compositor dan kembali 300 ms tanpa efek berat |
 
 ### Log keputusan
 

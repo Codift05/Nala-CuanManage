@@ -89,7 +89,7 @@ class DashboardScreenState extends State<DashboardScreen>
       if (uri?.host == 'add_transaction' && mounted) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
+          addTransactionRoute(),
         ).then((result) {
           if (result == true && mounted) _loadData();
         });
@@ -116,9 +116,7 @@ class DashboardScreenState extends State<DashboardScreen>
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => const AddTransactionScreen(),
-                        ),
+                        addTransactionRoute(),
                       ).then((result) {
                         if (result == true && mounted) _loadData();
                       });
@@ -790,9 +788,7 @@ class DashboardScreenState extends State<DashboardScreen>
           () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => const AddTransactionScreen(),
-              ),
+              addTransactionRoute(),
             ).then((result) {
               if (result == true && mounted) _loadData();
             });

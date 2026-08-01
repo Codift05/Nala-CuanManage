@@ -34,6 +34,14 @@ void main() {
     expect(result.selection.baseOffset, 6);
   });
 
+  test('Add transaction uses the shared horizontal route', () {
+    final route = addTransactionRoute<void>();
+
+    expect(route, isA<PageRouteBuilder<void>>());
+    expect(route.transitionDuration, const Duration(milliseconds: 360));
+    expect(route.reverseTransitionDuration, const Duration(milliseconds: 300));
+  });
+
   test('Legacy auth token migrates to secure storage', () async {
     FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({'auth_token': 'legacy-token'});

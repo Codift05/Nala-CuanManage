@@ -429,9 +429,7 @@ class _TransactionScreenState extends State<TransactionScreen>
                   onPressed: () async {
                     final result = await Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => const AddTransactionScreen(),
-                      ),
+                      addTransactionRoute(),
                     );
                     if (result == true) {
                       _loadTransactions();
@@ -701,9 +699,7 @@ class _TransactionScreenState extends State<TransactionScreen>
       onTap: () async {
         final result = await Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => AddTransactionScreen(transactionToEdit: rawTx),
-          ),
+          addTransactionRoute(transactionToEdit: rawTx),
         );
         if (result == true) {
           _loadTransactions();

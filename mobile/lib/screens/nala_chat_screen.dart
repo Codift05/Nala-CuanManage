@@ -80,9 +80,7 @@ class _NalaChatScreenState extends State<NalaChatScreen> {
       if (draft != null) {
         final saved = await Navigator.push<bool>(
           context,
-          MaterialPageRoute(
-            builder: (_) => AddTransactionScreen(transactionDraft: draft),
-          ),
+          addTransactionRoute(transactionDraft: draft),
         );
         if (!mounted) return;
         setState(() {

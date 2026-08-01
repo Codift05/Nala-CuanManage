@@ -71,7 +71,7 @@ class _MainShellState extends State<MainShell> {
   Future<void> _openAddTransaction() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const AddTransactionScreen()),
+      addTransactionRoute(),
     );
     if (result == true && mounted) {
       setState(() => _refreshScreen(_selectedIndex));
