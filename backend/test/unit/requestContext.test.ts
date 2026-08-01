@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { normalizeErrorBody } from '../src/middleware/requestContext';
+import { normalizeErrorBody } from '../../src/middleware/requestContext';
 
 test('error responses keep legacy message and add traceable contract', () => {
   assert.deepEqual(
@@ -19,3 +19,4 @@ test('error responses keep legacy message and add traceable contract', () => {
     'INTERNAL_ERROR',
   );
 });
+

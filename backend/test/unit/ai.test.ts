@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getGeminiTimeoutMs, withTimeout } from '../src/utils/ai';
+import { getGeminiTimeoutMs, withTimeout } from '../../src/utils/ai';
 
 test('Gemini timeout is bounded and stops waiting for a stalled request', async () => {
   assert.equal(getGeminiTimeoutMs(undefined), 8000);
@@ -13,3 +13,4 @@ test('Gemini timeout is bounded and stops waiting for a stalled request', async 
     /Gemini timeout/,
   );
 });
+

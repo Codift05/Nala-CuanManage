@@ -4,7 +4,7 @@ import {
   createPasswordResetToken,
   hashPasswordResetToken,
   PASSWORD_RESET_MINUTES,
-} from '../src/utils/passwordReset';
+} from '../../src/utils/passwordReset';
 
 test('password reset tokens are random, hashed, and expire in 15 minutes', () => {
   const first = createPasswordResetToken();
@@ -16,3 +16,4 @@ test('password reset tokens are random, hashed, and expire in 15 minutes', () =>
   assert.ok(first.expiresAt.getTime() - Date.now() <= PASSWORD_RESET_MINUTES * 60000);
   assert.ok(first.expiresAt.getTime() > Date.now());
 });
+

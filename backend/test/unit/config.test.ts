@@ -5,7 +5,7 @@ import {
   getEmailConfig,
   getJwtSecret,
   isOriginAllowed,
-} from '../src/utils/config';
+} from '../../src/utils/config';
 
 test('production requires strong secrets and an explicit CORS allowlist', () => {
   assert.throws(() => getJwtSecret({ NODE_ENV: 'production' }), /JWT_SECRET/);
@@ -44,3 +44,4 @@ test('production requires strong secrets and an explicit CORS allowlist', () => 
     'https://app.nala.example/reset',
   );
 });
+

@@ -358,8 +358,8 @@ Hasil hanya ditulis setelah pilot. Kandidat metrik:
 |---|---|---|
 | Backend unit | 12 file test menggunakan runner native `node:test` | Kelompokkan per domain dan tambah coverage score, AI privacy, serta edge case |
 | Backend integration | Recurring 118 baris dan transaction/API 673 baris memakai PostgreSQL serta Redis nyata di CI | Pecah per domain agar kegagalan mudah didiagnosis |
-| Mobile unit/widget | 21 test berada dalam satu `mobile/test/widget_test.dart` berukuran 339 baris | Pisahkan unit, widget, helper, fixture, accessibility, dan golden test terpilih |
-| Mobile integration | Belum ada `mobile/integration_test` | Tambahkan auth, transaksi, receipt, budget, dan AI Coach flow |
+| Mobile unit/widget | 12 domain/unit test dan 9 widget test telah dipisahkan pada folder tersendiri | Tambah helper, fixture, accessibility, dan golden test terpilih |
+| Mobile integration | Auth shell smoke flow tersedia di `mobile/integration_test`; runner Linux headless dikonfigurasi di CI | Tambahkan transaksi, receipt, budget, dan AI Coach flow |
 | Contract | Belum menjadi suite tersendiri | Kunci kesesuaian model Flutter dengan request/response backend |
 | Security | Test IDOR, JWT, rate limit, dan input berbahaya tersebar di integration suite | Jadikan suite serta laporan keamanan yang dapat ditelusuri |
 | Performance | Belum ada script dan laporan terukur | Ukur p50/p95, error rate, startup, dashboard, transaksi, dan OCR |
@@ -687,6 +687,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Transisi halaman Catat disatukan | Semua pintu transaksi memakai slide kanan-ke-kiri 360 ms berbasis compositor dan kembali 300 ms tanpa efek berat |
 | 2 Agustus 2026 | Transisi horizontal diperluas | Budget, Scan, Skor, Profil/Edit, Bank & dompet, Tagihan berulang, dan Nala Chat memakai gerak halaman yang konsisten |
 | 2 Agustus 2026 | Strategi pengujian profesional ditetapkan | Baseline backend/mobile diaudit; struktur unit, widget, integration, contract, security, accessibility, performance, E2E, test gate, dan evidence proposal dicatat |
+| 2 Agustus 2026 | Testing foundation mulai diterapkan | 12 backend unit dan 2 integration suite dikelompokkan; mobile dipecah menjadi 12 unit dan 9 widget test; auth integration smoke serta runner Linux headless ditambahkan |
 
 ### Log keputusan
 

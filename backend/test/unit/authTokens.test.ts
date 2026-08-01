@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import jwt from 'jsonwebtoken';
-import { createAccessToken, hashRefreshToken } from '../src/utils/authTokens';
+import { createAccessToken, hashRefreshToken } from '../../src/utils/authTokens';
 
 test('auth tokens are hashed and access tokens expire after 15 minutes', () => {
   const raw = 'refresh-token-secret';
@@ -18,3 +18,4 @@ test('auth tokens are hashed and access tokens expire after 15 minutes', () => {
   assert.equal(decoded.sessionId, 'session-1');
   assert.equal(decoded.exp - decoded.iat, 15 * 60);
 });
+

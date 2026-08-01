@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { parseTransactionDraft } from '../src/utils/transactionDraft';
+import { parseTransactionDraft } from '../../src/utils/transactionDraft';
 
 test('accepts a safe draft and rejects invalid money or another user wallet', () => {
   const wallets = new Set(['wallet-1']);
@@ -29,3 +29,4 @@ test('accepts a safe draft and rejects invalid money or another user wallet', ()
     null,
   );
 });
+

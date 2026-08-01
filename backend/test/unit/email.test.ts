@@ -3,7 +3,7 @@ import test from 'node:test';
 import {
   sendEmailVerification,
   sendPasswordResetEmail,
-} from '../src/utils/email';
+} from '../../src/utils/email';
 
 test('password reset email uses the provider safely and no-ops in development', async () => {
   assert.equal(
@@ -53,3 +53,4 @@ test('verification email contains a NALA verification deep link', async () => {
   );
   assert.match(body, /nala:\/\/verify-email\?token=verify-secret/);
 });
+

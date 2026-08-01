@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import prisma from '../src/utils/prisma';
+import prisma from '../../src/utils/prisma';
 
 const apiUrl = process.env.API_BASE_URL ?? 'http://127.0.0.1:3000/api';
 const key = `integration-${Date.now()}`;
@@ -671,3 +671,4 @@ run().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+

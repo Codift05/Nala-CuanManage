@@ -5,7 +5,7 @@ import {
   recurringDueDays,
   recurringIdempotencyKey,
   recurringPeriod,
-} from '../src/utils/idempotency';
+} from '../../src/utils/idempotency';
 
 test('accepts bounded idempotency keys and rejects unsafe values', () => {
   assert.equal(
@@ -39,3 +39,4 @@ test('month end includes recurring bills that use unavailable dates', () => {
   assert.deepEqual(recurringDueDays(new Date(2028, 1, 29)), [29, 30, 31]);
   assert.deepEqual(recurringDueDays(new Date(2026, 3, 30)), [30, 31]);
 });
+

@@ -6,7 +6,7 @@ import {
   parseTransactionCursor,
   parseTransactionLimit,
   parseTransactionType,
-} from '../src/utils/transactionInput';
+} from '../../src/utils/transactionInput';
 
 test('transaction inputs reject invalid types, dates, and list limits', () => {
   assert.equal(parseTransactionType('INCOME'), 'INCOME');
@@ -33,3 +33,4 @@ test('transaction inputs reject invalid types, dates, and list limits', () => {
   });
   assert.equal(parseTransactionCursor('invalid'), null);
 });
+

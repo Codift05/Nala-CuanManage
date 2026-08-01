@@ -5,7 +5,7 @@ import {
   parsePeriodPart,
   parseText,
   parseWalletType,
-} from '../src/utils/resourceInput';
+} from '../../src/utils/resourceInput';
 
 test('resource inputs accept normalized values and reject unsafe shapes', () => {
   assert.equal(parseText('  Dompet utama  ', 80), 'Dompet utama');
@@ -25,3 +25,4 @@ test('resource inputs accept normalized values and reject unsafe shapes', () => 
   });
   assert.equal(parseBase64Image('not base64'), null);
 });
+

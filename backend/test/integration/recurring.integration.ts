@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import prisma from '../src/utils/prisma';
-import { processRecurringBills } from '../src/cron/recurringJob';
+import prisma from '../../src/utils/prisma';
+import { processRecurringBills } from '../../src/cron/recurringJob';
 import {
   recurringIdempotencyKey,
   recurringPeriod,
-} from '../src/utils/idempotency';
+} from '../../src/utils/idempotency';
 
 const run = async () => {
   const user = await prisma.user.findUnique({
@@ -116,3 +116,4 @@ run().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
