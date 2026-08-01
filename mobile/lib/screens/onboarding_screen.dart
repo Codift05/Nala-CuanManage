@@ -41,6 +41,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Future<void> _showAuthSheet(Widget screen) async {
     HapticFeedback.lightImpact();
     _motionController.stop();
+    final maxSheetHeight = MediaQuery.sizeOf(context).height * .88;
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -50,14 +51,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       barrierColor: Colors.black.withValues(alpha: .42),
       builder: (context) => TweenAnimationBuilder<double>(
         tween: Tween(end: MediaQuery.viewInsetsOf(context).bottom),
-        duration: const Duration(milliseconds: 260),
-        curve: Curves.easeOutCubic,
-        child: RepaintBoundary(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.sizeOf(context).height * .88,
+        duration: const Duration(milliseconds: 340),
+        curve: Curves.easeInOutCubic,
+        child: MediaQuery.removeViewInsets(
+          context: context,
+          removeBottom: true,
+          child: RepaintBoundary(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxSheetHeight),
+              child: screen,
             ),
-            child: screen,
           ),
         ),
         builder: (context, keyboardInset, child) => Transform.translate(

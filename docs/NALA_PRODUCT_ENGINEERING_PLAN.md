@@ -592,6 +592,7 @@ Pada akhir setiap sesi pengembangan:
 | 1 Agustus 2026 | Login dan Register menjadi bottom sheet | Welcome tetap terlihat sebagai konteks; form naik dengan modal native yang dapat di-swipe, keyboard-safe, dan biometric dipindahkan ke samping CTA Masuk |
 | 1 Agustus 2026 | Bottom sheet autentikasi dioptimalkan | Animasi hero dijeda selama modal aktif, repaint dipisahkan, dan Login/Register memakai tipografi sistem serta field yang lebih ringan |
 | 2 Agustus 2026 | Pergerakan form saat keyboard dioptimalkan | Pergeseran Login/Register memakai transform terkomposisi sehingga keyboard tidak memicu layout ulang seluruh form pada setiap frame |
+| 2 Agustus 2026 | Frame awal animasi keyboard distabilkan | Tinggi sheet dikunci, inset keyboard tidak diteruskan ke subtree form, dan kurva ease-in-out menghilangkan lonjakan gerak pada frame awal |
 
 ### Log keputusan
 
