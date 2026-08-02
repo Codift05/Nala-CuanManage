@@ -1,11 +1,11 @@
 {
-    "name": "nala",
-    "short_name": "nala",
+    "name": "Nala",
+    "short_name": "Nala",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F7F7F9",
+    "theme_color": "#FF9818",
+    "description": "Pendamping pengelolaan keuangan mahasiswa.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
