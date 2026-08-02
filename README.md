@@ -280,6 +280,22 @@ menjadi pekerjaan lanjutan dan tidak diklaim selesai.
 NALA dikembangkan untuk GEMASTIK XIX 2026 oleh mahasiswa Program Studi Teknik
 Informatika angkatan 2023, Fakultas Teknik, Universitas Sam Ratulangi, Manado.
 
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/Codift05">
+        <img src="https://github.com/Codift05.png" width="96" alt="Miftah Uddin Arsyad" /><br />
+        <strong>Miftah Uddin Arsyad</strong>
+      </a><br />
+      <sub>Ketua Tim · Lead Software Developer</sub>
+    </td>
+  </tr>
+</table>
+
+Pengembangan NALA dikerjakan bersama tim. Peran di atas mencatat tanggung jawab
+utama pada arah teknis, arsitektur, implementasi, integrasi, dan quality gate
+perangkat lunak.
+
 ---
 
 <div align="center">
