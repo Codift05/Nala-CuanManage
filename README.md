@@ -284,8 +284,8 @@ Informatika angkatan 2023, Fakultas Teknik, Universitas Sam Ratulangi, Manado.
   <tr>
     <td align="center">
       <a href="https://github.com/Codift05">
-        <img src="https://github.com/Codift05.png" width="96" alt="Miftah Uddin Arsyad" /><br />
-        <strong>Miftah Uddin Arsyad</strong>
+        <img src="https://github.com/Codift05.png" width="96" alt="Miftahuddin S. Arsyad" /><br />
+        <strong>Miftahuddin S. Arsyad</strong>
       </a><br />
       <sub>Ketua Tim · Lead Software Developer</sub>
     </td>
