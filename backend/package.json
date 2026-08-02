@@ -15,7 +15,8 @@
     "test:integration": "node --require ts-node/register test/integration/recurring.integration.ts && node --require ts-node/register test/integration/transaction.integration.ts && node --require ts-node/register test/integration/health.integration.ts",
     "evaluate:receipts": "node --require ts-node/register scripts/evaluateReceipts.ts",
     "generate:receipt-dataset": "node --require ts-node/register scripts/generateSyntheticReceipts.ts",
-    "test:receipt-dataset": "node --require ts-node/register scripts/runReceiptDataset.ts"
+    "test:receipt-dataset": "node --require ts-node/register scripts/runReceiptDataset.ts",
+    "evaluate:ai-coach-live": "node --require ts-node/register scripts/evaluateAiCoachLive.ts"
   },
   "keywords": [],
   "author": "",

@@ -228,13 +228,13 @@ Acceptance criteria:
 
 ### M4 — Tiga inovasi inti
 
-Status: **Planned**
+Status: **Active**
 
 #### Frictionless Financial Capture
 
 - [ ] Input manual selesai dalam alur singkat
-- [ ] Receipt extraction menandai field yang tidak yakin
-- [ ] Pengguna dapat mengoreksi hasil sebelum menyimpan
+- [x] Receipt extraction menandai field yang tidak yakin
+- [x] Pengguna dapat mengoreksi hasil sebelum menyimpan
 - [ ] Impor screenshot/share sebagai alternatif SMS
 - [ ] Deteksi SMS diposisikan sebagai eksperimen Android
 
@@ -356,7 +356,7 @@ Hasil hanya ditulis setelah pilot. Kandidat metrik:
 
 | Area | Kondisi | Gap berikutnya |
 |---|---|---|
-| Backend unit | 16 file test menggunakan runner native `node:test` | Tambah AI privacy serta edge case per domain |
+| Backend unit | 17 file test menggunakan runner native `node:test` | Tambah edge case per domain seiring perubahan fitur |
 | Backend integration | Suite recurring, transaction/API, dan Habit Score snapshot memakai PostgreSQL serta Redis nyata di CI | Tambah contract, failure-path, dan pengujian concurrency per domain |
 | Mobile unit/widget | 12 domain/unit, 2 contract, dan 9 widget test telah dipisahkan pada folder tersendiri | Tambah helper, fixture, accessibility, dan golden test terpilih |
 | Mobile integration | Auth shell, create transaksi, receipt review-koreksi-simpan, serta AI Coach cancel/confirm tersedia di `mobile/integration_test`; runner Linux headless dikonfigurasi di CI | Tambahkan budget flow dan validasi hasil runner CI |
@@ -701,6 +701,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Security suite AI Coach dipisahkan | Corpus adversarial deterministik menguji email, telepon, kartu/rekening, delimiter escape, cross-wallet draft, action, nominal, dan kategori berbahaya; runner menjadi gate CI tanpa memanggil Gemini |
 | 2 Agustus 2026 | Integration flow AI Coach ditambahkan | Server deterministik mengembalikan draft; test membuktikan batal tidak mengirim transaksi dan konfirmasi mengirim payload hasil review, lalu menampilkan status tersimpan; runner Linux ditambahkan ke CI |
 | 2 Agustus 2026 | Kontrak response AI Coach dikunci | Backend selalu mengirim `reply`, `transactionDraft`, dan `fallback`; Flutter menolak envelope malformed, membuang draft tidak aman dan field ekstra; backend contract suite serta 23 Flutter test lulus |
+| 2 Agustus 2026 | Runner evaluasi live AI Coach tersedia | Delapan kasus sintetis mencakup advice, draft, ambiguity, PII, prompt exfiltration, delimiter escape, dan mutasi berbahaya; request cap serta konfirmasi eksplisit mencegah pemakaian kuota tidak sengaja |
 
 ### Log keputusan
 
@@ -721,6 +722,17 @@ Pada akhir setiap sesi pengembangan:
 ## 14. Langkah Berikutnya
 
 Urutan kerja aktif menjaga M4 tetap terukur dan tidak menumpuk utang test:
+
+### Snapshot sisa pekerjaan
+
+| Tahap | Tersisa | Catatan |
+|---|---:|---|
+| M4 inovasi inti | 3 checklist | Ukur input manual, impor screenshot/share, dan tetapkan UX SMS eksperimen |
+| M5 bukti nasional | 9 checklist | Membutuhkan responden, pilot, laporan, serta media aktual |
+| M6 release beta | 9 checklist | Deployment, security/privacy operasional, backup, dan signed build |
+
+Total checklist utama yang masih terbuka: **21**. Sebagian besar bukan sekadar
+coding dan tidak boleh ditandai selesai tanpa bukti aktual.
 
 1. **Testing foundation gate — selesai**
    - Mobile unit/widget, backend unit/integration, serta auth dan transaction
