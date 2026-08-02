@@ -712,6 +712,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Structured logging backend disatukan | Access log, controller, scheduler, Redis, dan global error handler memakai JSON event bersama; redaksi email, credential, bearer token, dan nomor 12–19 digit dikunci oleh unit test ke-18; typecheck, build, contract, security, dan tiga integration flow lulus |
 | 2 Agustus 2026 | Privacy dan data rights baseline selesai | Registrasi memerlukan consent versi aktif, notice tersedia sebelum/setelah daftar, export JSON dibatasi dan mengecualikan credential, delete reauthentication menghapus seluruh relasi, serta integration test PostgreSQL lulus |
 | 3 Agustus 2026 | Dataset demonstrasi terintegrasi | Seed akun development direkonsiliasi menjadi 3 wallet, 24 transaksi, 12 budget, dan 3 tagihan berulang untuk tiga bulan; API menghasilkan Habit Score 85 dan tren 60→85→85, sementara dokumentasi melarang fixture disebut sebagai hasil riset |
+| 3 Agustus 2026 | README repository diterbitkan | Identitas produk, fitur, arsitektur, stack, setup, demo, testing, keamanan, production baseline, struktur repo, status, dan indeks dokumentasi disatukan tanpa mengubah fixture menjadi klaim hasil riset |
 
 ### Log keputusan
 
