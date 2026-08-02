@@ -102,7 +102,7 @@ Legenda:
 | Recurring scheduler | 🟡 | Execution record, duplicate protection, dan bulan pendek tersedia | Perlu monitoring dan timezone production |
 | AI safety | 🟡 | Konteks AI diminimalkan, PII umum disamarkan, input dibatasi, delimiter diamankan, dan mutasi tetap berupa draft terkonfirmasi | Perluas corpus adversarial dan evaluasi prompt injection live |
 | Audit trail | ✅ | Auth, profil, session, akun, dan mutasi transaksi tercatat atomik | Tetapkan retensi dan akses admin sebelum production |
-| Backend test | 🟡 | 18 file unit test serta integration test recurring, transaksi/API, dan histori Habit Score tersedia; database, Redis, auth, IDOR, saldo, idempotency, scheduler, redaksi log, serta deduplikasi snapshot telah dicakup | Tambah performance test dan terbitkan laporan |
+| Backend test | 🟡 | 19 file unit test serta integration test recurring, transaksi/API, dan histori Habit Score tersedia; database, Redis, auth, IDOR, saldo, idempotency, scheduler, fixture demo, redaksi log, serta deduplikasi snapshot telah dicakup | Tambah performance test dan terbitkan laporan |
 | Observability | 🟡 | Request ID, access/error event JSON, event domain, dan redaksi data sensitif tersedia | Hubungkan log service, alert, retensi, dan metrik pada staging |
 | Production deployment | 🟡 | Multi-stage image non-root/read-only, one-shot migration, production Compose, fail-fast config, health check, runbook, serta restore drill tersedia | Staging aktual, TLS, secret manager, backup terjadwal, dan error tracking |
 
@@ -357,7 +357,7 @@ Hasil hanya ditulis setelah pilot. Kandidat metrik:
 
 | Area | Kondisi | Gap berikutnya |
 |---|---|---|
-| Backend unit | 18 file test menggunakan runner native `node:test` | Tambah edge case per domain seiring perubahan fitur |
+| Backend unit | 19 file test menggunakan runner native `node:test` | Tambah edge case per domain seiring perubahan fitur |
 | Backend integration | Suite recurring, transaction/API, dan Habit Score snapshot memakai PostgreSQL serta Redis nyata di CI | Tambah contract, failure-path, dan pengujian concurrency per domain |
 | Mobile unit/widget | 12 domain/unit, 2 contract, dan 9 widget test telah dipisahkan pada folder tersendiri | Tambah helper, fixture, accessibility, dan golden test terpilih |
 | Mobile integration | Auth shell, create transaksi, receipt review-koreksi-simpan, serta AI Coach cancel/confirm tersedia di `mobile/integration_test`; runner Linux headless dikonfigurasi di CI | Tambahkan budget flow dan validasi hasil runner CI |
@@ -711,6 +711,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Backup dan restore PostgreSQL diverifikasi | Backup custom terkompresi diberi checksum SHA-256 dan izin `600`; restore ke PostgreSQL 15 sementara berhasil memulihkan 12 tabel serta 9 migration tanpa menyentuh database sumber |
 | 2 Agustus 2026 | Structured logging backend disatukan | Access log, controller, scheduler, Redis, dan global error handler memakai JSON event bersama; redaksi email, credential, bearer token, dan nomor 12–19 digit dikunci oleh unit test ke-18; typecheck, build, contract, security, dan tiga integration flow lulus |
 | 2 Agustus 2026 | Privacy dan data rights baseline selesai | Registrasi memerlukan consent versi aktif, notice tersedia sebelum/setelah daftar, export JSON dibatasi dan mengecualikan credential, delete reauthentication menghapus seluruh relasi, serta integration test PostgreSQL lulus |
+| 3 Agustus 2026 | Dataset demonstrasi terintegrasi | Seed akun development direkonsiliasi menjadi 3 wallet, 24 transaksi, 12 budget, dan 3 tagihan berulang untuk tiga bulan; API menghasilkan Habit Score 85 dan tren 60→85→85, sementara dokumentasi melarang fixture disebut sebagai hasil riset |
 
 ### Log keputusan
 
@@ -730,6 +731,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Restore drill selalu memakai database terisolasi | Mencegah prosedur pengujian pemulihan menimpa database sumber atau production |
 | 2 Agustus 2026 | Log JSON platform-native dipakai sebelum menambah vendor | `stdout`/`stderr` cukup untuk staging awal; SDK, dashboard, dan metrik ditambahkan setelah target serta platform deployment nyata ditetapkan |
 | 2 Agustus 2026 | Consent dicatat sebagai audit event berversi | Tidak menambah tabel baru sebelum kebutuhan multi-purpose consent ada; audit trail yang sudah tersedia memberi bukti versi/waktu dengan implementasi minimum |
+| 3 Agustus 2026 | Akun `admin@nala.com` dikhususkan untuk demo repeatable | Seed boleh mereset data finansial akun demo agar screenshot konsisten, tetapi tidak pernah menyentuh akun lain dan tidak dijalankan pada staging/production |
 
 ## 14. Langkah Berikutnya
 
