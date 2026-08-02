@@ -94,7 +94,7 @@ Legenda:
 | Area | Status | Kondisi aktual | Bukti selesai berikutnya |
 |---|---:|---|---|
 | REST API | 🟡 | Validasi, error contract, request ID, dan pagination transaksi tersedia | API versioning dan audit log |
-| PostgreSQL | ✅ | Database utama dan constraint dasar tersedia | Migration terkontrol dan backup |
+| PostgreSQL | ✅ | Database utama, constraint, migration terkontrol, serta backup/restore terverifikasi tersedia | Jadwalkan backup terenkripsi dan retensi production |
 | Nilai uang | ✅ | PostgreSQL `BIGINT`, Prisma `BigInt`, dan Flutter `int` | Pertahankan contract test |
 | Authentication | ✅ | Access 15 menit, refresh rotation, revoke, rate limit, reset, dan verifikasi email | Pertahankan integration test |
 | Authorization | ✅ | IDOR wallet, transaksi, budget, recurring, session, dan profil diuji lintas akun | Pertahankan test saat resource baru ditambah |
@@ -104,7 +104,7 @@ Legenda:
 | Audit trail | ✅ | Auth, profil, session, akun, dan mutasi transaksi tercatat atomik | Tetapkan retensi dan akses admin sebelum production |
 | Backend test | 🟡 | 16 unit test serta integration test recurring, transaksi/API, dan histori Habit Score tersedia; database, Redis, auth, IDOR, saldo, idempotency, scheduler, serta deduplikasi snapshot telah dicakup | Pisahkan suite contract, security, dan performance serta terbitkan laporan |
 | Observability | 🟡 | Request ID dan access log JSON tersedia | Error tracking dan metrik production |
-| Production deployment | 🟡 | Multi-stage image non-root/read-only, one-shot migration, production Compose, fail-fast config, health check, dan runbook tersedia | Staging aktual, TLS, secret manager, backup/restore, dan error tracking |
+| Production deployment | 🟡 | Multi-stage image non-root/read-only, one-shot migration, production Compose, fail-fast config, health check, runbook, serta restore drill tersedia | Staging aktual, TLS, secret manager, backup terjadwal, dan error tracking |
 
 ### Proposal dan validasi
 
@@ -284,7 +284,7 @@ Acceptance criteria:
 
 ### M6 — Release beta
 
-Status: **Planned**
+Status: **In progress**
 
 - [x] Production Docker image
 - [x] Database migration terkontrol
@@ -292,7 +292,7 @@ Status: **Planned**
 - [ ] HTTPS/TLS
 - [ ] Secret management
 - [ ] Structured logging dan error tracking
-- [ ] Backup serta restore test PostgreSQL
+- [x] Backup serta restore test PostgreSQL
 - [ ] Privacy notice, consent, export, dan delete data
 - [ ] Signed Android build dan internal testing
 
@@ -706,6 +706,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Protokol usability capture tersedia | Dua tugas terstandar, consent, data pseudonim, definisi timer, template raw CSV, task success, median waktu, bantuan, dan koreksi ditetapkan tanpa mengarang hasil |
 | 2 Agustus 2026 | Baseline production backend tersedia | Multi-stage TypeScript image dibangun, Prisma migration dipisahkan dari runtime, startup tidak menjalankan seed/db push, container non-root/read-only lolos health smoke, dan Compose menolak secret wajib yang kosong |
 | 2 Agustus 2026 | Dependency production diaudit | Dua high dan enam moderate transitif diperbarui tanpa force/major upgrade; typecheck, build, unit, contract, security, dan `npm audit --omit=dev` kembali lulus dengan 0 vulnerability |
+| 2 Agustus 2026 | Backup dan restore PostgreSQL diverifikasi | Backup custom terkompresi diberi checksum SHA-256 dan izin `600`; restore ke PostgreSQL 15 sementara berhasil memulihkan 12 tabel serta 9 migration tanpa menyentuh database sumber |
 
 ### Log keputusan
 
@@ -722,6 +723,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Test menjadi gate sebelum perluasan M4 | Setiap inovasi inti harus membawa unit, contract, integration, failure-path, dan bukti yang sesuai risikonya |
 | 2 Agustus 2026 | Gemini 3.5 Flash-Lite menjadi default | Gemini 1.5 Flash sudah tidak tersedia dan 2.5 Flash ditolak untuk project baru; model dapat dioverride melalui `GEMINI_MODEL` |
 | 2 Agustus 2026 | Habit Score memakai snapshot bulanan yang dapat dihitung ulang | Upsert mencegah histori ganda saat data bulan berjalan berubah; versi metodologi menjaga keterlacakan formula |
+| 2 Agustus 2026 | Restore drill selalu memakai database terisolasi | Mencegah prosedur pengujian pemulihan menimpa database sumber atau production |
 
 ## 14. Langkah Berikutnya
 
@@ -733,9 +735,9 @@ Urutan kerja aktif menjaga M4 tetap terukur dan tidak menumpuk utang test:
 |---|---:|---|
 | M4 inovasi inti | 1 checklist | Ukur alur input manual dengan peserta dan protokol yang sudah tersedia |
 | M5 bukti nasional | 9 checklist | Membutuhkan responden, pilot, laporan, serta media aktual |
-| M6 release beta | 7 checklist | Staging/TLS, secret manager, observability, backup, privacy, dan signed build |
+| M6 release beta | 6 checklist | Staging/TLS, secret manager, observability, backup terjadwal, privacy, dan signed build |
 
-Total checklist utama yang masih terbuka: **17**. Sebagian besar bukan sekadar
+Total checklist utama yang masih terbuka: **16**. Sebagian besar bukan sekadar
 coding dan tidak boleh ditandai selesai tanpa bukti aktual.
 
 1. **Testing foundation gate — selesai**
@@ -764,6 +766,10 @@ coding dan tidak boleh ditandai selesai tanpa bukti aktual.
 5. **M5 — Validasi nasional**
    - Jalankan usability, receipt evaluation, security, performance, dan pilot
      setelah ketiga alur M4 dapat didemonstrasikan end-to-end.
+6. **M6 — Release beta — aktif**
+   - Production image, migration terkontrol, dan restore drill sudah selesai.
+   - Berikutnya pasang structured error tracking/metrics tanpa mencatat data
+     finansial sensitif, lalu validasi deployment pada staging ber-TLS.
 
 Pekerjaan berikutnya memerlukan pengumpulan dataset struk nyata berizin sesuai
 `docs/evaluation/RECEIPT_EVALUATION_PROTOCOL.md` dan validasi bobot Habit Score

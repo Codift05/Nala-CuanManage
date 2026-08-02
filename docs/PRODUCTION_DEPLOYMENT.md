@@ -38,10 +38,37 @@ Gunakan tag image/commit sebelumnya lalu jalankan Compose kembali. Migration
 database harus backward-compatible; rollback schema destruktif memerlukan runbook
 dan backup terverifikasi, bukan `prisma db push` atau reset database.
 
+## Backup dan verifikasi restore
+
+Buat backup berformat PostgreSQL custom dari service database yang sedang aktif:
+
+```bash
+NALA_ENV_FILE=/path/to/nala.production.env \
+NALA_BACKUP_DIR=/secure/off-host-backups \
+scripts/backup-postgres.sh
+```
+
+Skrip menulis arsip dan checksum SHA-256 dengan izin file `600`. Simpan hasilnya
+di penyimpanan off-host terenkripsi dengan akses dan retensi terbatas. Skrip
+tidak menghapus backup lama secara otomatis agar kebijakan retensi tetap
+eksplisit.
+
+Verifikasi bahwa sebuah arsip benar-benar dapat dipulihkan:
+
+```bash
+scripts/verify-postgres-restore.sh \
+  /secure/off-host-backups/nala_YYYYMMDDTHHMMSSZ.dump
+```
+
+Verifikasi membuat PostgreSQL 15 sementara di memori, memeriksa checksum,
+memulihkan arsip dengan `--exit-on-error`, lalu memastikan tabel dan histori
+migration tersedia. Database sumber maupun production tidak menjadi target
+restore. Jalankan drill berkala dan sebelum migration berisiko tinggi.
+
 ## Belum dianggap selesai
 
 - Domain dan TLS aktual.
 - Secret manager aktual.
-- Backup/restore drill.
+- Penjadwalan backup production, retensi, dan penyimpanan off-host aktual.
 - Error tracking production.
 - Staging smoke test dan signed Android build.
