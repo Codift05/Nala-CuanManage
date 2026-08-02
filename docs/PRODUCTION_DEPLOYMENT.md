@@ -32,6 +32,10 @@ Service `migrate` menjalankan `prisma migrate deploy` satu kali sebelum backend.
 Production tidak menjalankan seed atau `prisma db push`. Runtime berjalan sebagai
 user non-root, read-only, tanpa development dependency.
 
+Log aplikasi tersedia sebagai JSON line pada `stdout`/`stderr`. Hubungkan output
+container ke log service platform dan ikuti redaksi, alert, serta retensi pada
+`docs/OBSERVABILITY.md`.
+
 ## Rollback
 
 Gunakan tag image/commit sebelumnya lalu jalankan Compose kembali. Migration

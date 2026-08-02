@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { NextFunction, Request, Response } from 'express';
+import { logInfo } from '../utils/logger';
 
 const errorCode = (status: number): string => ({
   400: 'VALIDATION_ERROR',
@@ -50,13 +51,12 @@ export const requestContext = (
       : body,
   )) as Response['json'];
 
-  res.on('finish', () => console.log(JSON.stringify({
-    timestamp: new Date().toISOString(),
+  res.on('finish', () => logInfo('http.request', {
     requestId,
     method: req.method,
     path: req.path,
     status: res.statusCode,
     durationMs: Date.now() - startedAt,
-  })));
+  }));
   next();
 };

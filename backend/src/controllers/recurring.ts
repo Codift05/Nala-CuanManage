@@ -3,6 +3,7 @@ import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/auth';
 import { parseRupiah } from '../utils/money';
 import { parsePeriodPart, parseText } from '../utils/resourceInput';
+import { logError } from '../utils/logger';
 
 export const createRecurringBill = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -50,7 +51,7 @@ export const createRecurringBill = async (req: AuthRequest, res: Response): Prom
 
     res.status(201).json({ message: 'Recurring bill created successfully', bill });
   } catch (error) {
-    console.error('Create recurring bill error:', error);
+    logError('recurring.create_failed', error);
     res.status(500).json({ error: 'Failed to create recurring bill' });
   }
 };
@@ -74,7 +75,7 @@ export const getRecurringBills = async (req: AuthRequest, res: Response): Promis
 
     res.json(bills);
   } catch (error) {
-    console.error('Get recurring bills error:', error);
+    logError('recurring.list_failed', error);
     res.status(500).json({ error: 'Failed to get recurring bills' });
   }
 };
@@ -99,7 +100,7 @@ export const deleteRecurringBill = async (req: AuthRequest, res: Response): Prom
 
     res.json({ message: 'Recurring bill deleted successfully' });
   } catch (error) {
-    console.error('Delete recurring bill error:', error);
+    logError('recurring.delete_failed', error);
     res.status(500).json({ error: 'Failed to delete recurring bill' });
   }
 };

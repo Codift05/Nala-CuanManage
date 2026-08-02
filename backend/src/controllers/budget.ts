@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 import { parseRupiah } from '../utils/money';
 import { parsePeriodPart, parseText } from '../utils/resourceInput';
+import { logError } from '../utils/logger';
 
 export const createBudget = async (req: Request, res: Response) => {
   try {
@@ -52,7 +53,7 @@ export const createBudget = async (req: Request, res: Response) => {
 
     res.status(201).json({ message: 'Budget created successfully', budget });
   } catch (error) {
-    console.error('Create budget error:', error);
+    logError('budget.create_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -86,7 +87,7 @@ export const getBudgets = async (req: Request, res: Response) => {
 
     res.json(budgets);
   } catch (error) {
-    console.error('Get budgets error:', error);
+    logError('budget.list_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -121,7 +122,7 @@ export const updateBudget = async (req: Request, res: Response) => {
 
     res.json({ message: 'Budget updated successfully', budget: updatedBudget });
   } catch (error) {
-    console.error('Update budget error:', error);
+    logError('budget.update_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -149,7 +150,7 @@ export const deleteBudget = async (req: Request, res: Response) => {
 
     res.json({ message: 'Budget deleted successfully' });
   } catch (error) {
-    console.error('Delete budget error:', error);
+    logError('budget.delete_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

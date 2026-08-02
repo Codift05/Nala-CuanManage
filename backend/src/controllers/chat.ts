@@ -11,6 +11,7 @@ import {
 } from '../utils/ai';
 import { parseText } from '../utils/resourceInput';
 import { buildChatResponse } from '../utils/chatResponse';
+import { logError } from '../utils/logger';
 
 const fallbackReply =
   'Maaf, layanan AI Nala sedang tidak tersedia. Kamu tetap bisa mencatat transaksi secara manual, lalu coba chat lagi nanti ya.';
@@ -90,7 +91,7 @@ Gunakan bahasa Indonesia yang ramah, singkat, dan jelas (maksimal 3 paragraf pen
         getGeminiTimeoutMs(),
       );
     } catch (error) {
-      console.error('Gemini request failed:', error);
+      logError('ai_coach.provider_failed', error);
       res.json(buildChatResponse(fallbackReply, null, true));
       return;
     }
@@ -106,14 +107,14 @@ Gunakan bahasa Indonesia yang ramah, singkat, dan jelas (maksimal 3 paragraf pen
           new Set(wallets.map((wallet) => wallet.id)),
         );
       } catch (e) {
-        console.error('Failed to parse transaction draft from Nala', e);
+        logError('ai_coach.draft_parse_failed', e);
       }
       nalaResponse = nalaResponse.replace(/```json\s*[\s\S]*?```/, '').trim();
     }
 
     res.json(buildChatResponse(nalaResponse, transactionDraft));
   } catch (error) {
-    console.error('Nala Chat API Error:', error);
+    logError('ai_coach.request_failed', error);
     res.status(500).json({ error: 'Gagal memproses chat dengan Nala. Mungkin API Key tidak valid atau limit.' });
   }
 };

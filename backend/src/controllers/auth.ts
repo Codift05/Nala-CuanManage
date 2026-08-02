@@ -8,6 +8,7 @@ import {
   hashPasswordResetToken,
 } from '../utils/passwordReset';
 import { sendEmailVerification, sendPasswordResetEmail } from '../utils/email';
+import { logError } from '../utils/logger';
 import {
   createEmailVerificationToken,
   hashEmailVerificationToken,
@@ -110,7 +111,7 @@ export const register = async (req: Request, res: Response) => {
           idempotencyKey: `verify-${user.id}`,
         });
       } catch (error) {
-        console.error('Verification email failed:', error);
+        logError('email.verification_failed', error);
       }
     }
 
@@ -126,7 +127,7 @@ export const register = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    logError('auth.registration_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -178,7 +179,7 @@ export const login = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Login error:', error);
+    logError('auth.login_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -255,7 +256,7 @@ export const resendVerification = async (req: Request, res: Response) => {
           idempotencyKey: verification.id,
         });
       } catch (error) {
-        console.error('Verification email failed:', error);
+        logError('email.verification_failed', error);
       }
     }
   }
@@ -283,7 +284,7 @@ export const me = async (req: AuthRequest, res: Response) => {
 
     return res.json({ user });
   } catch (error) {
-    console.error('Get current user error:', error);
+    logError('auth.current_user_failed', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -369,7 +370,7 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Update profile error:', error);
+    logError('profile.update_failed', error);
     return res.status(500).json({ message: 'Gagal memperbarui profil' });
   }
 };
@@ -438,7 +439,7 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
 
     return res.json({ message: 'Password berhasil diubah. Silakan masuk kembali.' });
   } catch (error) {
-    console.error('Change password error:', error);
+    logError('auth.password_change_failed', error);
     return res.status(500).json({ message: 'Gagal mengubah password' });
   }
 };
@@ -451,7 +452,7 @@ export const refreshSession = async (req: Request, res: Response) => {
     }
     return res.json(tokens);
   } catch (error) {
-    console.error('Refresh session error:', error);
+    logError('auth.session_refresh_failed', error);
     return res.status(500).json({ message: 'Gagal memperbarui sesi' });
   }
 };
@@ -548,7 +549,7 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
         });
       } catch (error) {
         await prisma.passwordResetToken.delete({ where: { id: reset.id } });
-        console.error('Password reset email failed:', error);
+        logError('email.password_reset_failed', error);
       }
     }
   }
@@ -647,7 +648,7 @@ export const deleteAccount = async (req: AuthRequest, res: Response) => {
 
     res.json({ message: 'Account deleted successfully' });
   } catch (error) {
-    console.error('Delete account error:', error);
+    logError('account.delete_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

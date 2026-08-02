@@ -2,6 +2,7 @@ import { Response } from 'express';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/auth';
 import { calculateHabitScore, describeHabitScore } from '../utils/habitScore';
+import { logError } from '../utils/logger';
 
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 const methodology = 'habit-score-v2';
@@ -146,7 +147,7 @@ export const getHealthScore = async (req: AuthRequest, res: Response): Promise<v
       },
     });
   } catch (error) {
-    console.error('Error calculating health score:', error);
+    logError('habit_score.calculate_failed', error);
     res.status(500).json({ error: 'Failed to calculate health score' });
   }
 };

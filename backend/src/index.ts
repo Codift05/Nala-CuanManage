@@ -9,6 +9,7 @@ import {
   validateProductionServices,
 } from './utils/config';
 import { requestContext } from './middleware/requestContext';
+import { logError, logInfo } from './utils/logger';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -66,11 +67,15 @@ app.use((_req, res) => {
 
 app.use((
   error: unknown,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction,
 ) => {
-  console.error('Unhandled request error:', error);
+  logError('http.unhandled_error', error, {
+    requestId: res.locals.requestId,
+    method: req.method,
+    path: req.path,
+  });
   if (res.headersSent) return;
   const status = error instanceof SyntaxError ? 400 : 500;
   res.status(status).json({
@@ -81,5 +86,5 @@ app.use((
 initRecurringJob();
 
 app.listen(Number(port), '0.0.0.0', () => {
-  console.log(`Server is running on port ${port}`);
+  logInfo('server.started', { port });
 });

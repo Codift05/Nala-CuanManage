@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 import { parseRupiah } from '../utils/money';
 import { parseText, parseWalletType } from '../utils/resourceInput';
+import { logError } from '../utils/logger';
 
 export const createWallet = async (req: Request, res: Response) => {
   try {
@@ -34,7 +35,7 @@ export const createWallet = async (req: Request, res: Response) => {
 
     res.status(201).json({ message: 'Wallet created successfully', wallet });
   } catch (error) {
-    console.error('Create wallet error:', error);
+    logError('wallet.create_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -54,7 +55,7 @@ export const getWallets = async (req: Request, res: Response) => {
 
     res.json(wallets);
   } catch (error) {
-    console.error('Get wallets error:', error);
+    logError('wallet.list_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -78,7 +79,7 @@ export const getWalletById = async (req: Request, res: Response) => {
 
     res.json(wallet);
   } catch (error) {
-    console.error('Get wallet error:', error);
+    logError('wallet.get_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -123,7 +124,7 @@ export const updateWallet = async (req: Request, res: Response) => {
 
     res.json({ message: 'Wallet updated successfully', wallet: updatedWallet });
   } catch (error) {
-    console.error('Update wallet error:', error);
+    logError('wallet.update_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -151,7 +152,7 @@ export const deleteWallet = async (req: Request, res: Response) => {
 
     res.json({ message: 'Wallet deleted successfully' });
   } catch (error) {
-    console.error('Delete wallet error:', error);
+    logError('wallet.delete_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

@@ -1,5 +1,6 @@
 import cron from 'node-cron';
 import prisma from '../utils/prisma';
+import { logError, logInfo } from '../utils/logger';
 import {
   recurringDueDays,
   recurringIdempotencyKey,
@@ -69,7 +70,7 @@ export const processRecurringBills = async (runAt = new Date()) => {
         continue;
       }
       failed++;
-      console.error(`[CRON] Failed to process bill ${bill.id}:`, error);
+      logError('recurring.process_failed', error, { recurringBillId: bill.id });
     }
   }
 
@@ -79,14 +80,14 @@ export const processRecurringBills = async (runAt = new Date()) => {
 // Run every day at 00:00 (Midnight)
 export const initRecurringJob = () => {
   cron.schedule('0 0 * * *', async () => {
-    console.log('[CRON] Running recurring bills check...');
+    logInfo('recurring.run_started');
     try {
       const result = await processRecurringBills();
-      console.log('[CRON] Recurring bills check completed:', result);
+      logInfo('recurring.run_completed', result);
     } catch (error) {
-      console.error('[CRON] Error running recurring bills job:', error);
+      logError('recurring.run_failed', error);
     }
   });
 
-  console.log('[CRON] Recurring job scheduler initialized.');
+  logInfo('recurring.scheduler_started');
 };

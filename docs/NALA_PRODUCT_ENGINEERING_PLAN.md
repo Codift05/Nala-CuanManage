@@ -102,8 +102,8 @@ Legenda:
 | Recurring scheduler | 🟡 | Execution record, duplicate protection, dan bulan pendek tersedia | Perlu monitoring dan timezone production |
 | AI safety | 🟡 | Konteks AI diminimalkan, PII umum disamarkan, input dibatasi, delimiter diamankan, dan mutasi tetap berupa draft terkonfirmasi | Perluas corpus adversarial dan evaluasi prompt injection live |
 | Audit trail | ✅ | Auth, profil, session, akun, dan mutasi transaksi tercatat atomik | Tetapkan retensi dan akses admin sebelum production |
-| Backend test | 🟡 | 16 unit test serta integration test recurring, transaksi/API, dan histori Habit Score tersedia; database, Redis, auth, IDOR, saldo, idempotency, scheduler, serta deduplikasi snapshot telah dicakup | Pisahkan suite contract, security, dan performance serta terbitkan laporan |
-| Observability | 🟡 | Request ID dan access log JSON tersedia | Error tracking dan metrik production |
+| Backend test | 🟡 | 18 file unit test serta integration test recurring, transaksi/API, dan histori Habit Score tersedia; database, Redis, auth, IDOR, saldo, idempotency, scheduler, redaksi log, serta deduplikasi snapshot telah dicakup | Tambah performance test dan terbitkan laporan |
+| Observability | 🟡 | Request ID, access/error event JSON, event domain, dan redaksi data sensitif tersedia | Hubungkan log service, alert, retensi, dan metrik pada staging |
 | Production deployment | 🟡 | Multi-stage image non-root/read-only, one-shot migration, production Compose, fail-fast config, health check, runbook, serta restore drill tersedia | Staging aktual, TLS, secret manager, backup terjadwal, dan error tracking |
 
 ### Proposal dan validasi
@@ -291,7 +291,8 @@ Status: **In progress**
 - [ ] Staging dan production environment
 - [ ] HTTPS/TLS
 - [ ] Secret management
-- [ ] Structured logging dan error tracking
+- [x] Structured logging dan redaksi data sensitif
+- [ ] Error tracking, alerting, dan retensi production
 - [x] Backup serta restore test PostgreSQL
 - [ ] Privacy notice, consent, export, dan delete data
 - [ ] Signed Android build dan internal testing
@@ -356,7 +357,7 @@ Hasil hanya ditulis setelah pilot. Kandidat metrik:
 
 | Area | Kondisi | Gap berikutnya |
 |---|---|---|
-| Backend unit | 17 file test menggunakan runner native `node:test` | Tambah edge case per domain seiring perubahan fitur |
+| Backend unit | 18 file test menggunakan runner native `node:test` | Tambah edge case per domain seiring perubahan fitur |
 | Backend integration | Suite recurring, transaction/API, dan Habit Score snapshot memakai PostgreSQL serta Redis nyata di CI | Tambah contract, failure-path, dan pengujian concurrency per domain |
 | Mobile unit/widget | 12 domain/unit, 2 contract, dan 9 widget test telah dipisahkan pada folder tersendiri | Tambah helper, fixture, accessibility, dan golden test terpilih |
 | Mobile integration | Auth shell, create transaksi, receipt review-koreksi-simpan, serta AI Coach cancel/confirm tersedia di `mobile/integration_test`; runner Linux headless dikonfigurasi di CI | Tambahkan budget flow dan validasi hasil runner CI |
@@ -707,6 +708,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Baseline production backend tersedia | Multi-stage TypeScript image dibangun, Prisma migration dipisahkan dari runtime, startup tidak menjalankan seed/db push, container non-root/read-only lolos health smoke, dan Compose menolak secret wajib yang kosong |
 | 2 Agustus 2026 | Dependency production diaudit | Dua high dan enam moderate transitif diperbarui tanpa force/major upgrade; typecheck, build, unit, contract, security, dan `npm audit --omit=dev` kembali lulus dengan 0 vulnerability |
 | 2 Agustus 2026 | Backup dan restore PostgreSQL diverifikasi | Backup custom terkompresi diberi checksum SHA-256 dan izin `600`; restore ke PostgreSQL 15 sementara berhasil memulihkan 12 tabel serta 9 migration tanpa menyentuh database sumber |
+| 2 Agustus 2026 | Structured logging backend disatukan | Access log, controller, scheduler, Redis, dan global error handler memakai JSON event bersama; redaksi email, credential, bearer token, dan nomor 12–19 digit dikunci oleh unit test ke-18; typecheck, build, contract, security, dan tiga integration flow lulus |
 
 ### Log keputusan
 
@@ -724,6 +726,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Gemini 3.5 Flash-Lite menjadi default | Gemini 1.5 Flash sudah tidak tersedia dan 2.5 Flash ditolak untuk project baru; model dapat dioverride melalui `GEMINI_MODEL` |
 | 2 Agustus 2026 | Habit Score memakai snapshot bulanan yang dapat dihitung ulang | Upsert mencegah histori ganda saat data bulan berjalan berubah; versi metodologi menjaga keterlacakan formula |
 | 2 Agustus 2026 | Restore drill selalu memakai database terisolasi | Mencegah prosedur pengujian pemulihan menimpa database sumber atau production |
+| 2 Agustus 2026 | Log JSON platform-native dipakai sebelum menambah vendor | `stdout`/`stderr` cukup untuk staging awal; SDK, dashboard, dan metrik ditambahkan setelah target serta platform deployment nyata ditetapkan |
 
 ## 14. Langkah Berikutnya
 
@@ -767,9 +770,10 @@ coding dan tidak boleh ditandai selesai tanpa bukti aktual.
    - Jalankan usability, receipt evaluation, security, performance, dan pilot
      setelah ketiga alur M4 dapat didemonstrasikan end-to-end.
 6. **M6 — Release beta — aktif**
-   - Production image, migration terkontrol, dan restore drill sudah selesai.
-   - Berikutnya pasang structured error tracking/metrics tanpa mencatat data
-     finansial sensitif, lalu validasi deployment pada staging ber-TLS.
+   - Production image, migration terkontrol, restore drill, structured access/
+     error log, dan redaksi data sensitif sudah selesai.
+   - Berikutnya hubungkan log service, alert, dan retensi pada staging ber-TLS;
+     checklist error tracking baru ditutup setelah drill aktual berhasil.
 
 Pekerjaan berikutnya memerlukan pengumpulan dataset struk nyata berizin sesuai
 `docs/evaluation/RECEIPT_EVALUATION_PROTOCOL.md` dan validasi bobot Habit Score

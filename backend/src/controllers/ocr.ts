@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { parseBase64Image } from '../utils/resourceInput';
 import { getGeminiModel, getGeminiTimeoutMs, withTimeout } from '../utils/ai';
 import { parseReceiptDraftResponse } from '../utils/receiptDraft';
+import { logError } from '../utils/logger';
 
 export const scanReceipt = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -62,7 +63,7 @@ Format JSON yang diharapkan:
 
     res.json(draft);
   } catch (error) {
-    console.error('Scan receipt error:', error);
+    logError('receipt.scan_failed', error);
     const timedOut = error instanceof Error &&
       error.message.startsWith('Gemini timeout');
     res.status(timedOut ? 504 : 500).json({

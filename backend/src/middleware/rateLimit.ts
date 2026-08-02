@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { createClient } from 'redis';
+import { logError } from '../utils/logger';
 
 const redis = createClient({ url: process.env.REDIS_URL });
-redis.on('error', (error) => console.error('Redis rate limit error:', error));
+redis.on('error', (error) => logError('redis.rate_limit_error', error));
 let connecting: Promise<unknown> | undefined;
 
 const memoryFallback = new Map<string, { count: number; expiresAt: number }>();

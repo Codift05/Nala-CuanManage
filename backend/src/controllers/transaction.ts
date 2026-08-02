@@ -10,6 +10,7 @@ import {
   parseTransactionType,
 } from '../utils/transactionInput';
 import { parseText } from '../utils/resourceInput';
+import { logError } from '../utils/logger';
 
 export const createTransaction = async (req: Request, res: Response) => {
   try {
@@ -144,7 +145,7 @@ export const createTransaction = async (req: Request, res: Response) => {
       replayed: false
     });
   } catch (error) {
-    console.error('Create transaction error:', error);
+    logError('transaction.create_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -231,7 +232,7 @@ export const getTransactions = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('Get transactions error:', error);
+    logError('transaction.list_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -260,7 +261,7 @@ export const getTransactionById = async (req: Request, res: Response) => {
 
     res.json(transaction);
   } catch (error) {
-    console.error('Get transaction error:', error);
+    logError('transaction.get_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -315,7 +316,7 @@ export const deleteTransaction = async (req: Request, res: Response) => {
 
     res.json({ message: 'Transaction deleted successfully' });
   } catch (error) {
-    console.error('Delete transaction error:', error);
+    logError('transaction.delete_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -438,7 +439,7 @@ export const updateTransaction = async (req: Request, res: Response) => {
 
     res.json({ message: 'Transaction updated successfully', transaction: updatedTransaction, warning });
   } catch (error) {
-    console.error('Update transaction error:', error);
+    logError('transaction.update_failed', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
