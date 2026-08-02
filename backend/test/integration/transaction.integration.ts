@@ -46,6 +46,7 @@ const run = async () => {
   let transactionId: string | undefined;
   let auditedTransactionId: string | undefined;
   let temporaryUserId: string | undefined;
+  let temporaryAuditIds: string[] = [];
   let idorBudgetId: string | undefined;
   let idorRecurringId: string | undefined;
 
@@ -175,6 +176,17 @@ const run = async () => {
     idorRecurringId = idorRecurring.body.bill.id;
 
     const temporaryEmail = `ownership-${Date.now()}@nala.test`;
+    const registrationWithoutConsent = await fetch(`${apiUrl}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Ownership Test',
+        email: temporaryEmail,
+        password: 'password123',
+      }),
+    });
+    assert.equal(registrationWithoutConsent.status, 400);
+
     const registrationResponse = await fetch(`${apiUrl}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -182,6 +194,8 @@ const run = async () => {
         name: 'Ownership Test',
         email: temporaryEmail,
         password: 'password123',
+        privacyAccepted: true,
+        privacyVersion: '2026-08-02',
       }),
     });
     const registration = await registrationResponse.json();
@@ -322,6 +336,27 @@ const run = async () => {
     ));
     assert.ok(!ownedRecurring.body.some(
       (item: { id: string }) => item.id === idorRecurringId,
+    ));
+
+    const dataExport = await request('/auth/me/export', temporaryToken);
+    assert.equal(dataExport.response.status, 200);
+    assert.match(
+      dataExport.response.headers.get('content-disposition') ?? '',
+      /nala-data\.json/,
+    );
+    assert.equal(dataExport.body.formatVersion, 1);
+    assert.equal(dataExport.body.data.id, temporaryUserId);
+    assert.equal(dataExport.body.data.email, temporaryEmail);
+    assert.equal(dataExport.body.data.passwordHash, undefined);
+    assert.equal(dataExport.body.data.sessions, undefined);
+    assert.equal(dataExport.body.data.emailVerificationTokens, undefined);
+    assert.ok(dataExport.body.data.wallets.every(
+      (item: { userId: string }) => item.userId === temporaryUserId,
+    ));
+    assert.ok(dataExport.body.data.auditLogs.some(
+      (item: { action: string; resourceId: string }) =>
+        item.action === 'PRIVACY_ACCEPTED' &&
+        item.resourceId === '2026-08-02',
     ));
 
     assert.ok(await prisma.wallet.findUnique({ where: { id: wallet.id } }));
@@ -467,6 +502,10 @@ const run = async () => {
       where: { userId: temporaryUserId },
       select: { id: true },
     })).map((session) => session.id);
+    temporaryAuditIds = (await prisma.auditLog.findMany({
+      where: { actorUserId: temporaryUserId },
+      select: { id: true },
+    })).map((audit) => audit.id);
 
     const deleteWithPassword = await request(
       '/auth/me',
@@ -484,9 +523,21 @@ const run = async () => {
       },
     });
     assert.equal(accountDeletionAudit?.actorUserId, null);
+    assert.equal(await prisma.user.count({ where: { id: temporaryUserId } }), 0);
+    assert.equal(await prisma.wallet.count({ where: { userId: temporaryUserId } }), 0);
+    assert.equal(await prisma.transaction.count({ where: { userId: temporaryUserId } }), 0);
+    assert.equal(await prisma.budget.count({ where: { userId: temporaryUserId } }), 0);
+    assert.equal(await prisma.recurringBill.count({ where: { userId: temporaryUserId } }), 0);
+    assert.equal(await prisma.session.count({ where: { userId: temporaryUserId } }), 0);
+    assert.equal(await prisma.habitScoreSnapshot.count({
+      where: { userId: temporaryUserId },
+    }), 0);
     await prisma.auditLog.deleteMany({
       where: {
-        resourceId: { in: [temporaryUserId!, ...temporarySessionIds] },
+        OR: [
+          { id: { in: temporaryAuditIds } },
+          { resourceId: { in: [temporaryUserId!, ...temporarySessionIds] } },
+        ],
       },
     });
     temporaryUserId = undefined;
@@ -671,4 +722,3 @@ run().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
-

@@ -34,6 +34,16 @@ class RegistrationResult extends AuthResult {
   final String? developmentVerificationToken;
 }
 
+class DataExportResult extends AuthResult {
+  const DataExportResult({
+    required super.success,
+    required super.message,
+    this.json,
+  });
+
+  final String? json;
+}
+
 class CurrentUserResult {
   const CurrentUserResult({
     required this.success,
@@ -100,6 +110,7 @@ class AuthService {
     String name,
     String email,
     String password,
+    bool privacyAccepted,
   ) async {
     try {
       final response = await http.post(
@@ -109,6 +120,8 @@ class AuthService {
           'name': name,
           'email': email,
           'password': password,
+          'privacyAccepted': privacyAccepted,
+          'privacyVersion': '2026-08-02',
           'deviceName': 'NALA Mobile',
         }),
       );
@@ -406,6 +419,31 @@ class AuthService {
     } catch (e) {
       debugPrint('Delete account error: $e');
       return const AuthResult(
+        success: false,
+        message: 'Tidak dapat terhubung ke server NALA.',
+      );
+    }
+  }
+
+  Future<DataExportResult> exportMyData() async {
+    try {
+      final response = await _api.get(Uri.parse('$baseUrl/auth/me/export'));
+      if (response.statusCode == 200) {
+        return DataExportResult(
+          success: true,
+          message: 'Data JSON berhasil disiapkan',
+          json: const JsonEncoder.withIndent('  ').convert(
+            jsonDecode(response.body),
+          ),
+        );
+      }
+      return DataExportResult(
+        success: false,
+        message: _responseMessage(response, 'Gagal mengekspor data'),
+      );
+    } catch (e) {
+      debugPrint('Data export error: $e');
+      return const DataExportResult(
         success: false,
         message: 'Tidak dapat terhubung ke server NALA.',
       );

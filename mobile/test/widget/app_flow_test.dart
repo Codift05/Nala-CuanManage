@@ -87,6 +87,11 @@ void main() {
 
     expect(find.text('Buat akun'), findsWidgets);
     expect(find.text('Sudah punya akun?'), findsOneWidget);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isFalse);
+    await tester.ensureVisible(find.text('Kebijakan Privasi'));
+    await tester.tap(find.text('Kebijakan Privasi'));
+    await tester.pumpAndSettle();
+    expect(find.text('Privasi di NALA'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

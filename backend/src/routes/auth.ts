@@ -4,6 +4,7 @@ import {
   refreshSession, logout, getSessions, revokeSession,
   requestPasswordReset, resetPassword,
   verifyEmail, resendVerification,
+  exportMyData,
 } from '../controllers/auth';
 import { authenticate } from '../middleware/auth';
 import { rateLimit } from '../middleware/rateLimit';
@@ -49,6 +50,11 @@ router.post('/resend-verification', rateLimit({
   includeEmail: true,
 }), resendVerification);
 router.get('/me', authenticate, me);
+router.get('/me/export', authenticate, rateLimit({
+  prefix: 'data-export',
+  limit: 5,
+  windowSeconds: 60 * 60,
+}), exportMyData);
 router.post('/logout', authenticate, logout);
 router.get('/sessions', authenticate, getSessions);
 router.delete('/sessions/:id', authenticate, revokeSession);

@@ -27,6 +27,7 @@ const readPassword = (password: unknown): string =>
 
 const MAX_NAME_LENGTH = 80;
 const MAX_AVATAR_BASE64_LENGTH = 1_500_000;
+export const PRIVACY_VERSION = '2026-08-02';
 
 const isValidBase64 = (value: string): boolean =>
   value.length % 4 === 0 && /^[A-Za-z0-9+/]*={0,2}$/.test(value);
@@ -36,9 +37,17 @@ export const register = async (req: Request, res: Response) => {
     const name = normalizeName(req.body.name);
     const email = normalizeEmail(req.body.email);
     const password = readPassword(req.body.password);
+    const privacyAccepted = req.body.privacyAccepted === true;
+    const privacyVersion = req.body.privacyVersion;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Nama, email, dan password wajib diisi' });
+    }
+
+    if (!privacyAccepted || privacyVersion !== PRIVACY_VERSION) {
+      return res.status(400).json({
+        message: 'Persetujuan kebijakan privasi terbaru wajib diberikan',
+      });
     }
 
     if (name.length < 2 || name.length > MAX_NAME_LENGTH) {
@@ -97,6 +106,19 @@ export const register = async (req: Request, res: Response) => {
           resourceType: 'USER',
           resourceId: createdUser.id,
           requestId: res.locals.requestId,
+        },
+      });
+      await tx.auditLog.create({
+        data: {
+          actorUserId: createdUser.id,
+          action: 'PRIVACY_ACCEPTED',
+          resourceType: 'PRIVACY_NOTICE',
+          resourceId: PRIVACY_VERSION,
+          requestId: res.locals.requestId,
+          metadata: {
+            version: PRIVACY_VERSION,
+            acceptedAt: new Date().toISOString(),
+          },
         },
       });
 
@@ -285,6 +307,66 @@ export const me = async (req: AuthRequest, res: Response) => {
     return res.json({ user });
   } catch (error) {
     logError('auth.current_user_failed', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const exportMyData = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ message: 'Sesi tidak valid' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        avatar: true,
+        emailVerifiedAt: true,
+        createdAt: true,
+        updatedAt: true,
+        wallets: true,
+        transactions: true,
+        budgets: true,
+        recurringBills: { include: { executions: true } },
+        habitScoreSnapshots: true,
+        auditLogs: {
+          select: {
+            action: true,
+            resourceType: true,
+            resourceId: true,
+            metadata: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+    if (!user) {
+      return res.status(404).json({ message: 'Pengguna tidak ditemukan' });
+    }
+
+    await prisma.auditLog.create({
+      data: {
+        actorUserId: userId,
+        action: 'DATA_EXPORTED',
+        resourceType: 'USER',
+        resourceId: userId,
+        requestId: res.locals.requestId,
+      },
+    });
+
+    res.set('Content-Disposition', 'attachment; filename="nala-data.json"');
+    return res.json({
+      formatVersion: 1,
+      generatedAt: new Date().toISOString(),
+      data: user,
+    });
+  } catch (error) {
+    logError('account.export_failed', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };

@@ -294,7 +294,7 @@ Status: **In progress**
 - [x] Structured logging dan redaksi data sensitif
 - [ ] Error tracking, alerting, dan retensi production
 - [x] Backup serta restore test PostgreSQL
-- [ ] Privacy notice, consent, export, dan delete data
+- [x] Privacy notice, consent, export, dan delete data
 - [ ] Signed Android build dan internal testing
 
 Acceptance criteria:
@@ -479,13 +479,14 @@ Tugas minimum:
 | Data | Penyimpanan/pemroses | Tujuan | Retensi target | Perlindungan |
 |---|---|---|---|---|
 | Email | PostgreSQL | Identitas dan autentikasi | Selama akun aktif | Access control |
-| Password | PostgreSQL | Autentikasi | Selama akun aktif | Hash bcrypt/Argon2id |
+| Password | PostgreSQL | Autentikasi | Selama akun aktif | Hash bcrypt; tidak diekspor |
 | Token | Keystore/Keychain | Session | Sampai expiry/revoke | Secure storage |
 | Transaksi | PostgreSQL | Fitur inti | Selama akun aktif | Ownership authorization |
-| Foto struk | Backend/Gemini sementara | Ekstraksi | Hapus setelah proses/≤24 jam | HTTPS dan minimalisasi |
+| Foto struk | Backend/Gemini sementara | Ekstraksi | Tidak disimpan backend setelah request | HTTPS dan validasi ukuran/format |
 | Ringkasan keuangan | Backend/Gemini | Insight kontekstual | Minimum yang diperlukan | Redaksi PII |
 | Histori Habit Score | PostgreSQL | Menjelaskan perubahan kebiasaan bulanan | Maksimal 24 bulan/hingga akun dihapus | Ownership, unique period, cascade delete |
-| SMS/notifikasi | Perangkat | Eksperimen impor | Tidak dikirim mentah | Consent dan izin |
+| Consent privasi | Audit trail PostgreSQL | Bukti versi notice yang disetujui | Retensi audit ditetapkan sebelum production | Tidak pre-checked, versi dan waktu tercatat |
+| Export data | Backend ke pengguna terautentikasi | Hak akses/portabilitas | Dibuat saat diminta, tidak disimpan backend | Ownership, rate limit, tanpa credential |
 | Event usability | Analytics/pilot dataset | Evaluasi produk | Selama studi | Pseudonimisasi |
 
 Sebelum pilot, pengguna harus mengetahui data apa yang diproses, tujuannya,
@@ -709,6 +710,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Dependency production diaudit | Dua high dan enam moderate transitif diperbarui tanpa force/major upgrade; typecheck, build, unit, contract, security, dan `npm audit --omit=dev` kembali lulus dengan 0 vulnerability |
 | 2 Agustus 2026 | Backup dan restore PostgreSQL diverifikasi | Backup custom terkompresi diberi checksum SHA-256 dan izin `600`; restore ke PostgreSQL 15 sementara berhasil memulihkan 12 tabel serta 9 migration tanpa menyentuh database sumber |
 | 2 Agustus 2026 | Structured logging backend disatukan | Access log, controller, scheduler, Redis, dan global error handler memakai JSON event bersama; redaksi email, credential, bearer token, dan nomor 12–19 digit dikunci oleh unit test ke-18; typecheck, build, contract, security, dan tiga integration flow lulus |
+| 2 Agustus 2026 | Privacy dan data rights baseline selesai | Registrasi memerlukan consent versi aktif, notice tersedia sebelum/setelah daftar, export JSON dibatasi dan mengecualikan credential, delete reauthentication menghapus seluruh relasi, serta integration test PostgreSQL lulus |
 
 ### Log keputusan
 
@@ -727,6 +729,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Habit Score memakai snapshot bulanan yang dapat dihitung ulang | Upsert mencegah histori ganda saat data bulan berjalan berubah; versi metodologi menjaga keterlacakan formula |
 | 2 Agustus 2026 | Restore drill selalu memakai database terisolasi | Mencegah prosedur pengujian pemulihan menimpa database sumber atau production |
 | 2 Agustus 2026 | Log JSON platform-native dipakai sebelum menambah vendor | `stdout`/`stderr` cukup untuk staging awal; SDK, dashboard, dan metrik ditambahkan setelah target serta platform deployment nyata ditetapkan |
+| 2 Agustus 2026 | Consent dicatat sebagai audit event berversi | Tidak menambah tabel baru sebelum kebutuhan multi-purpose consent ada; audit trail yang sudah tersedia memberi bukti versi/waktu dengan implementasi minimum |
 
 ## 14. Langkah Berikutnya
 
@@ -738,9 +741,9 @@ Urutan kerja aktif menjaga M4 tetap terukur dan tidak menumpuk utang test:
 |---|---:|---|
 | M4 inovasi inti | 1 checklist | Ukur alur input manual dengan peserta dan protokol yang sudah tersedia |
 | M5 bukti nasional | 9 checklist | Membutuhkan responden, pilot, laporan, serta media aktual |
-| M6 release beta | 6 checklist | Staging/TLS, secret manager, observability, backup terjadwal, privacy, dan signed build |
+| M6 release beta | 5 checklist | Staging/TLS, secret manager, observability, backup terjadwal, dan signed build |
 
-Total checklist utama yang masih terbuka: **16**. Sebagian besar bukan sekadar
+Total checklist utama yang masih terbuka: **15**. Sebagian besar bukan sekadar
 coding dan tidak boleh ditandai selesai tanpa bukti aktual.
 
 1. **Testing foundation gate — selesai**
@@ -771,7 +774,7 @@ coding dan tidak boleh ditandai selesai tanpa bukti aktual.
      setelah ketiga alur M4 dapat didemonstrasikan end-to-end.
 6. **M6 — Release beta — aktif**
    - Production image, migration terkontrol, restore drill, structured access/
-     error log, dan redaksi data sensitif sudah selesai.
+     error log, redaksi data sensitif, dan privacy/data rights sudah selesai.
    - Berikutnya hubungkan log service, alert, dan retensi pada staging ber-TLS;
      checklist error tracking baru ditutup setelah drill aktual berhasil.
 

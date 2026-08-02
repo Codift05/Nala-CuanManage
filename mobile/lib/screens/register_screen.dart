@@ -3,6 +3,7 @@ import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../widgets/auth_visuals.dart';
 import 'login_screen.dart';
+import '../widgets/privacy_notice.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key, this.sheet = false});
@@ -21,15 +22,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _authService = AuthService();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _privacyAccepted = false;
 
   Future<void> _register() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!_privacyAccepted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Setujui kebijakan privasi untuk lanjut.')),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
     final result = await _authService.register(
       _nameController.text.trim(),
       _emailController.text.trim(),
       _passwordController.text,
+      _privacyAccepted,
     );
     if (!mounted) return;
     setState(() => _isLoading = false);
@@ -179,7 +189,46 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 14),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 28,
+                          height: 28,
+                          child: Checkbox(
+                            value: _privacyAccepted,
+                            onChanged: (value) => setState(
+                              () => _privacyAccepted = value ?? false,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              const Text(
+                                'Saya telah membaca dan menyetujui ',
+                                style: TextStyle(fontSize: 12.5),
+                              ),
+                              GestureDetector(
+                                onTap: () => showPrivacyNotice(context),
+                                child: const Text(
+                                  'Kebijakan Privasi',
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.primaryColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
                       height: 52,

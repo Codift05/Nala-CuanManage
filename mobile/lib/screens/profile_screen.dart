@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/biometric_service.dart';
@@ -8,6 +9,7 @@ import 'wallet_management_screen.dart';
 import 'recurring_bills_screen.dart';
 import 'edit_profile_screen.dart';
 import '../widgets/horizontal_page_route.dart';
+import '../widgets/privacy_notice.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -22,6 +24,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   bool _isLoading = true;
   String? _loadError;
   bool _biometricEnabled = false;
+  bool _isExporting = false;
 
   @override
   void initState() {
@@ -139,6 +142,31 @@ class _ProfileScreenState extends State<ProfileScreen>
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
                 ),
+              ),
+              const SizedBox(height: 20),
+              _buildSectionLabel('Privasi & data'),
+              const SizedBox(height: 10),
+              _buildMenuGroup(
+                children: [
+                  _buildMenuTile(
+                    icon: Icons.privacy_tip_outlined,
+                    title: 'Kebijakan privasi',
+                    onTap: () => showPrivacyNotice(context),
+                  ),
+                  _buildDivider(),
+                  _buildMenuTile(
+                    icon: Icons.file_download_outlined,
+                    title: 'Salin ekspor data JSON',
+                    trailing: _isExporting
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : null,
+                    onTap: _isExporting ? () {} : _exportData,
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               _buildProfileHeader(),
@@ -395,6 +423,21 @@ class _ProfileScreenState extends State<ProfileScreen>
     final enabled = !_biometricEnabled;
     await biometrics.setEnabled(enabled);
     if (mounted) setState(() => _biometricEnabled = enabled);
+  }
+
+  Future<void> _exportData() async {
+    setState(() => _isExporting = true);
+    final result = await AuthService().exportMyData();
+    if (!mounted) return;
+    setState(() => _isExporting = false);
+    if (result.success && result.json != null) {
+      await Clipboard.setData(ClipboardData(text: result.json!));
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(
+          result.success ? 'Data JSON disalin ke clipboard.' : result.message),
+    ));
   }
 
   Widget _buildDivider() {
