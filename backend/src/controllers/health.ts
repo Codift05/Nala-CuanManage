@@ -4,6 +4,7 @@ import { AuthRequest } from '../middleware/auth';
 import { calculateHabitScore, describeHabitScore } from '../utils/habitScore';
 
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+const methodology = 'habit-score-v2';
 
 const getMonthRange = (baseDate: Date, offset = 0) => {
   const start = new Date(baseDate.getFullYear(), baseDate.getMonth() + offset, 1);
@@ -58,6 +59,57 @@ export const getHealthScore = async (req: AuthRequest, res: Response): Promise<v
 
     const currentScore = trend[2]!.breakdown;
     const { status, nudgeMessage } = describeHabitScore(currentScore.score);
+    const currentPeriod = `${monthRanges[2]!.year}-${String(monthRanges[2]!.month).padStart(2, '0')}`;
+    const retentionCutoff = new Date(
+      now.getFullYear(),
+      now.getMonth() - 24,
+      1,
+    );
+    if (currentScore.score !== null) {
+      await prisma.$transaction([
+        prisma.habitScoreSnapshot.upsert({
+          where: {
+            userId_period_methodology: {
+              userId,
+              period: currentPeriod,
+              methodology,
+            },
+          },
+          create: {
+            userId,
+            period: currentPeriod,
+            methodology,
+            score: currentScore.score,
+            factors: currentScore.factors,
+            actions: currentScore.actions,
+          },
+          update: {
+            score: currentScore.score,
+            factors: currentScore.factors,
+            actions: currentScore.actions,
+          },
+        }),
+        prisma.habitScoreSnapshot.deleteMany({
+          where: {
+            userId,
+            calculatedAt: { lt: retentionCutoff },
+          },
+        }),
+      ]);
+    }
+    const history = await prisma.habitScoreSnapshot.findMany({
+      where: { userId },
+      orderBy: { calculatedAt: 'desc' },
+      take: 24,
+      select: {
+        period: true,
+        methodology: true,
+        score: true,
+        factors: true,
+        actions: true,
+        calculatedAt: true,
+      },
+    });
 
     const previousTrend = trend.length > 1 ? trend[trend.length - 2] : undefined;
     const previousScore = previousTrend?.score;
@@ -80,10 +132,11 @@ export const getHealthScore = async (req: AuthRequest, res: Response): Promise<v
       totalExpense: currentScore.totalExpense,
       totalBudget: currentScore.totalBudget,
       transactionCount: currentScore.transactionCount,
-      methodology: 'habit-score-v2',
+      methodology,
       updatedAt: new Date().toISOString(),
       details: currentScore.factors,
       actions: currentScore.actions,
+      history: history.reverse(),
       trend: {
         labels: trend.map((item) => item.label),
         scores: trend.map((item) => item.score),

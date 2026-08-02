@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node --require ts-node/register --test test/unit/*.test.ts",
     "test:unit": "node --require ts-node/register --test test/unit/*.test.ts",
-    "test:integration": "node --require ts-node/register test/integration/recurring.integration.ts && node --require ts-node/register test/integration/transaction.integration.ts",
+    "test:integration": "node --require ts-node/register test/integration/recurring.integration.ts && node --require ts-node/register test/integration/transaction.integration.ts && node --require ts-node/register test/integration/health.integration.ts",
     "evaluate:receipts": "node --require ts-node/register scripts/evaluateReceipts.ts",
     "generate:receipt-dataset": "node --require ts-node/register scripts/generateSyntheticReceipts.ts",
     "test:receipt-dataset": "node --require ts-node/register scripts/runReceiptDataset.ts"

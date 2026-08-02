@@ -102,7 +102,7 @@ Legenda:
 | Recurring scheduler | 🟡 | Execution record, duplicate protection, dan bulan pendek tersedia | Perlu monitoring dan timezone production |
 | AI safety | 🟡 | Mutasi AI berupa draft terkonfirmasi dan output transaksi/struk divalidasi | Privacy dan evaluasi prompt injection |
 | Audit trail | ✅ | Auth, profil, session, akun, dan mutasi transaksi tercatat atomik | Tetapkan retensi dan akses admin sebelum production |
-| Backend test | 🟡 | 12 unit test serta integration test recurring dan transaksi tersedia; database, Redis, auth, IDOR, saldo, idempotency, dan scheduler telah dicakup | Pisahkan suite unit, integration, contract, security, dan performance serta terbitkan laporan |
+| Backend test | 🟡 | 16 unit test serta integration test recurring, transaksi/API, dan histori Habit Score tersedia; database, Redis, auth, IDOR, saldo, idempotency, scheduler, serta deduplikasi snapshot telah dicakup | Pisahkan suite contract, security, dan performance serta terbitkan laporan |
 | Observability | 🟡 | Request ID dan access log JSON tersedia | Error tracking dan metrik production |
 | Production deployment | ⬜ | Docker Compose development tersedia | Image production, TLS, secrets, migration |
 
@@ -245,7 +245,7 @@ Status: **Planned**
 - [x] Tangani pemasukan nol, tanpa budget, dan pengguna baru
 - [x] Jelaskan penyebab perubahan skor
 - [x] Beri satu hingga tiga tindakan yang relevan
-- [ ] Simpan histori skor untuk evaluasi perubahan
+- [x] Simpan histori skor untuk evaluasi perubahan
 
 #### Context-Aware AI Coach
 
@@ -357,7 +357,7 @@ Hasil hanya ditulis setelah pilot. Kandidat metrik:
 | Area | Kondisi | Gap berikutnya |
 |---|---|---|
 | Backend unit | 16 file test menggunakan runner native `node:test` | Tambah AI privacy serta edge case per domain |
-| Backend integration | Recurring 118 baris dan transaction/API 673 baris memakai PostgreSQL serta Redis nyata di CI | Pecah per domain agar kegagalan mudah didiagnosis |
+| Backend integration | Suite recurring, transaction/API, dan Habit Score snapshot memakai PostgreSQL serta Redis nyata di CI | Tambah contract, failure-path, dan pengujian concurrency per domain |
 | Mobile unit/widget | 12 domain/unit test dan 9 widget test telah dipisahkan pada folder tersendiri | Tambah helper, fixture, accessibility, dan golden test terpilih |
 | Mobile integration | Auth shell, create transaksi, serta receipt review-koreksi-simpan tersedia di `mobile/integration_test`; runner Linux headless dikonfigurasi di CI | Tambahkan budget dan AI Coach flow; validasi hasil runner CI |
 | Contract | Belum menjadi suite tersendiri | Kunci kesesuaian model Flutter dengan request/response backend |
@@ -483,6 +483,7 @@ Tugas minimum:
 | Transaksi | PostgreSQL | Fitur inti | Selama akun aktif | Ownership authorization |
 | Foto struk | Backend/Gemini sementara | Ekstraksi | Hapus setelah proses/≤24 jam | HTTPS dan minimalisasi |
 | Ringkasan keuangan | Backend/Gemini | Insight kontekstual | Minimum yang diperlukan | Redaksi PII |
+| Histori Habit Score | PostgreSQL | Menjelaskan perubahan kebiasaan bulanan | Maksimal 24 bulan/hingga akun dihapus | Ownership, unique period, cascade delete |
 | SMS/notifikasi | Perangkat | Eksperimen impor | Tidak dikirim mentah | Consent dan izin |
 | Event usability | Analytics/pilot dataset | Evaluasi produk | Selama studi | Pseudonimisasi |
 
@@ -695,6 +696,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Dataset receipt sintetis tersedia | 30 JPEG deterministik mencakup 5 kategori dan 6 kondisi visual; manifest serta integritas aset diuji, runner OCR live tersedia |
 | 2 Agustus 2026 | OCR baseline sintetis dijalankan | Gemini 3.5 Flash-Lite memproses 30/30; nominal dan merchant tepat, kategori 25/30, confidence gagal menandai 5 kesalahan; raw evidence dan laporan disimpan |
 | 2 Agustus 2026 | Explainable Habit Score v2 diterapkan | Diversifikasi dan fallback 72 dihapus; rasio simpan 40%, budget 35%, konsistensi 25% dinormalisasi hanya dari data tersedia; alasan, tindakan, nullable trend, dan 4 edge case diuji |
+| 2 Agustus 2026 | Histori Habit Score bulanan disimpan | Migration menambah snapshot unik per pengguna-periode-metodologi; pemanggilan ulang melakukan upsert, retensi dibatasi 24 bulan, dan integration test PostgreSQL lulus |
 
 ### Log keputusan
 
@@ -710,6 +712,7 @@ Pada akhir setiap sesi pengembangan:
 | 30 Juli 2026 | RecurringExecution dipisahkan dari Transaction | Marker periode tetap ada walaupun transaksi hasil scheduler dihapus |
 | 2 Agustus 2026 | Test menjadi gate sebelum perluasan M4 | Setiap inovasi inti harus membawa unit, contract, integration, failure-path, dan bukti yang sesuai risikonya |
 | 2 Agustus 2026 | Gemini 3.5 Flash-Lite menjadi default | Gemini 1.5 Flash sudah tidak tersedia dan 2.5 Flash ditolak untuk project baru; model dapat dioverride melalui `GEMINI_MODEL` |
+| 2 Agustus 2026 | Habit Score memakai snapshot bulanan yang dapat dihitung ulang | Upsert mencegah histori ganda saat data bulan berjalan berubah; versi metodologi menjaga keterlacakan formula |
 
 ## 14. Langkah Berikutnya
 
@@ -725,8 +728,8 @@ Urutan kerja aktif menjaga M4 tetap terukur dan tidak menumpuk utang test:
      flow sudah tersedia.
    - Ukur waktu input manual dan scan-to-review tanpa mengarang hasil.
 3. **M4.2 — Explainable Financial Habit Score — aktif**
-   - Formula, edge case, alasan perubahan, tindakan, dan UI explainability
-     selesai; berikutnya snapshot histori dan validasi bobot.
+   - Formula, edge case, alasan perubahan, tindakan, UI explainability, dan
+     snapshot histori 24 bulan selesai; berikutnya validasi bobot melalui pilot.
 4. **M4.3 — Context-Aware AI Coach**
    - Minimalkan konteks, redaksi PII, batasi input, uji prompt injection, dan
      pertahankan draft + konfirmasi.
@@ -735,6 +738,7 @@ Urutan kerja aktif menjaga M4 tetap terukur dan tidak menumpuk utang test:
      setelah ketiga alur M4 dapat didemonstrasikan end-to-end.
 
 Pekerjaan berikutnya memerlukan pengumpulan dataset struk nyata berizin sesuai
-`docs/evaluation/RECEIPT_EVALUATION_PROTOCOL.md`. Setelah baseline M4.1 dapat
-diukur, coding berlanjut ke **M4.2 Explainable Financial Habit Score**.
-Confidence model hanya dipakai sebagai sinyal review, bukan bukti akurasi.
+`docs/evaluation/RECEIPT_EVALUATION_PROTOCOL.md` dan validasi bobot Habit Score
+melalui pilot. Sambil menunggu data primer, coding berlanjut ke **M4.3
+Context-Aware AI Coach**. Confidence model hanya dipakai sebagai sinyal review,
+bukan bukti akurasi.

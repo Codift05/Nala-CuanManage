@@ -29,13 +29,29 @@ model User {
   passwordResetTokens PasswordResetToken[]
   emailVerificationTokens EmailVerificationToken[]
   auditLogs      AuditLog[]
+  habitScoreSnapshots HabitScoreSnapshot[]
+}
+
+model HabitScoreSnapshot {
+  id           String   @id @default(uuid())
+  userId       String
+  period       String   @db.VarChar(7)
+  methodology  String   @db.VarChar(50)
+  score        Int
+  factors      Json
+  actions      Json
+  calculatedAt DateTime @default(now()) @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, period, methodology])
+  @@index([userId, calculatedAt])
 }
 
 model AuditLog {
   id          String   @id @default(uuid())
   actorUserId String?
   action      String   @db.VarChar(50)
-  resourceType String  @db.VarChar(50)
+  resourceType String   @db.VarChar(50)
   resourceId  String?
   requestId   String   @db.VarChar(100)
   metadata    Json?
