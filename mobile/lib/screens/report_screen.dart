@@ -23,6 +23,9 @@ class _ReportScreenState extends State<ReportScreen>
   );
 
   bool _isLoading = true;
+  bool _isChangingMonth = false;
+  bool _hasLoadedReport = false;
+  int _monthSlideDirection = 1;
   String? _loadError;
   int _totalIncome = 0;
   int _totalExpense = 0;
@@ -72,20 +75,27 @@ class _ReportScreenState extends State<ReportScreen>
     return months[d.month - 1];
   }
 
-  Future<void> _loadReport() async {
+  Future<void> _loadReport({DateTime? month}) async {
+    if (_isChangingMonth) return;
+
+    final targetMonth = month ?? _selectedDate;
     setState(() {
-      _isLoading = true;
+      if (_hasLoadedReport) {
+        _isChangingMonth = true;
+      } else {
+        _isLoading = true;
+      }
       _loadError = null;
     });
     try {
       final transactions = await _transactionService.getTransactions(
-        dateFrom: DateTime(_selectedDate.year, _selectedDate.month - 2),
-        dateTo: DateTime(_selectedDate.year, _selectedDate.month + 1),
+        dateFrom: DateTime(targetMonth.year, targetMonth.month - 2),
+        dateTo: DateTime(targetMonth.year, targetMonth.month + 1),
       );
       final monthlyTransactions = transactions.where(
         (tx) =>
-            tx.date.month == _selectedDate.month &&
-            tx.date.year == _selectedDate.year,
+            tx.date.month == targetMonth.month &&
+            tx.date.year == targetMonth.year,
       );
 
       int income = 0;
@@ -139,8 +149,7 @@ class _ReportScreenState extends State<ReportScreen>
 
       List<Map<String, dynamic>> trendData = [];
       for (int i = 2; i >= 0; i--) {
-        DateTime monthDate =
-            DateTime(_selectedDate.year, _selectedDate.month - i);
+        DateTime monthDate = DateTime(targetMonth.year, targetMonth.month - i);
         final monthTxs = transactions.where((tx) =>
             tx.date.month == monthDate.month && tx.date.year == monthDate.year);
         int inc = 0;
@@ -161,19 +170,31 @@ class _ReportScreenState extends State<ReportScreen>
 
       if (!mounted) return;
       setState(() {
+        _monthSlideDirection = targetMonth.isAfter(_selectedDate) ? 1 : -1;
+        _selectedDate = targetMonth;
         _totalIncome = income;
         _totalExpense = expense;
         _expenseCategories = catList;
         _trendData = trendData;
         _isLoading = false;
+        _isChangingMonth = false;
+        _hasLoadedReport = true;
       });
     } catch (e) {
       debugPrint('Load report error: $e');
       if (mounted) {
         setState(() {
-          _loadError = 'Laporan belum dapat dimuat.';
+          if (!_hasLoadedReport) {
+            _loadError = 'Laporan belum dapat dimuat.';
+          }
           _isLoading = false;
+          _isChangingMonth = false;
         });
+        if (_hasLoadedReport) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Bulan laporan belum dapat dimuat.')),
+          );
+        }
       }
     }
   }
@@ -184,44 +205,54 @@ class _ReportScreenState extends State<ReportScreen>
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _loadError != null
-                ? LoadErrorView(message: _loadError, onRetry: _loadReport)
-                : RefreshIndicator(
-                    onRefresh: _loadReport,
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildHeader(),
-                          const SizedBox(height: 16),
-                          _buildDatePicker(),
-                          const SizedBox(height: 16),
-                          _buildSummaryCards(),
-                          const SizedBox(height: 24),
-                          _buildTrendChart(),
-                          const SizedBox(height: 24),
-                          Text(
-                            'Pengeluaran terbesar',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.textPrimary,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 240),
+          switchInCurve: Curves.easeOut,
+          switchOutCurve: Curves.easeIn,
+          child: _isLoading
+              ? const _ReportLoadingSkeleton(key: ValueKey('loading'))
+              : _loadError != null
+                  ? LoadErrorView(
+                      key: const ValueKey('error'),
+                      message: _loadError,
+                      onRetry: _loadReport,
+                    )
+                  : RefreshIndicator(
+                      key: const ValueKey('content'),
+                      onRefresh: _loadReport,
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildHeader(),
+                            const SizedBox(height: 16),
+                            _buildDatePicker(),
+                            const SizedBox(height: 16),
+                            _buildSummaryCards(),
+                            const SizedBox(height: 24),
+                            _buildTrendChart(),
+                            const SizedBox(height: 24),
+                            Text(
+                              'Pengeluaran terbesar',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.textPrimary,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          _buildExpenseList(),
-                          const SizedBox(height: 24),
-                        ],
+                            const SizedBox(height: 12),
+                            _buildExpenseList(),
+                            const SizedBox(height: 24),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
+        ),
       ),
     );
   }
@@ -252,12 +283,16 @@ class _ReportScreenState extends State<ReportScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          GestureDetector(
-            onTap: () {
-              _selectedDate =
-                  DateTime(_selectedDate.year, _selectedDate.month - 1);
-              _loadReport();
-            },
+          InkResponse(
+            onTap: _isChangingMonth
+                ? null
+                : () => _loadReport(
+                      month: DateTime(
+                        _selectedDate.year,
+                        _selectedDate.month - 1,
+                      ),
+                    ),
+            radius: 20,
             child: const Padding(
               padding: EdgeInsets.all(4.0),
               child: Icon(
@@ -268,22 +303,49 @@ class _ReportScreenState extends State<ReportScreen>
             ),
           ),
           Expanded(
-            child: Text(
-              _formatMonthYear(_selectedDate),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary,
+            child: ClipRect(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) {
+                  final currentKey = ValueKey(
+                    '${_selectedDate.year}-${_selectedDate.month}',
+                  );
+                  final direction = child.key == currentKey
+                      ? _monthSlideDirection
+                      : -_monthSlideDirection;
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      begin: Offset(0.08 * direction, 0),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  );
+                },
+                child: Text(
+                  _formatMonthYear(_selectedDate),
+                  key: ValueKey('${_selectedDate.year}-${_selectedDate.month}'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
               ),
             ),
           ),
-          GestureDetector(
-            onTap: () {
-              _selectedDate =
-                  DateTime(_selectedDate.year, _selectedDate.month + 1);
-              _loadReport();
-            },
+          InkResponse(
+            onTap: _isChangingMonth
+                ? null
+                : () => _loadReport(
+                      month: DateTime(
+                        _selectedDate.year,
+                        _selectedDate.month + 1,
+                      ),
+                    ),
+            radius: 20,
             child: const Padding(
               padding: EdgeInsets.all(4.0),
               child: Icon(
@@ -564,6 +626,91 @@ class _ReportScreenState extends State<ReportScreen>
           ),
         );
       }).toList(),
+    );
+  }
+}
+
+class _ReportLoadingSkeleton extends StatefulWidget {
+  const _ReportLoadingSkeleton({super.key});
+
+  @override
+  State<_ReportLoadingSkeleton> createState() => _ReportLoadingSkeletonState();
+}
+
+class _ReportLoadingSkeletonState extends State<_ReportLoadingSkeleton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _bone({required double height, double? width, double radius = 16}) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Memuat laporan',
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) => ShaderMask(
+          blendMode: BlendMode.srcATop,
+          shaderCallback: (bounds) => LinearGradient(
+            begin: Alignment(-1.5 + (_controller.value * 3), 0),
+            end: Alignment(-0.5 + (_controller.value * 3), 0),
+            colors: const [
+              Color(0xFFE7EAF0),
+              Color(0xFFF8F9FB),
+              Color(0xFFE7EAF0),
+            ],
+          ).createShader(bounds),
+          child: child,
+        ),
+        child: SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _bone(width: 78, height: 22, radius: 8),
+              const SizedBox(height: 16),
+              _bone(height: 44, radius: 22),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(child: _bone(height: 78)),
+                  const SizedBox(width: 10),
+                  Expanded(child: _bone(height: 78)),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _bone(width: 112, height: 18, radius: 7),
+              const SizedBox(height: 16),
+              _bone(height: 198, radius: 22),
+              const SizedBox(height: 24),
+              _bone(width: 156, height: 18, radius: 7),
+              const SizedBox(height: 12),
+              _bone(height: 72, radius: 18),
+              const SizedBox(height: 10),
+              _bone(height: 72, radius: 18),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
