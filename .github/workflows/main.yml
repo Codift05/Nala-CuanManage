@@ -66,6 +66,9 @@ jobs:
           cat /tmp/nala-backend.log
           exit 1
       - run: npm run test:integration
+      - name: Build production backend image
+        working-directory: .
+        run: docker build --target runtime -t nala-backend-ci ./backend
 
   mobile-test:
     runs-on: ubuntu-latest

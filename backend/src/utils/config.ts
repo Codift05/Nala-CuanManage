@@ -52,3 +52,12 @@ export const getEmailConfig = (
   if (!apiKey || !from || !appUrl) return null;
   return { apiKey, from, appUrl: new URL(appUrl).toString() };
 };
+
+export const validateProductionServices = (
+  env: Environment = process.env,
+): void => {
+  if (env.NODE_ENV !== 'production') return;
+  for (const name of ['DATABASE_URL', 'REDIS_URL'] as const) {
+    if (!env[name]?.trim()) throw new Error(`${name} wajib dikonfigurasi`);
+  }
+};

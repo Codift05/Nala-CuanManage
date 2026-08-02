@@ -104,7 +104,7 @@ Legenda:
 | Audit trail | ✅ | Auth, profil, session, akun, dan mutasi transaksi tercatat atomik | Tetapkan retensi dan akses admin sebelum production |
 | Backend test | 🟡 | 16 unit test serta integration test recurring, transaksi/API, dan histori Habit Score tersedia; database, Redis, auth, IDOR, saldo, idempotency, scheduler, serta deduplikasi snapshot telah dicakup | Pisahkan suite contract, security, dan performance serta terbitkan laporan |
 | Observability | 🟡 | Request ID dan access log JSON tersedia | Error tracking dan metrik production |
-| Production deployment | ⬜ | Docker Compose development tersedia | Image production, TLS, secrets, migration |
+| Production deployment | 🟡 | Multi-stage image non-root/read-only, one-shot migration, production Compose, fail-fast config, health check, dan runbook tersedia | Staging aktual, TLS, secret manager, backup/restore, dan error tracking |
 
 ### Proposal dan validasi
 
@@ -286,8 +286,8 @@ Acceptance criteria:
 
 Status: **Planned**
 
-- [ ] Production Docker image
-- [ ] Database migration terkontrol
+- [x] Production Docker image
+- [x] Database migration terkontrol
 - [ ] Staging dan production environment
 - [ ] HTTPS/TLS
 - [ ] Secret management
@@ -704,6 +704,8 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Runner evaluasi live AI Coach tersedia | Delapan kasus sintetis mencakup advice, draft, ambiguity, PII, prompt exfiltration, delimiter escape, dan mutasi berbahaya; request cap serta konfirmasi eksplisit mencegah pemakaian kuota tidak sengaja |
 | 2 Agustus 2026 | Capture tidak lagi meminta izin SMS | Dependency, permission, receiver, dan listener SMS dihapus dari build beta; Scan Struk menampilkan impor screenshot melalui galeri sebagai jalur yang lebih aman |
 | 2 Agustus 2026 | Protokol usability capture tersedia | Dua tugas terstandar, consent, data pseudonim, definisi timer, template raw CSV, task success, median waktu, bantuan, dan koreksi ditetapkan tanpa mengarang hasil |
+| 2 Agustus 2026 | Baseline production backend tersedia | Multi-stage TypeScript image dibangun, Prisma migration dipisahkan dari runtime, startup tidak menjalankan seed/db push, container non-root/read-only lolos health smoke, dan Compose menolak secret wajib yang kosong |
+| 2 Agustus 2026 | Dependency production diaudit | Dua high dan enam moderate transitif diperbarui tanpa force/major upgrade; typecheck, build, unit, contract, security, dan `npm audit --omit=dev` kembali lulus dengan 0 vulnerability |
 
 ### Log keputusan
 
@@ -731,9 +733,9 @@ Urutan kerja aktif menjaga M4 tetap terukur dan tidak menumpuk utang test:
 |---|---:|---|
 | M4 inovasi inti | 1 checklist | Ukur alur input manual dengan peserta dan protokol yang sudah tersedia |
 | M5 bukti nasional | 9 checklist | Membutuhkan responden, pilot, laporan, serta media aktual |
-| M6 release beta | 9 checklist | Deployment, security/privacy operasional, backup, dan signed build |
+| M6 release beta | 7 checklist | Staging/TLS, secret manager, observability, backup, privacy, dan signed build |
 
-Total checklist utama yang masih terbuka: **19**. Sebagian besar bukan sekadar
+Total checklist utama yang masih terbuka: **17**. Sebagian besar bukan sekadar
 coding dan tidak boleh ditandai selesai tanpa bukti aktual.
 
 1. **Testing foundation gate — selesai**

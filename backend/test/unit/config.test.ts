@@ -5,6 +5,7 @@ import {
   getEmailConfig,
   getJwtSecret,
   isOriginAllowed,
+  validateProductionServices,
 } from '../../src/utils/config';
 
 test('production requires strong secrets and an explicit CORS allowlist', () => {
@@ -43,5 +44,21 @@ test('production requires strong secrets and an explicit CORS allowlist', () => 
     })?.appUrl,
     'https://app.nala.example/reset',
   );
-});
 
+  assert.throws(
+    () => validateProductionServices({ NODE_ENV: 'production' }),
+    /DATABASE_URL/,
+  );
+  assert.throws(
+    () => validateProductionServices({
+      NODE_ENV: 'production',
+      DATABASE_URL: 'postgresql://database',
+    }),
+    /REDIS_URL/,
+  );
+  assert.doesNotThrow(() => validateProductionServices({
+    NODE_ENV: 'production',
+    DATABASE_URL: 'postgresql://database',
+    REDIS_URL: 'redis://cache',
+  }));
+});
