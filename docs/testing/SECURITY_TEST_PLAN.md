@@ -19,3 +19,17 @@
 
 Hasil harus memuat environment, commit, langkah reproduksi, dampak, bukti,
 mitigasi, status retest, dan tidak boleh menyimpan secret nyata.
+
+## Suite otomatis aktual
+
+Jalankan dari folder `backend`:
+
+```bash
+npm run test:security
+```
+
+Corpus `test/fixtures/aiCoachAdversarial.json` mencakup redaksi PII, delimiter
+escape, dan instruksi pengambilalihan konteks. Suite juga memastikan output AI
+tidak dapat memilih wallet pengguna lain atau melewati schema draft transaksi.
+Test ini deterministik dan tidak memanggil Gemini; evaluasi model live dicatat
+terpisah agar biaya, model, prompt, dan hasilnya dapat direproduksi.
