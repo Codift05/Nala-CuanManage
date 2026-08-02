@@ -6,22 +6,66 @@ import 'api_client.dart';
 class ChatReply {
   final String message;
   final Map<String, dynamic>? transactionDraft;
+  final bool fallback;
 
-  const ChatReply({required this.message, this.transactionDraft});
+  const ChatReply({
+    required this.message,
+    this.transactionDraft,
+    this.fallback = false,
+  });
 }
 
 Map<String, dynamic>? parseTransactionDraft(Object? value) {
   if (value is! Map<String, dynamic>) return null;
   final type = value['type'];
   final amount = value['amount'];
+  final walletId = value['walletId'];
+  final categoryId = value['categoryId'];
+  const categories = {
+    'Food',
+    'Transport',
+    'Entertainment',
+    'Shopping',
+    'Bills',
+    'Income',
+    'Salary',
+    'Others',
+  };
   if ((type != 'INCOME' && type != 'EXPENSE') ||
       amount is! int ||
       amount <= 0 ||
-      value['walletId'] is! String ||
-      value['categoryId'] is! String) {
+      amount > 1000000000000 ||
+      walletId is! String ||
+      walletId.isEmpty ||
+      categoryId is! String ||
+      !categories.contains(categoryId)) {
     return null;
   }
-  return value;
+  final merchant = value['merchant'];
+  final notes = value['notes'];
+  return {
+    'type': type,
+    'amount': amount,
+    'walletId': walletId,
+    'categoryId': categoryId,
+    if (merchant is String && merchant.trim().isNotEmpty)
+      'merchant': merchant.trim(),
+    if (notes is String && notes.trim().isNotEmpty) 'notes': notes.trim(),
+  };
+}
+
+ChatReply? parseChatReply(Object? value) {
+  if (value is! Map<String, dynamic>) return null;
+  final reply = value['reply'];
+  final fallback = value['fallback'];
+  if (reply is! String || reply.trim().isEmpty || fallback is! bool) {
+    return null;
+  }
+  return ChatReply(
+    message: reply.trim(),
+    transactionDraft: parseTransactionDraft(value['transactionDraft']),
+    fallback: fallback,
+  );
 }
 
 class ChatService {
@@ -36,12 +80,11 @@ class ChatService {
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        final draft = data['transactionDraft'];
-        return ChatReply(
-          message: data['reply'] as String? ?? 'Aku belum punya jawaban.',
-          transactionDraft: parseTransactionDraft(draft),
-        );
+        return parseChatReply(jsonDecode(response.body)) ??
+            const ChatReply(
+              message: 'Respons Nala belum dapat diproses. Coba lagi nanti.',
+              fallback: true,
+            );
       } else {
         debugPrint(
           'Failed to send chat: ${response.statusCode} - ${response.body}',

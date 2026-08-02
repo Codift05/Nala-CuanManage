@@ -358,9 +358,9 @@ Hasil hanya ditulis setelah pilot. Kandidat metrik:
 |---|---|---|
 | Backend unit | 16 file test menggunakan runner native `node:test` | Tambah AI privacy serta edge case per domain |
 | Backend integration | Suite recurring, transaction/API, dan Habit Score snapshot memakai PostgreSQL serta Redis nyata di CI | Tambah contract, failure-path, dan pengujian concurrency per domain |
-| Mobile unit/widget | 12 domain/unit test dan 9 widget test telah dipisahkan pada folder tersendiri | Tambah helper, fixture, accessibility, dan golden test terpilih |
+| Mobile unit/widget | 12 domain/unit, 2 contract, dan 9 widget test telah dipisahkan pada folder tersendiri | Tambah helper, fixture, accessibility, dan golden test terpilih |
 | Mobile integration | Auth shell, create transaksi, receipt review-koreksi-simpan, serta AI Coach cancel/confirm tersedia di `mobile/integration_test`; runner Linux headless dikonfigurasi di CI | Tambahkan budget flow dan validasi hasil runner CI |
-| Contract | Belum menjadi suite tersendiri | Kunci kesesuaian model Flutter dengan request/response backend |
+| Contract | AI Coach memiliki serializer backend dan parser Flutter yang mengunci envelope sukses/fallback serta draft aman pada suite terpisah | Perluas ke auth, transaksi, wallet, budget, dan Habit Score |
 | Security | IDOR, JWT, dan rate limit tersedia di integration suite; corpus AI Coach menguji PII, delimiter escape, serta hostile draft pada suite security terpisah | Tambah evaluasi model live, kebocoran log, dependency audit, dan laporan keamanan yang dapat ditelusuri |
 | Performance | Belum ada script dan laporan terukur | Ukur p50/p95, error rate, startup, dashboard, transaksi, dan OCR |
 | Evidence | Output CI tersedia tetapi belum menjadi artefak proposal | Simpan laporan aktual tanpa mengubah target menjadi hasil |
@@ -700,6 +700,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Privacy baseline AI Coach diterapkan | Gemini hanya menerima agregat bulan berjalan serta ID/jenis wallet; nama pengguna dan wallet tidak dikirim, PII umum disamarkan, delimiter pesan diamankan, input maksimal 2.000 karakter, dan chat dibatasi 20 request/menit |
 | 2 Agustus 2026 | Security suite AI Coach dipisahkan | Corpus adversarial deterministik menguji email, telepon, kartu/rekening, delimiter escape, cross-wallet draft, action, nominal, dan kategori berbahaya; runner menjadi gate CI tanpa memanggil Gemini |
 | 2 Agustus 2026 | Integration flow AI Coach ditambahkan | Server deterministik mengembalikan draft; test membuktikan batal tidak mengirim transaksi dan konfirmasi mengirim payload hasil review, lalu menampilkan status tersimpan; runner Linux ditambahkan ke CI |
+| 2 Agustus 2026 | Kontrak response AI Coach dikunci | Backend selalu mengirim `reply`, `transactionDraft`, dan `fallback`; Flutter menolak envelope malformed, membuang draft tidak aman dan field ekstra; backend contract suite serta 23 Flutter test lulus |
 
 ### Log keputusan
 
@@ -739,8 +740,9 @@ Urutan kerja aktif menjaga M4 tetap terukur dan tidak menumpuk utang test:
    - Corpus adversarial, security gate, dan integration flow saran-draft-batal-
      konfirmasi selesai di codebase; hasil runner Linux menunggu bukti CI karena
      workstation lokal belum memiliki `libsecret` development package.
-   - Berikutnya contract test response AI dan evaluasi model live yang terpisah
-     dari CI.
+   - Contract response backend/Flutter selesai; berikutnya evaluasi model live
+     yang terpisah dari CI dengan prompt, model, latency, hasil, dan biaya yang
+     dapat ditelusuri.
 5. **M5 — Validasi nasional**
    - Jalankan usability, receipt evaluation, security, performance, dan pilot
      setelah ketiga alur M4 dapat didemonstrasikan end-to-end.

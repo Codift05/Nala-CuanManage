@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node --require ts-node/register --test test/unit/*.test.ts",
     "test:unit": "node --require ts-node/register --test test/unit/*.test.ts",
+    "test:contract": "node --require ts-node/register --test test/contract/*.test.ts",
     "test:security": "node --require ts-node/register --test test/security/*.test.ts",
     "test:integration": "node --require ts-node/register test/integration/recurring.integration.ts && node --require ts-node/register test/integration/transaction.integration.ts && node --require ts-node/register test/integration/health.integration.ts",
     "evaluate:receipts": "node --require ts-node/register scripts/evaluateReceipts.ts",

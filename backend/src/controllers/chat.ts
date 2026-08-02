@@ -10,6 +10,7 @@ import {
   withTimeout,
 } from '../utils/ai';
 import { parseText } from '../utils/resourceInput';
+import { buildChatResponse } from '../utils/chatResponse';
 
 const fallbackReply =
   'Maaf, layanan AI Nala sedang tidak tersedia. Kamu tetap bisa mencatat transaksi secara manual, lalu coba chat lagi nanti ya.';
@@ -31,11 +32,7 @@ export const chatWithNala = async (req: AuthRequest, res: Response): Promise<voi
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      res.json({
-        reply: fallbackReply,
-        transactionDraft: null,
-        fallback: true,
-      });
+      res.json(buildChatResponse(fallbackReply, null, true));
       return;
     }
 
@@ -94,11 +91,7 @@ Gunakan bahasa Indonesia yang ramah, singkat, dan jelas (maksimal 3 paragraf pen
       );
     } catch (error) {
       console.error('Gemini request failed:', error);
-      res.json({
-        reply: fallbackReply,
-        transactionDraft: null,
-        fallback: true,
-      });
+      res.json(buildChatResponse(fallbackReply, null, true));
       return;
     }
 
@@ -118,7 +111,7 @@ Gunakan bahasa Indonesia yang ramah, singkat, dan jelas (maksimal 3 paragraf pen
       nalaResponse = nalaResponse.replace(/```json\s*[\s\S]*?```/, '').trim();
     }
 
-    res.json({ reply: nalaResponse, transactionDraft });
+    res.json(buildChatResponse(nalaResponse, transactionDraft));
   } catch (error) {
     console.error('Nala Chat API Error:', error);
     res.status(500).json({ error: 'Gagal memproses chat dengan Nala. Mungkin API Key tidak valid atau limit.' });

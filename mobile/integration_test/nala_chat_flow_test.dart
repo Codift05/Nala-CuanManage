@@ -35,6 +35,7 @@ void main() {
           ..headers.contentType = ContentType.json
           ..write(jsonEncode({
             'reply': 'Aku menyiapkan draft pengeluaran untuk kamu periksa.',
+            'fallback': false,
             'transactionDraft': {
               'type': 'EXPENSE',
               'amount': 35000,
