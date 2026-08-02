@@ -75,10 +75,10 @@ Legenda:
 | Multi-wallet | 🟡 | CRUD, loading, empty, error, retry, dan refresh tersedia | Integration test CRUD lengkap |
 | Transaksi manual | 🟡 | CRUD, integer rupiah, idempotency, pagination, dan state UI tersedia | Uji konkurensi wallet |
 | Budget planner | 🟡 | CRUD, progress, loading, empty, error, dan retry tersedia | Edge case dan integration test |
-| Financial score | 🟡 | Formula v2, faktor, alasan, tindakan, tren nullable, dan edge-case test tersedia | Simpan snapshot histori dan validasi bobot melalui pilot |
-| AI Coach | 🟡 | Chat kontekstual dan pembuatan transaksi tersedia | Wajib diubah menjadi draft + konfirmasi |
-| Scan struk | 🟡 | Gemini mengekstrak gambar Base64 | Validasi file, schema output, review, evaluasi |
-| Deteksi SMS | 🟡 | Hanya mendeteksi kata GoPay/BCA dan “berhasil” | Turunkan menjadi eksperimen Android |
+| Financial score | 🟡 | Formula v2, faktor, alasan, tindakan, tren nullable, snapshot 24 bulan, dan edge-case test tersedia | Validasi bobot melalui pilot |
+| AI Coach | 🟡 | Konteks minimum, redaksi PII, safe draft, konfirmasi, contract/security/integration test, dan runner evaluasi tersedia | Jalankan evaluasi live terkontrol dan pilot |
+| Scan struk | 🟡 | Validasi gambar, schema output, confidence, review/koreksi, dataset sintetis, dan impor screenshot tersedia | Evaluasi dataset nyata berizin |
+| Deteksi SMS | ⬜ | Dihapus dari build beta beserta permission dan receiver | Hanya eksperimen riset Android dengan consent terpisah |
 | Home widget | 🟡 | Implementasi Android tersedia | Verifikasi pembaruan data dan pengujian perangkat |
 | Tagihan berulang | 🟡 | CRUD tersedia | Edit/nonaktif, status eksekusi, idempotency |
 | Profil | ✅ | Edit profil, password, loading, dan error state diperkuat | Test integrasi dengan backend |
@@ -135,7 +135,7 @@ Legenda:
 | Multer untuk struk | Gambar dikirim dalam Base64 JSON | Dokumentasikan fakta atau ubah implementasi |
 | Email verification | Token sekali pakai, delivery email, resend, dan deep link sudah tersedia | Pertahankan test delivery pada staging |
 | Setup wallet wizard | Backend membuat dompet utama otomatis | Sesuaikan panduan atau implementasikan wizard |
-| SMS mengisi transaksi otomatis | Baru deteksi kata sederhana | Jadikan eksperimen, bukan fitur inti |
+| SMS mengisi transaksi otomatis | Tidak ada pada build beta | Eksperimen terpisah hanya jika ada consent dan justifikasi distribusi |
 | Laporan PDF | Belum tersedia | Pertahankan status “planned” |
 | Push notification | Belum tersedia | Pertahankan status “planned” |
 | AI mencatat transaksi aman | AI menghasilkan draft terstruktur dan pengguna mengonfirmasi sebelum penyimpanan | Pertahankan contract, prompt-injection, dan integration test |
@@ -235,8 +235,8 @@ Status: **Active**
 - [ ] Input manual selesai dalam alur singkat
 - [x] Receipt extraction menandai field yang tidak yakin
 - [x] Pengguna dapat mengoreksi hasil sebelum menyimpan
-- [ ] Impor screenshot/share sebagai alternatif SMS
-- [ ] Deteksi SMS diposisikan sebagai eksperimen Android
+- [x] Impor screenshot dari galeri sebagai alternatif SMS
+- [x] Deteksi SMS diposisikan sebagai eksperimen Android, bukan fitur build beta
 
 #### Explainable Financial Habit Score
 
@@ -702,6 +702,8 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Integration flow AI Coach ditambahkan | Server deterministik mengembalikan draft; test membuktikan batal tidak mengirim transaksi dan konfirmasi mengirim payload hasil review, lalu menampilkan status tersimpan; runner Linux ditambahkan ke CI |
 | 2 Agustus 2026 | Kontrak response AI Coach dikunci | Backend selalu mengirim `reply`, `transactionDraft`, dan `fallback`; Flutter menolak envelope malformed, membuang draft tidak aman dan field ekstra; backend contract suite serta 23 Flutter test lulus |
 | 2 Agustus 2026 | Runner evaluasi live AI Coach tersedia | Delapan kasus sintetis mencakup advice, draft, ambiguity, PII, prompt exfiltration, delimiter escape, dan mutasi berbahaya; request cap serta konfirmasi eksplisit mencegah pemakaian kuota tidak sengaja |
+| 2 Agustus 2026 | Capture tidak lagi meminta izin SMS | Dependency, permission, receiver, dan listener SMS dihapus dari build beta; Scan Struk menampilkan impor screenshot melalui galeri sebagai jalur yang lebih aman |
+| 2 Agustus 2026 | Protokol usability capture tersedia | Dua tugas terstandar, consent, data pseudonim, definisi timer, template raw CSV, task success, median waktu, bantuan, dan koreksi ditetapkan tanpa mengarang hasil |
 
 ### Log keputusan
 
@@ -727,11 +729,11 @@ Urutan kerja aktif menjaga M4 tetap terukur dan tidak menumpuk utang test:
 
 | Tahap | Tersisa | Catatan |
 |---|---:|---|
-| M4 inovasi inti | 3 checklist | Ukur input manual, impor screenshot/share, dan tetapkan UX SMS eksperimen |
+| M4 inovasi inti | 1 checklist | Ukur alur input manual dengan peserta dan protokol yang sudah tersedia |
 | M5 bukti nasional | 9 checklist | Membutuhkan responden, pilot, laporan, serta media aktual |
 | M6 release beta | 9 checklist | Deployment, security/privacy operasional, backup, dan signed build |
 
-Total checklist utama yang masih terbuka: **21**. Sebagian besar bukan sekadar
+Total checklist utama yang masih terbuka: **19**. Sebagian besar bukan sekadar
 coding dan tidak boleh ditandai selesai tanpa bukti aktual.
 
 1. **Testing foundation gate — selesai**
@@ -742,7 +744,9 @@ coding dan tidak boleh ditandai selesai tanpa bukti aktual.
 2. **M4.1 — Frictionless Financial Capture — aktif**
    - Receipt review, koreksi, confidence, warning per field, dan integration
      flow sudah tersedia.
-   - Ukur waktu input manual dan scan-to-review tanpa mengarang hasil.
+   - Screenshot galeri menjadi alternatif aman; izin/listener SMS dikeluarkan
+     dari build beta dan hanya tersisa sebagai eksperimen riset Android.
+   - Jalankan protokol usability untuk menutup checklist waktu input manual.
 3. **M4.2 — Explainable Financial Habit Score — aktif**
    - Formula, edge case, alasan perubahan, tindakan, UI explainability, dan
      snapshot histori 24 bulan selesai; berikutnya validasi bobot melalui pilot.

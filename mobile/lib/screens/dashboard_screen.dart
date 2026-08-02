@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
@@ -19,7 +19,6 @@ import '../models/budget.dart';
 import 'budget_screen.dart';
 import 'add_transaction_screen.dart';
 import 'scan_screen.dart';
-import 'package:telephony/telephony.dart';
 import 'package:home_widget/home_widget.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -64,15 +63,11 @@ class DashboardScreenState extends State<DashboardScreen>
   );
   StreamSubscription<Uri?>? _homeWidgetSubscription;
 
-  bool get _isAndroid =>
-      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
-
   @override
   void initState() {
     super.initState();
     _loadData(showFullScreenLoader: true);
     if (!kIsWeb) _initHomeWidget();
-    if (_isAndroid) _initSmsListener();
   }
 
   @override
@@ -96,44 +91,6 @@ class DashboardScreenState extends State<DashboardScreen>
         });
       }
     });
-  }
-
-  void _initSmsListener() async {
-    try {
-      final telephony = Telephony.instance;
-      bool? permissionsGranted = await telephony.requestPhoneAndSmsPermissions;
-      if (permissionsGranted ?? false) {
-        telephony.listenIncomingSms(
-          onNewMessage: (SmsMessage message) {
-            if (!mounted) return;
-            String text = message.body?.toLowerCase() ?? '';
-            if (text.contains('berhasil') &&
-                (text.contains('gopay') || text.contains('bca'))) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Ada SMS pemotongan dana terdeteksi!'),
-                  action: SnackBarAction(
-                    label: 'Catat ke Nala',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        addTransactionRoute(),
-                      ).then((result) {
-                        if (result == true && mounted) _loadData();
-                      });
-                    },
-                  ),
-                  duration: const Duration(seconds: 10),
-                ),
-              );
-            }
-          },
-          listenInBackground: false,
-        );
-      }
-    } catch (e) {
-      debugPrint('SMS listener error: $e');
-    }
   }
 
   Future<T> _safeLoad<T>(Future<T> request, T fallback) async {

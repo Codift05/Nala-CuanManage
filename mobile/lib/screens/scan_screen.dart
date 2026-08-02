@@ -261,7 +261,7 @@ class _ScanScreenState extends State<ScanScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            'Ambil foto yang jelas. NALA akan menyiapkan draft untuk kamu periksa.',
+            'Foto struk atau pilih screenshot dari galeri. NALA akan menyiapkan draft untuk kamu periksa.',
             style: TextStyle(
               fontSize: 13,
               height: 1.4,
@@ -319,7 +319,7 @@ class _ScanScreenState extends State<ScanScreen> {
                         const SizedBox(width: 12),
                         _buildOptionBtn(
                           Icons.photo_library,
-                          'Galeri',
+                          'Screenshot',
                           () => _pickAndScanImage(ImageSource.gallery),
                         ),
                       ],
