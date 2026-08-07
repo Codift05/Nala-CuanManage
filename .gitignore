@@ -4,3 +4,10 @@ backend/node_modules/
 backend/.env
 backend/dist/
 backups/
+
+# Data responden mentah dan dokumen proposal perantara tidak dipublikasikan.
+dataset/*Form Responses*.csv
+docs/proposal/NALA_Proposal_GEMASTIK_2026 (1).docx
+docs/proposal/NALA_Proposal_GEMASTIK_2026_Content_Compact.docx
+docs/proposal/NALA_Proposal_GEMASTIK_2026_Content_Complete.docx
+docs/proposal/NALA_Proposal_GEMASTIK_2026_Final_Jury_Compact.docx

@@ -1,0 +1,193 @@
+{
+  "source_responses": 53,
+  "included_active_students": 51,
+  "excluded_non_students": 2,
+  "age": {
+    "n": 51,
+    "min": 19,
+    "max": 23,
+    "median": 20
+  },
+  "three_or_more_payment_media": {
+    "count": 36,
+    "percent": 70.6
+  },
+  "records_occasionally_or_never": {
+    "count": 37,
+    "percent": 72.5
+  },
+  "budgets_occasionally_or_never": {
+    "count": 43,
+    "percent": 84.3
+  },
+  "problem_items": {
+    "Saya sering tidak mengetahui ke mana sebagian besar uang saya digunakan.": {
+      "n": 51,
+      "mean": 3.65,
+      "median": 4,
+      "top2_count": 30,
+      "top2_percent": 58.8
+    },
+    "Saya sering lupa mencatat transaksi kecil.": {
+      "n": 51,
+      "mean": 4.08,
+      "median": 4,
+      "top2_count": 37,
+      "top2_percent": 72.5
+    },
+    "Saya pernah menghabiskan uang lebih cepat dari rencana sebelum akhir bulan.": {
+      "n": 51,
+      "mean": 4.2,
+      "median": 4,
+      "top2_count": 41,
+      "top2_percent": 80.4
+    },
+    "Saya kesulitan mengontrol pengeluaran dari beberapa rekening, e-wallet, dan uang tunai.": {
+      "n": 51,
+      "mean": 3.82,
+      "median": 4,
+      "top2_count": 33,
+      "top2_percent": 64.7
+    },
+    "Saya membutuhkan peringatan ketika pengeluaran mendekati batas anggaran.": {
+      "n": 51,
+      "mean": 4.27,
+      "median": 5,
+      "top2_count": 41,
+      "top2_percent": 80.4
+    }
+  },
+  "barriers": [
+    {
+      "label": "Sering lupa",
+      "count": 43,
+      "percent": 84.3
+    },
+    {
+      "label": "Proses input terlalu merepotkan",
+      "count": 23,
+      "percent": 45.1
+    },
+    {
+      "label": "Harus memasukkan transaksi secara manual",
+      "count": 19,
+      "percent": 37.3
+    },
+    {
+      "label": "Tidak tahu aplikasi yang cocok",
+      "count": 19,
+      "percent": 37.3
+    },
+    {
+      "label": "Saya tidak mengalami hambatan",
+      "count": 6,
+      "percent": 11.8
+    },
+    {
+      "label": "Tidak merasa mendapatkan manfaat",
+      "count": 3,
+      "percent": 5.9
+    },
+    {
+      "label": "Khawatir terhadap keamanan data",
+      "count": 2,
+      "percent": 3.9
+    },
+    {
+      "label": "Lainnya",
+      "count": 1,
+      "percent": 2.0
+    }
+  ],
+  "features": [
+    {
+      "label": "Scan struk otomatis",
+      "count": 32,
+      "percent": 62.7
+    },
+    {
+      "label": "Peringatan batas pengeluaran",
+      "count": 25,
+      "percent": 49.0
+    },
+    {
+      "label": "Budget planner",
+      "count": 24,
+      "percent": 47.1
+    },
+    {
+      "label": "Pencatatan transaksi melalui chat AI",
+      "count": 24,
+      "percent": 47.1
+    },
+    {
+      "label": "AI Financial Coach",
+      "count": 21,
+      "percent": 41.2
+    },
+    {
+      "label": "Laporan keuangan bulanan",
+      "count": 20,
+      "percent": 39.2
+    },
+    {
+      "label": "Pengelolaan beberapa dompet",
+      "count": 14,
+      "percent": 27.5
+    },
+    {
+      "label": "Indikator kebiasaan keuangan",
+      "count": 14,
+      "percent": 27.5
+    },
+    {
+      "label": "Tagihan berulang",
+      "count": 5,
+      "percent": 9.8
+    }
+  ],
+  "scan_interest": {
+    "n": 51,
+    "mean": 4.18,
+    "top2_count": 38,
+    "top2_percent": 74.5
+  },
+  "ai_coach_interest": {
+    "n": 51,
+    "mean": 4.04,
+    "top2_count": 36,
+    "top2_percent": 70.6
+  },
+  "trial_intention": {
+    "n": 50,
+    "mean": 8.58,
+    "median": 9.0,
+    "score_7_plus_count": 46,
+    "score_7_plus_percent": 92.0,
+    "score_8_plus_count": 38,
+    "score_8_plus_percent": 76.0
+  },
+  "quality_notes": {
+    "barrier_responses_over_stated_limit": 5,
+    "feature_responses_over_stated_limit": 9,
+    "missing_by_question": {
+      "1": 0,
+      "2": 0,
+      "3": 3,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0,
+      "11": 0,
+      "12": 0,
+      "13": 0,
+      "14": 0,
+      "15": 0,
+      "16": 0,
+      "17": 1
+    }
+  }
+}
