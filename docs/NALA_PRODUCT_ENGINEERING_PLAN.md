@@ -3,7 +3,7 @@
 Dokumen ini adalah sumber acuan utama untuk menyelaraskan proposal GEMASTIK,
 pengembangan produk, pengujian, dan validasi pengguna NALA.
 
-Terakhir diperbarui: 2 Agustus 2026
+Terakhir diperbarui: 3 Agustus 2026
 Status produk: Beta internal / belum siap untuk pengguna publik
 
 ## 1. Arah Produk
@@ -188,7 +188,7 @@ Acceptance criteria:
 
 ### M2 — Authentication untuk pengguna nyata
 
-Status: **Complete**
+Status: **In progress**
 
 - [x] Access token berumur singkat
 - [x] Refresh token rotation dan session per perangkat
@@ -199,10 +199,11 @@ Status: **Complete**
 - [x] Reauthentication sebelum penghapusan akun
 - [x] Biometric app unlock pada perangkat yang mendukung
 - [x] CORS production allowlist dan secret tanpa fallback
+- [ ] Tambahkan UI daftar dan revoke seluruh sesi perangkat
 
 Acceptance criteria:
 
-- Session dapat dilihat dan dicabut. ✅
+- Endpoint session dapat melihat dan mencabut sesi; UI pengguna masih perlu ditambahkan. 🟡
 - Password berubah menyebabkan session lama tidak lagi dipercaya. ✅
 - Endpoint auth memiliki test sukses, gagal, expiry, dan rate limit. ✅
 - Secret production wajib berasal dari environment/secret manager. ✅
@@ -714,6 +715,16 @@ Pada akhir setiap sesi pengembangan:
 | 3 Agustus 2026 | Dataset demonstrasi terintegrasi | Seed akun development direkonsiliasi menjadi 3 wallet, 24 transaksi, 12 budget, dan 3 tagihan berulang untuk tiga bulan; API menghasilkan Habit Score 85 dan tren 60→85→85, sementara dokumentasi melarang fixture disebut sebagai hasil riset |
 | 3 Agustus 2026 | README repository diterbitkan | Identitas produk, fitur, arsitektur, stack, setup, demo, testing, keamanan, production baseline, struktur repo, status, dan indeks dokumentasi disatukan tanpa mengubah fixture menjadi klaim hasil riset |
 | 3 Agustus 2026 | Loading dan perpindahan bulan Laporan distabilkan | Initial spinner diganti skeleton native yang mengikuti layout asli; konten lama dipertahankan selama request bulan, data diterapkan atomik setelah siap, request berulang dicegah, dan label bulan bergeser 220 ms sesuai arah navigasi tanpa dependency tambahan |
+| 3 Agustus 2026 | Restrukturisasi proposal GEMASTIK XIX dimulai | Draf baru menetapkan judul berbasis tiga inovasi inti, target mahasiswa 18–24 tahun, pagu 30 halaman, peta bobot penilaian, kebijakan sumber, dan koreksi klaim lama agar sesuai implementasi aktual |
+| 3 Agustus 2026 | Latar belakang proposal ditulis ulang | Argumen memakai SNLIK 2025, Laporan Perekonomian Indonesia 2025, dan empat studi ber-DOI; gap literasi–inklusi mahasiswa, masalah desain, siklus Capture–Understand–Act, rumusan masalah, serta kebutuhan bukti primer dipisahkan dari klaim hasil |
+| 3 Agustus 2026 | Tujuan, manfaat, dan sustainability proposal dirumuskan | Tujuan umum/khusus, penerima manfaat, teori perubahan, target usability/receipt, outcome pilot, tujuh dimensi keberlanjutan, serta label terimplementasi–teruji–tervalidasi diselaraskan dengan evidence plan |
+| 3 Agustus 2026 | Batasan proposal diselaraskan dengan beta aktual | Scope kompetisi, domain yang dikecualikan, batas Habit Score/AI/OCR/platform/privasi/evaluasi, serta mitigasi risiko dirinci; UU PDP dan NIST AI RMF dipakai sebagai dasar tanpa klaim kepatuhan atau sertifikasi berlebihan |
+| 3 Agustus 2026 | Metodologi proposal diselaraskan dengan proses repository | Agile iteratif–inkremental berbasis risiko dijelaskan sebagai praktik Scrum yang disesuaikan; siklus, backlog, milestone, traceability, Definition of Done, test gate, validasi, dan PlantUML ditulis berdasarkan engineering plan serta riwayat increment aktual |
+| 3 Agustus 2026 | Analisis kebutuhan dan desain solusi proposal dirinci | Proto-persona dan asumsi validasi, Capture–Understand–Act, user journey, FR/NFR, perbandingan resmi Sribuu/Money Lover/Spendee, use case, modular-monolith architecture, ERD, sequence receipt/AI, kontrol keamanan, dan traceability diselaraskan dengan codebase aktual |
+| 3 Agustus 2026 | Implementasi proposal diaudit terhadap repository | Stack, struktur modul, mobile/API/database, tiga inovasi, auth/privacy, test/CI, deployment, reproduksi, dan bukti progres ditulis; setelah gap UI session ditemukan, M0–M4 tercatat 48/52 (92,3%) dan seluruh roadmap 53/71 (74,6%) tanpa disamakan dengan validasi dampak atau production readiness |
+| 3 Agustus 2026 | Storyboard screenshot proposal ditetapkan | Lima figur utama memetakan welcome/auth, home/activity, receipt review, explainable Habit Score, dan AI safe draft; standar capture, caption, bukti penilaian, file opsional, serta manifest commit/platform/seed disiapkan tanpa mengklaim placeholder sebagai screenshot aktual |
+| 3 Agustus 2026 | Dokumentasi penggunaan proposal diselesaikan | Prasyarat, autentikasi, navigasi, wallet, manual/receipt/recurring/AI capture, budget, Habit Score, laporan, profil/data rights, troubleshooting, dan alur demo juri ditulis mengikuti label serta navigasi codebase aktual |
+| 3 Agustus 2026 | Naskah video penyisihan disiapkan | Storyboard 2:50 memetakan proses desain, progres terukur, kegunaan, dan demo Capture–Understand–Act; voice-over per segmen, shot list, aturan editing/data, deskripsi YouTube, serta checklist publikasi disiapkan |
 
 ### Log keputusan
 
@@ -734,6 +745,7 @@ Pada akhir setiap sesi pengembangan:
 | 2 Agustus 2026 | Log JSON platform-native dipakai sebelum menambah vendor | `stdout`/`stderr` cukup untuk staging awal; SDK, dashboard, dan metrik ditambahkan setelah target serta platform deployment nyata ditetapkan |
 | 2 Agustus 2026 | Consent dicatat sebagai audit event berversi | Tidak menambah tabel baru sebelum kebutuhan multi-purpose consent ada; audit trail yang sudah tersedia memberi bukti versi/waktu dengan implementasi minimum |
 | 3 Agustus 2026 | Akun `admin@nala.com` dikhususkan untuk demo repeatable | Seed boleh mereset data finansial akun demo agar screenshot konsisten, tetapi tidak pernah menyentuh akun lain dan tidak dijalankan pada staging/production |
+| 3 Agustus 2026 | Judul proposal NALA ditetapkan | Gunakan “NALA: Inovasi Aplikasi Pendamping Kebiasaan Finansial Mahasiswa melalui Frictionless Capture, Explainable Financial Habit Score, dan Kecerdasan Artifisial Kontekstual”; 18 kata, menampilkan tiga inovasi tanpa klaim dampak sebelum pilot |
 
 ## 14. Langkah Berikutnya
 
@@ -743,11 +755,13 @@ Urutan kerja aktif menjaga M4 tetap terukur dan tidak menumpuk utang test:
 
 | Tahap | Tersisa | Catatan |
 |---|---:|---|
+| M0 baseline | 2 checklist | Finalisasi istilah/arsitektur dan sinkronisasi proposal setelah editorial pass |
+| M2 autentikasi | 1 checklist | Tambahkan UI daftar dan revoke seluruh sesi perangkat |
 | M4 inovasi inti | 1 checklist | Ukur alur input manual dengan peserta dan protokol yang sudah tersedia |
 | M5 bukti nasional | 9 checklist | Membutuhkan responden, pilot, laporan, serta media aktual |
 | M6 release beta | 5 checklist | Staging/TLS, secret manager, observability, backup terjadwal, dan signed build |
 
-Total checklist utama yang masih terbuka: **15**. Sebagian besar bukan sekadar
+Total checklist utama yang masih terbuka: **18**. Sebagian besar bukan sekadar
 coding dan tidak boleh ditandai selesai tanpa bukti aktual.
 
 1. **Testing foundation gate — selesai**
