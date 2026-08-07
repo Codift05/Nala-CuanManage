@@ -1,0 +1,65 @@
+@startuml
+title Arsitektur Solusi NALA
+top to bottom direction
+skinparam linetype ortho
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ArrowColor #64748B
+skinparam componentStyle rectangle
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #CBD5E1
+  FontColor #111827
+  RoundCorner 6
+}
+skinparam database {
+  BackgroundColor #FFF7ED
+  BorderColor #F97316
+  FontColor #111827
+}
+skinparam cloud {
+  BackgroundColor #F8FAFC
+  BorderColor #94A3B8
+  FontColor #111827
+}
+
+actor Mahasiswa as User
+
+rectangle "Mobile Layer" {
+  component "Flutter Mobile App\nUI • State • Secure Storage" as Mobile #FFF7ED
+}
+
+rectangle "API & Application Layer" {
+  component "Express REST API\nValidation • Auth • Rate Limit" as API #FFEDD5
+  together {
+    component "Account & Session" as Auth
+    component "Financial Core\nWallet • Transaction • Budget • Recurring" as Core
+    component "Habit Score & Report" as Insight
+    component "Safe Draft AI\nReceipt OCR • AI Coach" as AI
+    component "Audit & Observability" as Audit
+  }
+}
+
+rectangle "Data Layer" {
+  database "PostgreSQL\nPrisma ORM" as DB
+  database "Redis\nRate Limiting" as Redis
+}
+
+cloud "Google Gemini API" as Gemini
+
+User -down-> Mobile
+Mobile -down-> API : HTTPS / JSON
+API -down-> Auth
+API -down-> Core
+API -down-> Insight
+API -down-> AI
+API -down-> Audit
+Auth -down-> DB
+Core -down-> DB
+Insight -down-> DB
+Audit -down-> DB
+API -down-> Redis
+AI -down-> Gemini
+@enduml

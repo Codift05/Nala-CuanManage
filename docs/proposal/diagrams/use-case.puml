@@ -1,0 +1,47 @@
+@startuml
+title Use Case Utama NALA
+top to bottom direction
+skinparam linetype ortho
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ArrowColor #64748B
+skinparam actorBorderColor #111827
+skinparam actorFontColor #111827
+skinparam usecase {
+  BackgroundColor #FFF7ED
+  BorderColor #F97316
+  FontColor #111827
+}
+skinparam rectangle {
+  BorderColor #CBD5E1
+  FontColor #111827
+  RoundCorner 8
+}
+
+actor Mahasiswa as User
+actor "Gemini API" as Gemini
+
+rectangle "Aplikasi NALA" {
+  usecase "Kelola akun, wallet,\ndan hak data" as UCAccount
+  usecase "Catat transaksi\nmanual atau scan" as UCCapture
+  usecase "Tinjau dan\nkonfirmasi draf" as UCReview
+  usecase "Kelola budget dan\ntagihan berulang" as UCBudget
+  usecase "Lihat laporan dan\nperkembangan" as UCReport
+  usecase "Pahami Financial\nHabit Score" as UCScore
+  usecase "Diskusi dengan\nAI Coach" as UCCoach
+}
+
+User --> UCAccount
+User --> UCCapture
+User --> UCBudget
+User --> UCReport
+User --> UCScore
+User --> UCCoach
+
+UCCapture --> UCReview : <<include>>
+UCCoach --> UCReview : <<include>>
+Gemini --> UCCapture
+Gemini --> UCCoach
+@enduml

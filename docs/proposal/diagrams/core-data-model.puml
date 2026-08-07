@@ -1,0 +1,116 @@
+@startuml
+title Model Data Inti NALA
+top to bottom direction
+skinparam linetype ortho
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam ArrowColor #64748B
+skinparam class {
+  BackgroundColor white
+  BorderColor #CBD5E1
+  FontColor #111827
+  HeaderBackgroundColor #FFF7ED
+}
+
+hide methods
+hide stereotypes
+
+entity User {
+  * id : UUID
+  --
+  email : String
+  name : String
+}
+
+entity Wallet {
+  * id : UUID
+  --
+  userId : UUID
+  name : String
+  type : String
+  balance : BigInt
+}
+
+entity Transaction {
+  * id : UUID
+  --
+  userId : UUID
+  walletId : UUID
+  type : String
+  amount : BigInt
+  categoryId : String?
+  date : DateTime
+  idempotencyKey : String?
+}
+
+entity Budget {
+  * id : UUID
+  --
+  userId : UUID
+  categoryId : String
+  month : Int
+  year : Int
+  amount : BigInt
+}
+
+entity RecurringBill {
+  * id : UUID
+  --
+  userId : UUID
+  walletId : UUID
+  amount : BigInt
+  categoryId : String
+  dueDate : Int
+}
+
+entity RecurringExecution {
+  * id : UUID
+  --
+  recurringBillId : UUID
+  transactionId : UUID?
+  period : String
+}
+
+entity HabitScoreSnapshot {
+  * id : UUID
+  --
+  userId : UUID
+  period : String
+  methodology : String
+  score : Int
+  factors : JSON
+  actions : JSON
+}
+
+entity Session {
+  * id : UUID
+  --
+  userId : UUID
+  refreshTokenHash : String
+  expiresAt : DateTime
+}
+
+entity AuditLog {
+  * id : UUID
+  --
+  actorUserId : UUID?
+  action : String
+  resourceType : String
+  resourceId : String?
+  metadata : JSON?
+}
+
+User ||--o{ Wallet
+User ||--o{ Transaction
+Wallet ||--o{ Transaction
+User ||--o{ Budget
+User ||--o{ RecurringBill
+Wallet ||--o{ RecurringBill
+RecurringBill ||--o{ RecurringExecution
+Transaction ||--o| RecurringExecution
+User ||--o{ HabitScoreSnapshot
+User ||--o{ Session
+User ||--o{ AuditLog
+@enduml
