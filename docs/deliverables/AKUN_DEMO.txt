@@ -1,0 +1,4 @@
+Email akun demo: admin@nala.com
+Password akun demo: password123
+
+Catatan: gunakan akun khusus demonstrasi tanpa data pribadi atau akses administratif.

@@ -275,6 +275,13 @@ menjadi pekerjaan lanjutan dan tidak diklaim selesai.
 4. Jangan commit `.env`, token, API key, data pengguna, atau foto struk nyata.
 5. Pastikan backend dan Flutter gate lulus sebelum pull request.
 
+## Lisensi
+
+NALA merupakan perangkat lunak proprietary dan **All Rights Reserved** selama
+GEMASTIK XIX 2026. Panitia dan juri memperoleh izin terbatas untuk memasang,
+menjalankan, memeriksa, dan mengevaluasi karya. Lihat [LICENSE](LICENSE) serta
+[dokumen adopsi lisensi](docs/deliverables/ADOPSI_LISENSI.md).
+
 ## Tim
 
 NALA dikembangkan untuk GEMASTIK XIX 2026 oleh mahasiswa Program Studi Teknik

@@ -1,0 +1,7 @@
+URL aplikasi web: https://nala-app.pages.dev
+URL API publik: https://nala-api-gemastik-unsrat.vercel.app/api
+Health check API: https://nala-api-gemastik-unsrat.vercel.app/health
+Repositori GitHub: https://github.com/Codift05/Nala-CuanManage
+Tanggal verifikasi: 14 Agustus 2026
+
+Status: web, health API, CORS, dan login akun demo telah diverifikasi.
